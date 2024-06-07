@@ -26,9 +26,9 @@ namespace Event_Management.Infrastructure.Configuration
 			{
 				options.TokenValidationParameters = new TokenValidationParameters
 				{
-					ValidIssuer = jwtSettings.Issuer,
-					ValidAudience = jwtSettings.Audience,
-					IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecurityKey)),
+					ValidIssuer = jwtSettings?.Issuer,
+					ValidAudience = jwtSettings?.Audience,
+					IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings?.SecurityKey!)),
 					ValidateIssuer = true,
 					ValidateAudience = true,
 					ValidateLifetime = true,

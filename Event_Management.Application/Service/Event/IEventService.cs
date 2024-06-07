@@ -13,7 +13,6 @@ namespace Event_Management.Application.Service
         public Task<bool> AddEvent(EventRequestDto eventDto);
         public Task<bool> UpdateEvent(EventRequestDto eventDto);
         public Task<bool> DeleteEvent(Guid eventId);
-        Task<APIResponse> GetAllEventTest();
 
         
     }

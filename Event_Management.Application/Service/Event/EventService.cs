@@ -1,17 +1,9 @@
 ﻿using AutoMapper;
+using Event_Management.Application.Dto.EventDTO.ResponseDTO;
 using Event_Management.Domain;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Models.System;
 using Event_Management.Domain.UnitOfWork;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-
-using Event_Management.Application.Dto.EventDTO.ResponseDTO;
 using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
 
@@ -22,10 +14,8 @@ namespace Event_Management.Application.Service
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly IDistributedCache _distributedCache;
 
-		public EventService(IUnitOfWork unitOfWork, IMapper mapper,
-                        IDistributedCache distributedCache)
+		public EventService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -106,45 +96,6 @@ namespace Event_Management.Application.Service
 
 
         }
-
-        public async Task<APIResponse> GetAllEventTest()
-        {
-            // Set up key for cache redis
-            string key = "TestRedisCache";
-
-			// Get data from cache
-			string cacheValue = await _distributedCache.GetStringAsync(key);
-
-			// If cache has value, return cache data
-			if (!string.IsNullOrEmpty(cacheValue))
-            {
-                var cacheData = JsonConvert.DeserializeObject<IEnumerable<EventPreview>>(cacheValue);
-
-				return new APIResponse
-                {
-					StatusResponse = System.Net.HttpStatusCode.OK,
-					Message = "Successfully!",
-					Data = cacheData
-				};
-			}
-
-			// If cache has no value, get data from database
-            var cacheOpt = new DistributedCacheEntryOptions
-			{
-				AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(24) // Set cache time 24h
-			};
-
-			var events = await _unitOfWork.EventRepository.GetAll(1, 10);
-
-            await _distributedCache.SetStringAsync(key, JsonConvert.SerializeObject(_mapper.Map<PagedList<EventPreview>>(events)), cacheOpt);
-
-			return new APIResponse
-			{
-				StatusResponse = System.Net.HttpStatusCode.OK,
-				Message = "Successfully!",
-				Data = _mapper.Map<IEnumerable<EventPreview>>(events)
-			};
-		}
 
        
     }

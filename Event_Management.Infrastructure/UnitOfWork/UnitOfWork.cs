@@ -1,6 +1,5 @@
 ﻿using Event_Management.Domain.Repository;
 using Event_Management.Domain.UnitOfWork;
-using Event_Management.Infrastructure.Repository.SQL;
 using Event_Management.Infrastructure.DBContext;
 using Event_Management.Infrastructure.Repository.SQL;
 

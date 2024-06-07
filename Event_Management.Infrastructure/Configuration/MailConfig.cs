@@ -10,7 +10,7 @@ namespace Event_Management.Infrastructure.Configuration
         {
 			var mailSetting = configuration.GetSection("GmailSetting").Get<MailSetting>();
 
-			services.AddFluentEmail(mailSetting.Mail)
+			services.AddFluentEmail(mailSetting!.Mail)
 			.AddSmtpSender(mailSetting.SmtpServer, mailSetting.Port,
 							mailSetting.DisplayName, mailSetting.Password)
 			.AddRazorRenderer();

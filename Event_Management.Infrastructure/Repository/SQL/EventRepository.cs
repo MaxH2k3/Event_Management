@@ -33,7 +33,7 @@ namespace Event_Management.Infrastructure.Repository.SQL
                 return await _context.Events.ToListAsync();
 
             var result = await _context.Events
-                .Where(e => e.EventName.Contains(keyword) || e.Location.Contains(keyword))
+                .Where(e => e.EventName.Contains(keyword) || e.Location!.Contains(keyword))
                 .ToListAsync();
 
             return result.Any() ? result : null;
@@ -49,7 +49,7 @@ namespace Event_Management.Infrastructure.Repository.SQL
             if (!string.IsNullOrWhiteSpace(filter.Location))
             {
                 eventList = from e in eventList
-                            where e.Location.Contains(filter.Location)
+                            where e.Location!.Contains(filter.Location)
                             select e;
             }
             if (!string.IsNullOrWhiteSpace(filter.StartDate))

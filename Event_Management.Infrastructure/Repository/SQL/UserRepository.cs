@@ -31,12 +31,12 @@ namespace Event_Management.Infrastructure.Repository.SQL
 
         public async Task<User?> GetUserByEmailAsync(string email)
         {
-            return await _context.Users.Include(a => a.Role).FirstOrDefaultAsync(x => x.Email.ToLower().Equals(email.ToLower()));
+            return await _context.Users.Include(a => a.Role).FirstOrDefaultAsync(x => x.Email!.ToLower().Equals(email.ToLower()));
         }
 
         public User? GetByEmail(string email)
         {
-            return _context.Users.FirstOrDefault(x => x.Email.ToLower().Equals(email.ToLower()));
+            return _context.Users.FirstOrDefault(x => x.Email!.ToLower().Equals(email.ToLower()));
         }
 
 

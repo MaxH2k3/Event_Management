@@ -1,12 +1,11 @@
 ﻿using Event_Management.API.Service;
 using Event_Management.Application.Dto.User;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
 namespace Event_Management.API.Controllers
 {
-    [Route("api/v1/user")]
+	[Route("api/v1/user")]
     [ApiController]
     public class UserController : Controller
     {
@@ -42,7 +41,7 @@ namespace Event_Management.API.Controllers
             {
                 return BadRequest(response);
             }
-            return Created(response.Message, response.Data);
+            return Created(response.Message!, response.Data);
         }
     }
 }
