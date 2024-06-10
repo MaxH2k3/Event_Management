@@ -1,7 +1,5 @@
-﻿using Event_Management.Application.Dto.ParticipantDTO;
-using Event_Management.Application.Message;
-using Event_Management.Application.Service;
-using Event_Management.Domain.Models.System;
+﻿using Event_Management.Domain.Models.ParticipantDTO;
+using Event_Management.Domain.Service;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -16,6 +14,19 @@ namespace Event_Management.API.Controllers
 		public ParticipantController(IRegisterEventService registerEventService)
 		{
 			_registerEventService = registerEventService;
+		}
+
+		[HttpGet("participants")]
+		public async Task<IActionResult> GetParticipantOnEvent([FromQuery] FilterParticipant filter)
+		{
+			var response = await _registerEventService.GetParticipantOnEvent(filter);
+
+			if (response.Any())
+			{
+				return Ok(response);
+			}
+
+			return BadRequest(response);
 		}
 
 		[HttpPost("register")]

@@ -1,18 +1,16 @@
 ﻿using Event_Management.Application;
-using Event_Management.Application.Dto.PackageDto;
-using Event_Management.Application.Message;
 using Event_Management.Application.Service;
-using Event_Management.Domain;
-﻿using Event_Management.Application.Dto.ParticipantDTO;
+using Event_Management.Domain.Message;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Models.System;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Event_Management.API.Controllers
 {
-    [Route("api/v1/events")]
+	[Route("api/v1/events")]
     [ApiController]
     public class EventController : Controller
     {
@@ -22,6 +20,8 @@ namespace Event_Management.API.Controllers
         {
             _eventService = eventService;
 		}
+
+        [Authorize]
         [HttpGet("GetAll")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -29,12 +29,25 @@ namespace Event_Management.API.Controllers
                                                       [FromQuery, Range(1, int.MaxValue)] int pageNo = 1, 
                                                       [FromQuery, Range(1, int.MaxValue)] int elementEachPage = 10)
         {
-            APIResponse response = await _eventService.GetAllEvents(filterObject, pageNo, elementEachPage);
-            if(response.StatusResponse == System.Net.HttpStatusCode.OK)
+            var response = await _eventService.GetAllEvents(filterObject, pageNo, elementEachPage);
+            if(response.TotalItems > 0)
             {
-                return Ok(response);
+
+                Response.Headers.Add("X-Total-Element", response.TotalItems.ToString());
+                Response.Headers.Add("X-Total-Page", response.TotalPages.ToString());
+                Response.Headers.Add("X-Current-Page", response.CurrentPage.ToString());
+                return Ok(new APIResponse
+                {
+                    StatusResponse = HttpStatusCode.OK,
+                    Message = "Get all events!",
+                    Data = response
+                });
             }
-            return BadRequest(response);
+            return BadRequest(new APIResponse
+            {
+                StatusResponse = HttpStatusCode.NotFound,
+                Message = "Not found!",
+            });
         }
         [HttpGet("UserParticipated")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -43,12 +56,25 @@ namespace Event_Management.API.Controllers
                                                                    [FromQuery, Range(1, int.MaxValue)] int pageNo = 1, 
                                                                    [FromQuery, Range(1, int.MaxValue)] int elementEachPage = 10)
         {
-            APIResponse response = await _eventService.GetUserParticipatedEvents(filter, userId, pageNo, elementEachPage);
-            if(response.StatusResponse == System.Net.HttpStatusCode.OK)
+            var response = await _eventService.GetUserParticipatedEvents(filter, userId, pageNo, elementEachPage);
+            if(response.TotalItems > 0)
             {
-                return Ok(response);
+
+                Response.Headers.Add("X-Total-Element", response.TotalItems.ToString());
+                Response.Headers.Add("X-Total-Page", response.TotalPages.ToString());
+                Response.Headers.Add("X-Current-Page", response.CurrentPage.ToString());
+                return Ok(new APIResponse
+                {
+                    StatusResponse = HttpStatusCode.OK,
+                    Message = "Get all user participated events!",
+                    Data = response
+                });
             }
-            return BadRequest(response);
+            return BadRequest(new APIResponse
+            {
+                StatusResponse = HttpStatusCode.NotFound,
+                Message = "Not found!",
+            });
         }
 
         [HttpPost("")]

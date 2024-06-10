@@ -1,23 +1,19 @@
-﻿using Event_Management.Application.Dto.User;
+﻿using Event_Management.Application.Dto.AuthenticationDTO;
 using Event_Management.Domain;
-using Event_Management.Domain.Constants.User;
-using Event_Management.Domain.Models.JWT;
-using Event_Management.Domain.Repository;
+using Event_Management.Domain.Constants;
+using Event_Management.Domain.Models.System;
+using Event_Management.Domain.Models.User;
 using Event_Management.Domain.UnitOfWork;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace Event_Management.Application.Service.Security
+namespace Event_Management.Application.Service
 {
-    public class JWTService : IJWTService
+	public class JWTService : IJWTService
     {
         //private readonly JWTSetting _jwtSettings; //violence dependecy inversion principle
         private readonly IConfiguration _configuration;
@@ -30,6 +26,7 @@ namespace Event_Management.Application.Service.Security
             _unitOfWork = unitOfWork;
         }
 
+        //generate access token
         public async Task<string> GenerateAccessToken(LoginUserDto userDto)
         {
 
@@ -39,10 +36,8 @@ namespace Event_Management.Application.Service.Security
                 return "Error! Unauthorized.";
             }
 
-
             List<Claim> claims = new List<Claim>
             {
-                //currently fixing
                 new Claim(UserClaimType.UserId, existUser.UserId.ToString()),
                 new Claim(ClaimTypes.Email, existUser.Email!),
                 new Claim(ClaimTypes.Role, existUser.Role.ToString()!)
@@ -64,8 +59,7 @@ namespace Event_Management.Application.Service.Security
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                //currently fixing
-                Expires = DateTime.Now.AddMinutes(2),
+                Expires = DateTime.UtcNow.AddDays(Convert.ToDouble(_configuration["JWTSetting:TokenExpiry"])),
                 Issuer = _configuration["JWTSetting:Issuer"],
                 Audience = _configuration["JWTSetting:Audience"],
                 SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
@@ -78,9 +72,113 @@ namespace Event_Management.Application.Service.Security
         }
 
 
-        public Task<string> GenerateRefreshToken(User user)
+
+        //Validate the token if the token is decoded with jwt, and then extract the information in the token
+        private ClaimsPrincipal? GetPrincipalFromExpiredToken(string? token)
         {
-            throw new NotImplementedException();
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateAudience = false,
+                ValidateIssuer = false,
+                //ValidateAudience = true,
+                //ValidateIssuer = true,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWTSetting:Securitykey"]!)),
+                ValidateLifetime = false
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
+            if (securityToken is not JwtSecurityToken jwtSecurityToken || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+                throw new SecurityTokenException("Invalid token");
+
+            return principal;
         }
+
+
+        public async Task<APIResponse> RefreshToken(TokenResponseDTO token)
+        {
+            //validate the token if it's a jwt token or not, then extract information to create new token
+            var principal = GetPrincipalFromExpiredToken(token.AccessToken);
+
+            var userIdClaim = principal!.Claims.FirstOrDefault(c => c.Type == UserClaimType.UserId);
+            var emailClaim = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
+            if (userIdClaim == null || emailClaim == null)
+            {
+                return new APIResponse
+                {
+                    StatusResponse = System.Net.HttpStatusCode.Unauthorized,
+                    Message = "Invalid access token",
+                    Data = null
+                };
+            }
+
+            //check user existed in the refresh token
+            var existUser = await _unitOfWork.RefreshTokenRepository.GetUserByIdAsync(Guid.Parse(userIdClaim!.Value));
+            if (existUser == null)
+            {
+                return new APIResponse
+                {
+                    StatusResponse = System.Net.HttpStatusCode.Unauthorized,
+                    Message = "Invalid token",
+                    Data = null
+                };
+            }
+
+            //check refresh token whether it's expired or null
+            var existingRefreshToken = await _unitOfWork.RefreshTokenRepository.GetTokenAsync(token.RefreshToken!);
+            if (existingRefreshToken == null || existingRefreshToken.ExpireAt <= DateTime.UtcNow)
+            {
+                return new APIResponse
+                {
+                    StatusResponse = System.Net.HttpStatusCode.Unauthorized,
+                    Message = "Refresh token has expired",
+                    Data = null
+                };
+            }
+
+            //capture expired date from original token 
+            var originalExpirationDate = existingRefreshToken.ExpireAt;
+
+            // remove old refresh token
+            await _unitOfWork.RefreshTokenRepository.RemoveRefreshTokenAsync(existingRefreshToken.Token);
+
+            // generate new tokens
+            var newAccessToken = await GenerateAccessToken(new LoginUserDto { Email = emailClaim.Value });
+            var newRefreshToken = GenerateRefreshToken();
+
+            var refreshTokenEntity = new RefreshToken
+            {
+                UserId = existUser.UserId,
+                Token = newRefreshToken,
+                CreatedAt = DateTime.UtcNow,
+                ExpireAt = originalExpirationDate
+            };
+
+            await _unitOfWork.RefreshTokenRepository.AddRefreshToken(refreshTokenEntity);
+            await _unitOfWork.SaveChangesAsync();
+
+            return new APIResponse
+            {
+                StatusResponse = System.Net.HttpStatusCode.OK,
+                Message = "Token refreshed successfully",
+                Data = new TokenResponseDTO
+                {
+                    AccessToken = newAccessToken,
+                    RefreshToken = newRefreshToken
+                }
+            };
+
+        }
+
+        //generate refresh token
+        public string GenerateRefreshToken()
+        {
+            var randomNumber = new byte[64];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+            return Convert.ToBase64String(randomNumber);
+        }
+
     }
 }

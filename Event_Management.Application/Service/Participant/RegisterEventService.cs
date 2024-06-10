@@ -1,13 +1,14 @@
 ﻿using AutoMapper;
-using Event_Management.Application.Dto.ParticipantDTO;
-using Event_Management.Application.Message;
+using Event_Management.Domain.Models.ParticipantDTO;
+using Event_Management.Domain.Message;
 using Event_Management.Domain;
 using Event_Management.Domain.Models.System;
 using Event_Management.Domain.UnitOfWork;
 using System.Net;
 using System.Text.Json;
+using Event_Management.Domain.Models.Common;
 
-namespace Event_Management.Application.Service
+namespace Event_Management.Domain.Service
 {
 	public class RegisterEventService : IRegisterEventService
 	{
@@ -152,6 +153,13 @@ namespace Event_Management.Application.Service
 				Message = MessageCommon.ServerError,
 				Data = JsonSerializer.Serialize(new { userId, eventId })
 			};
+		}
+
+		public async Task<PagedList<ParticipantEventModel>> GetParticipantOnEvent(FilterParticipant filter)
+		{
+			var participants = await _unitOfWork.ParticipantRepository.FilterDataParticipant(filter);
+
+			return _mapper.Map<PagedList<ParticipantEventModel>>(participants);
 		}
 
 	}

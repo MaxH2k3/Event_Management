@@ -1,4 +1,4 @@
-﻿namespace Event_Management.Application.Message
+﻿namespace Event_Management.Domain.Message
 {
 	public class MessageParticipant
 	{

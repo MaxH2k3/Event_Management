@@ -1,5 +1,5 @@
-﻿using Event_Management.Application.Message;
-using Event_Management.Application.Service;
+﻿using Event_Management.Domain.Message;
+using Event_Management.Domain.Service;
 using Microsoft.AspNetCore.SignalR;
 using System.Net;
 

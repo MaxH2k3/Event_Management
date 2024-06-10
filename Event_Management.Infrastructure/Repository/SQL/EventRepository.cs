@@ -1,10 +1,13 @@
-﻿using Event_Management.Domain;
+﻿using Event_Management.Application.Dto.EventDTO.ResponseDTO;
+using Event_Management.Domain;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Repository;
+using Event_Management.Domain.Repository.Common;
 using Event_Management.Infrastructure.DBContext;
 using Event_Management.Infrastructure.Extensions;
 using Event_Management.Infrastructure.Repository.Common;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using System.Globalization;
 
 namespace Event_Management.Infrastructure.Repository.SQL
@@ -13,20 +16,22 @@ namespace Event_Management.Infrastructure.Repository.SQL
     {
         private readonly EventManagementContext _context;
 
-        public EventRepository(EventManagementContext context) : base(context)
+		public EventRepository(EventManagementContext context) : base(context)
         {
             _context = context;
-        }
+		}
 
-        public async Task<List<Event>> GetAllEvents(EventFilterObject filter, int pageNo, int elementEachPage)
+        public async Task<PagedList<Event>> GetAllEvents(EventFilterObject filter, int pageNo, int elementEachPage)
         {
             //int skipElements = (pageNo - 1) * elementEachPage;
+            var totalEle = await _context.Events.CountAsync();
             var eventList = _context.Events.AsQueryable();
             eventList = ApplyFilter(eventList, filter).PaginateAndSort(pageNo, elementEachPage, filter.SortBy ?? "EventId", filter.IsAscending);
             //eventList = ApplyFilter(eventList, filter).Skip(skipElements).Take(elementEachPage);
             var result = await eventList.ToListAsync();
-            return result;
+            return new PagedList<Event>(result, totalEle, pageNo, elementEachPage);
         }
+
         private async Task<List<Event>?> ApplySearch(string keyword)
         {
             if (string.IsNullOrWhiteSpace(keyword))
@@ -52,23 +57,45 @@ namespace Event_Management.Infrastructure.Repository.SQL
                             where e.Location!.Contains(filter.Location)
                             select e;
             }
-            if (!string.IsNullOrWhiteSpace(filter.StartDate))
+            if (filter.StartDateFrom != null)
             {
-                if (DateTime.TryParseExact(filter.StartDate, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var startDate))
-                {
-                    eventList = from e in eventList
-                                where e.StartDate >= startDate
+                DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeMilliseconds((long)filter.StartDateFrom);
+                // get DateTime from DateTimeOffset
+                DateTime startDateFrom = dateTimeOffset.DateTime;
+                eventList = from e in eventList
+                                where e.StartDate >= startDateFrom
                                 select e;
-                }
             }
-            if (!string.IsNullOrWhiteSpace(filter.EndDate))
+            if(filter.StartDateTo != null)
             {
-                if (DateTime.TryParseExact(filter.EndDate, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var EndDate))
-                {
-                    eventList = from e in eventList
-                                where e.EndDate <= EndDate
+                DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeMilliseconds((long)filter.StartDateTo);
+                // get DateTime from DateTimeOffset
+                DateTime startDateTo = dateTimeOffset.DateTime;
+                eventList = from e in eventList
+                            where e.StartDate <= startDateTo
+                            select e;
+            }
+            if (filter.EndDateFrom != null)
+            {
+                DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeMilliseconds((long)filter.EndDateFrom);
+                // get DateTime from DateTimeOffset
+                DateTime endDateFrom = dateTimeOffset.DateTime;
+                eventList = from e in eventList
+                                where e.EndDate >= endDateFrom
                                 select e;
-                }
+                
+            }
+            if ((filter.EndDateTo != null))
+            {
+                DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeMilliseconds((long)filter.EndDateTo);
+                // get DateTime from DateTimeOffset
+                DateTime endDateTo = dateTimeOffset.DateTime;
+                eventList = from e in eventList
+                            where e.EndDate <= endDateTo
+                            select e;
+            }
+            {
+                
             }
             if (!string.IsNullOrWhiteSpace(filter.Status))
             {
@@ -109,14 +136,15 @@ namespace Event_Management.Infrastructure.Repository.SQL
                 .Where(e => participants.Contains(e.EventId))
                 .AsNoTracking();
         }
-        public async Task<List<Event>> GetUserParticipatedEvents(EventFilterObject filter, string userId, int pageNo, int elementEachPage)
+        public async Task<PagedList<Event>> GetUserParticipatedEvents(EventFilterObject filter, string userId, int pageNo, int elementEachPage)
         {
             //int skipElements = (pageNo - 1) * elementEachPage;
             var events = await GetUserParticipatedEventsQuery(userId);
+            var totalEle = await events.CountAsync();
             events =  ApplyFilter(events, filter).PaginateAndSort(pageNo, elementEachPage, filter.SortBy ?? "EventId", filter.IsAscending);
             //events = ApplyFilter(events, filter).Skip(skipElements).Take(elementEachPage);
             var result = await events.ToListAsync();
-            return result;
+            return new PagedList<Event>(result, totalEle, pageNo, elementEachPage);
         }
 
         public async Task<Event> CreateEvent(Event eventCreate)

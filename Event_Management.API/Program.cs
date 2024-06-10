@@ -1,18 +1,31 @@
 using Event_Management.API.Hub;
 using Event_Management.API.Middleware;
 using Event_Management.API.Utilities;
-using Event_Management.Domain.Constants.System;
+using Event_Management.Domain.Constants;
 using Event_Management.Infastructure.Configuration;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.Extensions.Options;
 using Serilog;
 using SwaggerThemes;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Set up config
 builder.Services.AddScoped<GlobalException>();
+
+
+//builder.Services.AddScoped<IRegisterEventService, RegisterEventService>();
+//builder.Services.AddScoped<ITagService, TagService>();
+//builder.Services.AddScoped<IEventService, EventService>();
+//builder.Services.AddScoped<IUserService, UserService>();
+//builder.Services.AddScoped<IJWTService, JWTService>();
+//builder.Services.AddScoped<IPackageService, PackageService>();
+//builder.Services.AddScoped<IEmailService, EmailService>();
+//builder.Services.AddSingleton<IVNPAYService, VNPAYService>();
+//builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+// Add services to the container.
+
 builder.AddInfrastructure();
 
 // Set up context
@@ -21,23 +34,21 @@ builder.Services.AddHttpContextAccessor();
 // Set up cors
 builder.Services.AddCors();
 
+
+
 //Set size limit for request
 builder.Services.Configure<KestrelServerOptions>(options =>
 {
 	options.Limits.MaxRequestBodySize = 1073741824; // 1GB
 });
 
-builder.Services.Configure<FormOptions>(options =>
-{
-	options.MultipartBodyLengthLimit = 1073741824; // 1GB
-});
+
 
 // Default services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
-
 
 app.UseCors(app => app
 	.AllowAnyOrigin()
@@ -57,6 +68,8 @@ app.UseSerilogRequestLogging();
 app.UseAuthentication();
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles();
 
 app.UseAuthorization();
 

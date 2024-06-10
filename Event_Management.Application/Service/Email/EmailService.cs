@@ -1,17 +1,9 @@
-﻿using Event_Management.Application.Dto.User;
-using Event_Management.Domain.Models.Mail;
+﻿using Event_Management.Domain.Models.User;
 using FluentEmail.Core;
-using Microsoft.VisualBasic;
-using MimeKit;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Event_Management.Application.Service.Email
+namespace Event_Management.Application.Service
 {
-    public class EmailService : IEmailService
+	public class EmailService : IEmailService
     {
         private readonly IFluentEmail _fluentEmail;
 

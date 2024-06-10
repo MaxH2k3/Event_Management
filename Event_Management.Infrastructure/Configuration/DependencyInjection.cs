@@ -1,19 +1,18 @@
-﻿using Event_Management.API.Service;
-using Event_Management.Application.Service;
-using Event_Management.Application.Service.Account;
-using Event_Management.Application.Service.Email;
-using Event_Management.Application.Service.PackageEvent;
-using Event_Management.Application.Service.Security;
-using Event_Management.Application.Service.TagEvent;
+﻿using Event_Management.Application.Service;
 using Event_Management.Application.Validators;
+using Event_Management.Domain.Repository.Common;
+using Event_Management.Domain.Service;
+using Event_Management.Domain.Service.TagEvent;
 using Event_Management.Domain.UnitOfWork;
 using Event_Management.Infrastructure.Configuration;
+using Event_Management.Infrastructure.Repository;
 using Event_Management.Infrastructure.UnitOfWork;
 using FluentValidation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using System.Text.Json;
+//using Event_Management.Application.Service.SQL;
 
 namespace Event_Management.Infastructure.Configuration
 {
@@ -55,6 +54,9 @@ namespace Event_Management.Infastructure.Configuration
 			//Setup FluentValidation
 			builder.Services.AddValidatorsFromAssemblyContaining<EventRequestDtoValidator>();
 
+            //Setup VNP
+            //services.Configure<VNPAYPaymentRequest>(configuration.GetSection("VNPAY"));
+
 			// Set up SignalR
 			builder.Services
 				.AddSignalR(option =>
@@ -74,8 +76,10 @@ namespace Event_Management.Infastructure.Configuration
 			builder.Services.AddScoped<IEventService, EventService>();
 			builder.Services.AddScoped<IUserService, UserService>();
 			builder.Services.AddScoped<IJWTService, JWTService>();
-			builder.Services.AddScoped<IPackageService, PackageService>();
 			builder.Services.AddScoped<IEmailService, EmailService>();
+			builder.Services.AddScoped<ICacheRepository, CacheRepository>();
+			//builder.Services.AddScoped<ISqlService, SqlService>();
+			//builder.Services.AddScoped<ICurrentUser, CurrentUserService>();
 			builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 		}

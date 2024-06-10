@@ -1,21 +1,13 @@
 ﻿using Event_Management.Domain;
-using Event_Management.Domain.Enum.User;
 using Event_Management.Domain.Repository;
-
-using Event_Management.Infrastructure.Repository.Common;
 using Event_Management.Infrastructure.DBContext;
+using Event_Management.Infrastructure.Repository.Common;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Asn1.Ocsp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+using Event_Management.Domain.Enum;
 
 namespace Event_Management.Infrastructure.Repository.SQL
 {
-    public class UserRepository : SQLExtendRepository<User>, IUserRepository
+	public class UserRepository : SQLExtendRepository<User>, IUserRepository
     {
         private readonly EventManagementContext _context;
 
@@ -62,5 +54,10 @@ namespace Event_Management.Infrastructure.Repository.SQL
             await _context.Users.AddAsync(newUser);
             return true;
         }
+
+        //public async Task<bool?> CheckRefreshTokenByUser(UserFieldType field, string value)
+        //{
+        //   return await _context.Users
+        //}
     }
 }

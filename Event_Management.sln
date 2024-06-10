@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Event_Management.Applicatio
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Event_Management.API", "Event_Management.API\Event_Management.API.csproj", "{2DAD1AEB-C85C-4C8A-9E0D-BAF8E861AB30}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Event_Management.Infrastructure", "Event_Management.Infrastructure\Event_Management.Infrastructure.csproj", "{A8694EA3-3581-46A5-93E1-A1A7FBBAE4AF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Event_Management.Infrastructure", "Event_Management.Infrastructure\Event_Management.Infrastructure.csproj", "{A8694EA3-3581-46A5-93E1-A1A7FBBAE4AF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

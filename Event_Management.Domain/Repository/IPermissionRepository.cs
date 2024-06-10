@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Event_Management.Domain.Repository
 {
-    public interface IPackageRepository : IExtendRepository<Package>
+    public interface IPermissionRepository
     {
     }
 }

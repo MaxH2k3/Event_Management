@@ -1,4 +1,4 @@
-﻿namespace Event_Management.Domain.Constants.System
+﻿namespace Event_Management.Domain.Constants
 {
 	public class DefaultSystem
 	{

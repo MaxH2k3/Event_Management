@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
+using System.Reflection;
 
 
 namespace Event_Management.Infrastructure.Configuration
@@ -14,7 +15,7 @@ namespace Event_Management.Infrastructure.Configuration
 				swagger.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
 				{
 					In = ParameterLocation.Header,
-					Description = "Please enter a valid token",
+					Description = "Please enter a valid token using the Bearer scheme (\"bearer {token}\")",
 					Name = "Authorization",
 					Type = SecuritySchemeType.Http,
 					BearerFormat = "JWT",
@@ -34,6 +35,7 @@ namespace Event_Management.Infrastructure.Configuration
 			new string[]{}
 		}
 	});
+
 			});
 		}
 	}

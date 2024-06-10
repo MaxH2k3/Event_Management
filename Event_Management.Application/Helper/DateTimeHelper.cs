@@ -1,4 +1,4 @@
-﻿namespace Event_Management.Application.Helper
+﻿namespace Event_Management.Domain.Helper
 {
     public class DateTimeHelper
     {

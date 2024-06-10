@@ -1,4 +1,5 @@
 ﻿using Event_Management.Domain.Repository;
+using Event_Management.Domain.Repository.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,19 +14,20 @@ namespace Event_Management.Domain.UnitOfWork
         IEventPaymentRepository EventPaymentRepository { get; }
         IEventRepository EventRepository { get; }
         IFeedbackRepository FeedbackRepository { get; }
-        IPackageRepository PackageRepository { get; }
+        ILogoRepository LogoRepository { get; }
         IParticipantRepository ParticipantRepository { get; }
         IPaymentMethodRepository PaymentMethodRepository { get; }
         IPaymentRepository PaymentRepository { get; }
-        IPerkRepository PerkRepository { get; }
-        IPolicyRepository PolicyRepository { get; }
+        ISponsorEventRepository SponsorEventRepository { get; }
+        IPermissionRepository PolicyRepository { get; }
         IRoleEventRepository RoleEventRepository { get; }
         IRoleRepository RoleRepository { get; }
         ISponsorMethodRepository SponsorMethodRepository { get; }
         ITagRepository TagRepository { get; }
         ITransactionRepository TransactionRepository { get; }
         IUserRepository UserRepository { get; }
+        IRefreshTokenRepository RefreshTokenRepository { get; } 
 
-        Task<bool> SaveChangesAsync();
+		Task<bool> SaveChangesAsync();
     }
 }

@@ -68,18 +68,5 @@ namespace Event_Management.Domain.Repository.Common
 		/// <param name="id"></param>
 		/// <returns></returns>
 		Task Delete(params dynamic[] id);
-
-		/// <summary>
-		/// Count all entities in database
-		/// </summary>
-		/// <returns></returns>
-		Task<int> Count();
-
-        /// <summary>
-        /// Count all entities in database with condition
-        /// </summary>
-        /// <param name="predicate"></param>
-        /// <returns></returns>
-        Task<int> Count(Expression<Func<T, bool>> predicate);
     }
 }

@@ -12,9 +12,9 @@ namespace Event_Management.Domain.Repository
     public interface IEventRepository : IExtendRepository<Event>
     {
         //Get List of events that user have participated
-        public Task<List<Event>> GetUserParticipatedEvents(EventFilterObject filter, string userId, int pageNo, int elementEachPage);
+        public Task<PagedList<Event>> GetUserParticipatedEvents(EventFilterObject filter, string userId, int pageNo, int elementEachPage);
         //Get All event with search, paging and sort.
-        public Task<List<Event>> GetAllEvents(EventFilterObject filter, int pageNo, int elementEachPage);
+        public Task<PagedList<Event>> GetAllEvents(EventFilterObject filter, int pageNo, int elementEachPage);
         //Create Event
         public Task<Event> CreateEvent(Event eventCreate);
         //AUTO update status for event

@@ -1,6 +1,5 @@
-﻿using Event_Management.Domain.Constants.System;
-using Event_Management.Domain.Constants.User;
-using Event_Management.Domain.Enum.User;
+﻿using Event_Management.Domain.Constants;
+using Event_Management.Domain.Enum;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Event_Management.Infrastructure.Configuration

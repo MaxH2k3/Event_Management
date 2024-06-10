@@ -1,16 +1,14 @@
-﻿using Event_Management.Application.Dto.User;
+﻿using Event_Management.Application.Dto.AuthenticationDTO;
 using Event_Management.Domain;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Event_Management.Domain.Models.System;
+using Event_Management.Domain.Models.User;
 
-namespace Event_Management.Application.Service.Security
+namespace Event_Management.Application.Service
 {
-    public interface IJWTService
+	public interface IJWTService
     {
-        public Task<string> GenerateAccessToken(LoginUserDto user);
-        public Task<string> GenerateRefreshToken(User user);
+        Task<string> GenerateAccessToken(LoginUserDto user);
+        string GenerateRefreshToken();
+        Task<APIResponse> RefreshToken(TokenResponseDTO token);
     }
 }

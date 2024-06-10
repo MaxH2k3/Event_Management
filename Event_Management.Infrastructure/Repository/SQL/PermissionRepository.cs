@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 
 namespace Event_Management.Infrastructure.Repository.SQL
 {
-    public class PolicyRepository : SQLRepository<Policy>, IPolicyRepository
+    public class PermissionRepository : SQLRepository<Permission>, IPermissionRepository
     {
         private readonly EventManagementContext _context;
 
-        public PolicyRepository(EventManagementContext context) : base(context)
+        public PermissionRepository(EventManagementContext context) : base(context)
         {
             _context = context;
         }

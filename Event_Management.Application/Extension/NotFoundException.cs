@@ -1,4 +1,4 @@
-﻿namespace Event_Management.Application.Extension
+﻿namespace Event_Management.Domain.Extension
 {
     public class NotFoundException : Exception
     {

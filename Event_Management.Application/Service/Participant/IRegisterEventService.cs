@@ -1,7 +1,8 @@
-﻿using Event_Management.Application.Dto.ParticipantDTO;
+﻿using Event_Management.Domain.Models.Common;
+using Event_Management.Domain.Models.ParticipantDTO;
 using Event_Management.Domain.Models.System;
 
-namespace Event_Management.Application.Service
+namespace Event_Management.Domain.Service
 {
 	public interface IRegisterEventService
 	{
@@ -16,5 +17,8 @@ namespace Event_Management.Application.Service
 
 		// Check in participant when already registered
 		Task<APIResponse> CheckInParticipant(Guid userId, Guid eventId);
+
+		// Get all participant on event
+		Task<PagedList<ParticipantEventModel>> GetParticipantOnEvent(FilterParticipant filter);
 	}
 }

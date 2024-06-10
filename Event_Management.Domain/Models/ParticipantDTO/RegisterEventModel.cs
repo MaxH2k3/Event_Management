@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Event_Management.Application.Dto.ParticipantDTO
+namespace Event_Management.Domain.Models.ParticipantDTO
 {
 	public class RegisterEventModel
 	{

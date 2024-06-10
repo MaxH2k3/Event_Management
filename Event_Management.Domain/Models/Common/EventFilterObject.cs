@@ -10,8 +10,10 @@ namespace Event_Management.Domain.Models.Common
     {
         public string? EventName { get; set; } = null;
         public string? Status { get; set; } = null ;
-        public string? StartDate { get; set; } = null;
-        public string? EndDate { get; set; } = null;
+        public long? StartDateFrom { get; set; } = null;
+        public long? StartDateTo { get; set; } = null;
+        public long? EndDateFrom { get; set; } = null;
+        public long? EndDateTo { get; set; } = null;
         public string? Location { get; set; } = null;
         public bool? Approval { get; set; } = null;
         public double? TicketFrom { get; set; } = null;

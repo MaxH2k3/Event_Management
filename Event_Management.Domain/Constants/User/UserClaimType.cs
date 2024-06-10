@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Event_Management.Domain.Constants.User
+namespace Event_Management.Domain.Constants
 {
     public class UserClaimType
     {

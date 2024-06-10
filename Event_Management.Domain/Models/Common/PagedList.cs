@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 
 namespace Event_Management.Domain.Models.Common
 {
-    public class PagedList<T> : IEnumerable<T> where T : class
+	public class PagedList<T> : IEnumerable<T> where T : class
     {
         public IEnumerable<T> Items { get; init; }
         public int TotalItems { get; init; }
@@ -42,5 +37,5 @@ namespace Event_Management.Domain.Models.Common
         {
             return GetEnumerator();
         }
-    }
+	}
 }

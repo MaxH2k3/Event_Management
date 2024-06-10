@@ -1,31 +1,19 @@
 ﻿using AutoMapper;
 using Event_Management.Application.Dto;
-using Event_Management.Application.Message;
-using Event_Management.Domain;
 using Event_Management.Domain.Models.Common;
-using Event_Management.Domain.Models.System;
 using Event_Management.Domain.UnitOfWork;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Event_Management.Application.Service.TagEvent
+namespace Event_Management.Domain.Service.TagEvent
 {
-    public class TagService : ITagService
+	public class TagService : ITagService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
 
-        public TagService(IUnitOfWork unitOfWork, IConfiguration configuration, IMapper mapper)
+        public TagService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
-            _configuration = configuration;
             _mapper = mapper;
         }
 

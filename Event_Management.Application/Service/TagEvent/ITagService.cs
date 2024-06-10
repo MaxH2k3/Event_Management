@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Event_Management.Application.Service
+namespace Event_Management.Domain.Service
 {
     public interface ITagService
     {
