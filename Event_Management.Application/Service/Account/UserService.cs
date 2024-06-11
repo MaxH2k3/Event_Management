@@ -4,9 +4,8 @@ using Event_Management.Application.Dto.UserDTO.Request;
 using Event_Management.Application.Dto.UserDTO.Response;
 using Event_Management.Application.ExternalServices;
 using Event_Management.Domain;
-using Event_Management.Domain.Constants.User;
+using Event_Management.Domain.Constants;
 using Event_Management.Domain.Enum;
-using Event_Management.Domain.Message;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Models.System;
 using Event_Management.Domain.Models.User;
@@ -17,7 +16,7 @@ using System.Security.Cryptography;
 
 namespace Event_Management.Application.Service
 {
-    public class UserService : IUserService
+	public class UserService : IUserService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;

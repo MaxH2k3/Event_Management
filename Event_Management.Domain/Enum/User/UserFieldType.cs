@@ -8,7 +8,7 @@ namespace Event_Management.Domain.Enum
 {
     public enum UserFieldType
     {
-        UserId = 1,
-        Email = 2,
+        UserId = 0,
+        Email = 1,
     }
 }

@@ -8,10 +8,10 @@ namespace Event_Management.Domain.Enum
 {
 	public enum EventRole
 	{
-		Guest = 1,
-		Sponsor = 2,
-		EventOperator = 3,
-		CheckingStaff = 4,
-		Visitor = 5
+		Guest,
+		Sponsor,
+		EventOperator,
+		CheckingStaff,
+		Visitor
 	}
 }

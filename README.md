@@ -1,23 +1,130 @@
-<h3>Flow:</h3>
-<ol>
-  <li>Clone code về</li>
-  <li>Checkout sang branch main của web/mobile/Apis</li>
-  <li>Break sang branch mới có tên mình và chức năng của mình làm</li>
-  <li>Code chức năng</li>
-  <li>Chỉ add & commit những file có thay đổi</li>
-  <li>Khi commit cần ghi sơ lược message các thay đổi, sau đó gạch đầu dòng miêu tả chi tiết hơn các thay đổi</li>
-  <li>Khi commit xong, sau đó push lên</li>
-  <li>Review code -> Merge -> Xoá Branch chức năng đã được merge</li>
-  <li>Các lần sau: fetch -> pull -> break -> code -> commit -> push -> merge</li>
-</ol>
 
-<h3>Git commands:</h3>
-<ol>
-  <li>git clone [url] - Clone code về</li>
-  <li>git pull hoặc git pull origin [branch khác] - Pull Code từ branch về</li>
-  <li>git fetch - fetch các changes mới từ remote về</li>
-  <li>git checkout [tên branch] - chuyển branch sang [tên branch]</li>
-  <li>git checkout -b [tên branch mới] - Break sang branch mới</li>
-  <li>git push - Đẩy code mới lên</li>
-  <li>Set Remote: git remote set-url origin <link></li>
-</ol>
+# Event Management System
+
+The Event Management System is a web application developed using ASP.NET for the backend. This system provides comprehensive tools for managing various events, including event creation, attendee registration, and event scheduling. The platform is designed to streamline the event management process, making it efficient and user-friendly for both organizers and participants.
+
+
+## Demo
+
+- [API Swagger](https://fpt-event-management.azurewebsites.net/swagger/index.html)
+
+
+## Features
+
+- Event Creation and Management: Create, update, and delete events with details like date, time, location, and description.
+- Attendee Registration: Allow users to register for events, manage attendee lists, and send confirmation emails.
+- Event Scheduling: View and manage event schedules using a calendar interface.
+- User Authentication: Secure login and registration for event organizers and attendees using JWT (JSON Web Tokens).
+- Admin Panel: Administrative dashboard for managing events, users, and system settings.
+- Notifications: Automated email notifications for event reminders and updates using Gmail.
+- Caching: Improve performance with Redis for caching frequently accessed data.
+- Checking Realtime
+
+## Architecture
+
+````
+EventManagementSystem/
+├── API/
+│   ├── Controllers/
+│   ├── Models/
+│   └── ...
+├── Application/
+│   ├── Interfaces/
+│   ├── Services/
+│   ├── UseCases/
+│   └── ...
+├── Domain/
+│   ├── Entities/
+│   ├── ValueObjects/
+│   ├── Services/
+│   └── ...
+├── Infrastructure/
+│   ├── Data/
+│   ├── Email/
+│   ├── Caching/
+│   ├── Configuaration/
+│   └── .../
+└── ...
+````
+## Installation & Setup
+
+#### 1. Clone the Repository
+
+- git clone '...'
+
+- cd event-management-system
+
+#### 2. Setup the Database
+- Ensure SQL Server is installed and running on your machine.
+- Create a new database named EventManagement.
+- Update the connection string in appsettings.json file located in the root directory of the project.
+
+```html
+"ConnectionStrings": {
+    "DefaultConnection": "Server=your_server_name;Database=EventManagementDB;Trusted_Connection=True;"
+}
+```
+
+#### 3. Configure Redis
+
+- Ensure Redis is installed and running on your machine or server.
+- Update the Redis configuration in appsettings.json.
+
+```html
+"Redis": {
+    "ConnectionString": "your_redis_server:6379",
+    "Password; "your_redis_password_if_using_cloud"
+}
+
+```
+
+#### 4. Configure Gamil
+
+- Set up a Gmail account for sending notifications.
+- Enable "Less secure app access" in your Gmail account settings.
+- Update the Gmail configuration in appsettings.json.
+
+
+```html
+"GmailSetting": {
+  "DisplayName": "your_email@gmail.com",
+  "SmtpServer": "smtp.gmail.com",
+  "Port": 587,
+  "Mail": "your_email@gmail.com",
+  "Password": "your_password"
+},
+
+```
+
+#### 5. Configure JWT
+
+```html
+"Jwt": {
+    "Securitykey": "your_secret_key",
+    "Issuer": "your_issuer",
+    "Audience": "your_audience",
+    "TokenExpiry": "your_time"
+}
+```
+
+#### 6. Run the Application
+
+- dotnet run
+
+## Tech Stack
+
+**Server:** asp.net
+
+**Framework:** EF6
+
+**Library:** FluentMail, FluentValidation, JWT Bear, Cache
+
+**Database:** SQL Server, Redis
+
+## Authors
+
+- [Le Huy](https://github.com/MaxH2k3)
+- [Gia Khang](https://github.com/giakhang3005)
+- [Cong Lam](https://github.com/CongLam1806)
+- [Duc Minh](https://github.com/Minhduc027)
+- [Truong Thanh](https://github.com/truongthanhvu2337)
