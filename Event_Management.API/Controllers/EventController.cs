@@ -6,7 +6,10 @@ using Event_Management.Domain.Models.System;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
+using Event_Management.Application.Dto.EventDTO.RequestDTO;
 using Microsoft.AspNetCore.Authorization;
+using Event_Management.Domain.Constants;
+using Event_Management.Domain.Enum;
 
 namespace Event_Management.API.Controllers
 {
@@ -21,7 +24,7 @@ namespace Event_Management.API.Controllers
             _eventService = eventService;
 		}
 
-        [Authorize]
+        //[Authorize(Roles = "Admin")]
         [HttpGet("GetAll")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -49,6 +52,8 @@ namespace Event_Management.API.Controllers
                 Message = "Not found!",
             });
         }
+
+        //[Authorize(Roles = "Organizer")]
         [HttpGet("UserParticipated")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -81,24 +86,26 @@ namespace Event_Management.API.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-        public async Task<APIResponse> AddEvent(EventRequestDto eventDto)
+        public async Task<IActionResult> AddEvent(EventRequestDto eventDto)
         {
             APIResponse response = new APIResponse();
-            var result = await _eventService.AddEvent(eventDto);
-
-            if (result)
+            try
             {
-                response.StatusResponse = HttpStatusCode.Created;
-                response.Message = MessageCommon.SavingSuccesfully;
-                response.Data = result;
-
-            }
-            else
+                var result = await _eventService.AddEvent(eventDto);
+                if(result != null)
+                {
+                    response.StatusResponse = HttpStatusCode.OK;
+                    response.Data = result;
+                    response.Message = MessageCommon.Complete;
+                    return Ok(response);
+                }
+            } catch(Exception ex)
             {
+                response.Message = ex.Message;
                 response.StatusResponse = HttpStatusCode.BadRequest;
-                response.Message = MessageCommon.SavingFailed;
+                return BadRequest(response);
             }
-            return response;
+            return BadRequest();
         }
 
         [HttpPut("")]
@@ -142,7 +149,53 @@ namespace Event_Management.API.Controllers
             }
             return response;
         }
+        [HttpPost("file-upload")]
+        public async Task<IActionResult> UploadEventImage([FromBody] FileUploadDto dto)
+        {
+            var result = await _eventService.UploadImage(dto);
+            if(result != null)
+            {
+                return Ok(new APIResponse
+                {
+                    StatusResponse = HttpStatusCode.OK,
+                    Message = MessageCommon.Complete,
+                    Data = result
+                });
+            }
+            return BadRequest(new APIResponse
+            {
+                StatusResponse = HttpStatusCode.BadRequest,
+                Message = "Error while create Event Image!"
+            });
+
+        }
+        [HttpGet("get-file")]
+        public async Task<IActionResult> GetBlobUri([FromQuery] string blobName)
+        {
+            var result = await _eventService.GetBlobUri(blobName);
+            return Ok(new APIResponse
+            {
+                StatusResponse = HttpStatusCode.OK,
+                Message = MessageCommon.Complete,
+                Data = result
+            });
+
+        }
+        [HttpGet("get-all-file")]
+        public async Task<IActionResult> GetAllBlobUri()
+        {
+            var result = await _eventService.GetAllBlobUris();
+            return Ok(new APIResponse
+            {
+                StatusResponse = HttpStatusCode.OK,
+                Message = MessageCommon.Complete,
+                Data = result
+            });
+
+        }
     }
+}
+    
   //      [HttpGet("GetTest")]
 		//public async Task<IActionResult> GetTest()
   //      {
@@ -151,5 +204,5 @@ namespace Event_Management.API.Controllers
   //          return Ok(response);
 		//}
 
-}
+
 

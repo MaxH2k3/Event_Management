@@ -1,7 +1,12 @@
 ﻿using AutoMapper;
 using Event_Management.Application.Dto.AuthenticationDTO;
+using Event_Management.Application.Dto.UserDTO.Request;
+using Event_Management.Application.Dto.UserDTO.Response;
+using Event_Management.Application.ExternalServices;
 using Event_Management.Domain;
+using Event_Management.Domain.Constants.User;
 using Event_Management.Domain.Enum;
+using Event_Management.Domain.Message;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Models.System;
 using Event_Management.Domain.Models.User;
@@ -12,24 +17,29 @@ using System.Security.Cryptography;
 
 namespace Event_Management.Application.Service
 {
-	public class UserService : IUserService
+    public class UserService : IUserService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IJWTService _JWTService;
         private readonly IEmailService _emailService;
         private readonly IConfiguration _configuration;
+        private readonly IAvatarApiClient _avatarApiClient;
 
-        public UserService(IUnitOfWork unitOfWork, IMapper mapper, IJWTService jWTService, IEmailService emailService, IConfiguration configuration)
+        public UserService(IUnitOfWork unitOfWork,
+            IMapper mapper, IJWTService jWTService,
+            IEmailService emailService, IConfiguration configuration,
+            IAvatarApiClient avatarApiClient)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _JWTService = jWTService;
             _emailService = emailService;
             _configuration = configuration;
+            _avatarApiClient = avatarApiClient;
         }
 
-       
+
 
         public Task<User?> GetUser(Guid userId)
         {
@@ -53,7 +63,7 @@ namespace Event_Management.Application.Service
             {
                 return new APIResponse
                 {
-                    StatusResponse = HttpStatusCode.OK,
+                    StatusResponse = HttpStatusCode.Unauthorized,
                     Message = "Wrong password",
                     Data = null
                 };
@@ -81,14 +91,33 @@ namespace Event_Management.Application.Service
             await _unitOfWork.RefreshTokenRepository.AddRefreshToken(refreshTokenEntity);
             await _unitOfWork.SaveChangesAsync();
 
+            
+            var userDTO = _mapper.Map<UserResponseDto>(user);
+            switch (userDTO.Gender)
+            {
+                case UserGender.Male:
+                    userDTO.Avatar = _avatarApiClient.GetRandomBoyAvatarUrl();
+                    break;
+                case UserGender.Female:
+                    userDTO.Avatar = _avatarApiClient.GetRandomGirlAvatarUrl();
+                    break;
+                default:
+                    userDTO.Avatar = _avatarApiClient.GetAvatarUrlWithName(userDTO.FirstName!, userDTO.LastName!);
+                    break;
+            };
+
             return new APIResponse
             {
                 StatusResponse = HttpStatusCode.OK,
                 Message = "Login successfully",
-                Data = new TokenResponseDTO
+                Data = new LoginResponseDto
                 {
-                    AccessToken = token,
-                    RefreshToken = refreshTokenEntity.Token
+                    User = userDTO,
+                    Token = new TokenResponseDTO
+                    {
+                        AccessToken = token,
+                        RefreshToken = refreshTokenEntity.Token
+                    }
                 }
             };
         }
@@ -97,6 +126,7 @@ namespace Event_Management.Application.Service
         public async Task<APIResponse> Register(RegisterUserDto newUser)
         {
             CreatePasswordHash(newUser.Password!, out byte[] passwordHash, out byte[] passwordSalt);
+            string token = Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
             var id = Guid.NewGuid();
             var user = new User()
             {
@@ -112,11 +142,12 @@ namespace Event_Management.Application.Service
                 RoleId = newUser.RoleId,
                 Status = AccountStatus.Pending.ToString(),
                 CreatedAt = DateTime.UtcNow,
+                //verifyToken = token,
                 UpdatedAt = null,
             };
             bool isAdded = await _unitOfWork.UserRepository.AddUser(user);
-            ////send mail
-            string token = Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
+
+
             var result = await _emailService.SendEmailWithTemplate("Views/Template/VerifyAccount.cshtml", "Testing", new UserMailDto()
             {
                 UserName = user.FirstName + " " + user.LastName,
@@ -173,6 +204,40 @@ namespace Event_Management.Application.Service
             };
         }
 
+        //public async Task<APIResponse> verifyAccount(string token, Guid id)
+        //{
+        //    var existUser = await _unitOfWork.UserRepository.GetUser(id);
+        //    if (existUser == null)
+        //    {
+        //        return new APIResponse
+        //        {
+        //            StatusResponse = HttpStatusCode.NotFound,
+        //            Message = MessageCommon.UserNotFound,
+        //            Data = null
+        //        };
+        //    }
+        //    else if (existUser.verifyToken != token)
+        //    {
+        //        return new APIResponse
+        //        {
+        //            StatusResponse = HttpStatusCode.NotFound,
+        //            Message = "Invalid Token",
+        //            Data = null
+        //        };
+        //    }
+        //    existUser.Status = AccountStatus.Active.ToString();
+        //    existUser.UpdatedAt = DateTime.UtcNow;
+        //    existUser.verifyToken = null;
+        //    await _unitOfWork.UserRepository.Update(existUser);
+        //    await _unitOfWork.SaveChangesAsync();
+        //    return new APIResponse
+        //    {
+        //        StatusResponse = HttpStatusCode.OK,
+        //        Message = "Verify successfully",
+        //        Data = null,
+        //    };
+        //}
+
 
         //Still confused about where I should put this code in which layers?????????????????????????????????????
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
@@ -195,9 +260,9 @@ namespace Event_Management.Application.Service
 
         }
 
-        public Task<PagedList<User>> GetAllUser(int page, int eachPage)
+        public async Task<PagedList<User>> GetAllUser(int page, int eachPage)
         {
-            throw new NotImplementedException();
+            return await _unitOfWork.UserRepository.GetAll(page, eachPage, "Email");
         }
     }
 }

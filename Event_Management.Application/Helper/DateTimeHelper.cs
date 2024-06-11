@@ -1,4 +1,6 @@
-﻿namespace Event_Management.Domain.Helper
+﻿using Org.BouncyCastle.Utilities;
+
+namespace Event_Management.Domain.Helper
 {
     public class DateTimeHelper
     {
@@ -28,6 +30,13 @@
             DateTime vietnamTime = TimeZoneInfo.ConvertTimeFromUtc(serverTime, vietnamTimeZone);
 
             return vietnamTime.ToString("dd/MM/yyyy");
+        }
+        public static bool ValidateStartTimeAndEndTime(DateTime startTime, DateTime endTime)
+        {
+            long startTimeTick = startTime.AddMinutes(30).Ticks;
+            long endTimeTick = endTime.Ticks;
+            long now = DateTime.Now.Ticks;
+            return startTimeTick > now && endTimeTick > startTimeTick;
         }
     }
 }

@@ -1,10 +1,12 @@
-﻿using Event_Management.Application.Service;
+﻿using Event_Management.Application.ExternalServices;
+using Event_Management.Application.Service;
 using Event_Management.Application.Validators;
 using Event_Management.Domain.Repository.Common;
 using Event_Management.Domain.Service;
 using Event_Management.Domain.Service.TagEvent;
 using Event_Management.Domain.UnitOfWork;
 using Event_Management.Infrastructure.Configuration;
+using Event_Management.Infrastructure.ExternalServices.ApiClients;
 using Event_Management.Infrastructure.Repository;
 using Event_Management.Infrastructure.UnitOfWork;
 using FluentValidation;
@@ -70,14 +72,17 @@ namespace Event_Management.Infastructure.Configuration
 					option.PayloadSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 				});
 
-			// Set up services to the container.
-			builder.Services.AddScoped<IRegisterEventService, RegisterEventService>();
+            // Set up services to the container.
+
+            builder.Services.AddScoped<IAvatarApiClient, AvatarApiClient>();
+            builder.Services.AddScoped<IRegisterEventService, RegisterEventService>();
 			builder.Services.AddScoped<ITagService, TagService>();
 			builder.Services.AddScoped<IEventService, EventService>();
-			builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IUserService, UserService>();
 			builder.Services.AddScoped<IJWTService, JWTService>();
 			builder.Services.AddScoped<IEmailService, EmailService>();
 			builder.Services.AddScoped<ICacheRepository, CacheRepository>();
+			
 			//builder.Services.AddScoped<ISqlService, SqlService>();
 			//builder.Services.AddScoped<ICurrentUser, CurrentUserService>();
 			builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();

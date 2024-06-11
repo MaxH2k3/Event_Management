@@ -2,6 +2,7 @@ using AutoMapper;
 using Event_Management.Application;
 using Event_Management.Application.Dto;
 using Event_Management.Application.Dto.EventDTO.ResponseDTO;
+using Event_Management.Application.Dto.UserDTO.Response;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Models.EventDTO.ResponseDTO;
 using Event_Management.Domain.Models.ParticipantDTO;
@@ -13,6 +14,9 @@ namespace Event_Management.Domain.Configuration
         public MapperConfig()
         {
             //Mapper User
+            CreateMap<User, UserResponseDto>()
+                .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role.RoleName))
+                .ReverseMap();
 
             //Mapper Event
             CreateMap<Event, EventResponseDto>().ReverseMap();

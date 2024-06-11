@@ -9,13 +9,20 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Content Remove="Views\Template\VerifyAccount.cshtml" />
+	  <Content Remove="wwwroot\Images\Sunset.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="Views\Template\VerifyAccount.cshtml">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="wwwroot\Images\Sunset.png" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\Event_Management.Application\Event_Management.Application.csproj" />
 		<ProjectReference Include="..\Event_Management.Domain\Event_Management.Domain.csproj" />
 		<ProjectReference Include="..\Event_Management.Infrastructure\Event_Management.Infrastructure.csproj" />
-	</ItemGroup>
-	<ItemGroup>
-		<Content Update="Views\Template\VerifyAccount.cshtml">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
 	</ItemGroup>
 </Project>

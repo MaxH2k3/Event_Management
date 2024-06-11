@@ -1,13 +1,13 @@
 ﻿using Event_Management.Application.Dto.AuthenticationDTO;
+using Event_Management.Application.Dto.UserDTO.Request;
 using Event_Management.Application.Service;
-using Event_Management.Domain.Models.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
 namespace Event_Management.API.Controllers
 {
-	[Route("api/v1/Auth")]
+    [Route("api/v1/Auth")]
     [ApiController]
     public class AuthenticateController : Controller
     {
@@ -48,13 +48,26 @@ namespace Event_Management.API.Controllers
             return Created(response.Message!, response.Data);
         }
 
+        //[HttpPost("verify")]
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status404NotFound)]
+        //public async Task<IActionResult> VerifyAccount([FromQuery] string token, [FromQuery] Guid userId)
+        //{
+        //    var response = await _userService.verifyAccount(token, userId);
+        //    if (response.StatusResponse != HttpStatusCode.OK)
+        //    {
+        //        return BadRequest(response);
+        //    }
+        //    return Ok(response);
+        //}
+
         [Authorize]
         [HttpPost("logout")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Logout([FromBody] string refreshToken)
+        public async Task<IActionResult> Logout([FromBody] LogoutRequestDto request)
         {
-            var response = await _userService.Logout(refreshToken);
+            var response = await _userService.Logout(request.RefreshToken!);
             if (response.StatusResponse != HttpStatusCode.OK)
             {
                 return BadRequest(response);

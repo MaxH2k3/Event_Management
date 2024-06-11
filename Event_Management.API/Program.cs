@@ -34,7 +34,7 @@ builder.Services.AddHttpContextAccessor();
 // Set up cors
 builder.Services.AddCors();
 
-
+// Set up Azure storage
 
 //Set size limit for request
 builder.Services.Configure<KestrelServerOptions>(options =>

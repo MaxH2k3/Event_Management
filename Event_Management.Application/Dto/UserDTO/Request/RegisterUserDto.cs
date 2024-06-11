@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Event_Management.Domain.Models.User
+namespace Event_Management.Application.Dto.UserDTO.Request
 {
     public class RegisterUserDto
     {

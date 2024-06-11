@@ -1,8 +1,8 @@
 ﻿using Event_Management.Application.Dto.AuthenticationDTO;
+using Event_Management.Application.Dto.UserDTO.Request;
 using Event_Management.Domain;
 using Event_Management.Domain.Constants;
 using Event_Management.Domain.Models.System;
-using Event_Management.Domain.Models.User;
 using Event_Management.Domain.UnitOfWork;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -13,7 +13,7 @@ using System.Text;
 
 namespace Event_Management.Application.Service
 {
-	public class JWTService : IJWTService
+    public class JWTService : IJWTService
     {
         //private readonly JWTSetting _jwtSettings; //violence dependecy inversion principle
         private readonly IConfiguration _configuration;
@@ -40,7 +40,7 @@ namespace Event_Management.Application.Service
             {
                 new Claim(UserClaimType.UserId, existUser.UserId.ToString()),
                 new Claim(ClaimTypes.Email, existUser.Email!),
-                new Claim(ClaimTypes.Role, existUser.Role.ToString()!)
+                new Claim(ClaimTypes.Role, existUser.Role.RoleName)
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
@@ -168,6 +168,8 @@ namespace Event_Management.Application.Service
                     RefreshToken = newRefreshToken
                 }
             };
+
+            
 
         }
 

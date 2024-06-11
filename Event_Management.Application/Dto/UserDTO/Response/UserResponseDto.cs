@@ -1,0 +1,14 @@
+﻿namespace Event_Management.Application.Dto.UserDTO.Response;
+
+public class UserResponseDto
+{
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
+    public int Age { get; set; }
+    public string? Gender { get; set; }
+    public string? Email { get; set; }
+    public string? Phone { get; set; }
+    public string Status { get; set; } = null!;
+    public string? RoleName { get; set; }
+    public string? Avatar { get; set; }
+}

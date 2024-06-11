@@ -23,5 +23,7 @@ namespace Event_Management.Domain.Message
         public const string Complete = "Complete!";
 
         public const string ServerError = "Somethings have wrong!";
-	}
+
+        public const string UserNotFound = "User not found!";
+    }
 }

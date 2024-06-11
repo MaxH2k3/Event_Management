@@ -23,13 +23,14 @@
             display: flex;
             justify-content: center;
             height: 100vh;
-            background: url('~/Images/Orange Gradient Sunset Desktop Wallpaper.png') no-repeat center center fixed;
-            background-size: cover
+            background-color: tan;
+            /* background: url('~/Images/Orange Gradient Sunset Desktop Wallpaper.png') no-repeat center center fixed;
+                    background-size: cover */
         }
 
         .email-content {
-            background: url('~/Images/Orange Gradient Sunset Desktop Wallpaper.png') no-repeat center center fixed;
-            background-size: cover;
+            /* background: url('~/Images/Orange Gradient Sunset Desktop Wallpaper.png') no-repeat center center fixed;
+                    background-size: cover; */
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             overflow: hidden;
@@ -40,6 +41,7 @@
             padding: 20px;
             margin-top: 20px;
             margin-bottom: 20px;
+            background-color: white;
         }
 
         .email-header {
@@ -103,12 +105,11 @@
     <div class="email-container">
         <div class="email-content">
             <div class="email-header">
-                <img src="Images/Sunset.png" alt="alo"/>
                 <h3 style="margin: 0 auto; color: black;">MaLu</h3>
             </div>
             <div class="email-body" style="color: black;">
                 <h1>Verify your email address</h1>
-                <p>Welcome to @Model.UserName.</p>
+                <p>Welcome @Model.UserName.</p>
                 <p>
                     Please click the button below to confirm your email address and
                     activate your account.
