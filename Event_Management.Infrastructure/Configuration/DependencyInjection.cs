@@ -14,6 +14,7 @@ using Event_Management.Infrastructure.ExternalServices.ApiClients;
 using Event_Management.Infrastructure.Repository;
 using Event_Management.Infrastructure.UnitOfWork;
 using FluentValidation;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
