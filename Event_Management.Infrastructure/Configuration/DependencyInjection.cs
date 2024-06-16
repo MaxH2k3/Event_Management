@@ -125,12 +125,10 @@ namespace Event_Management.Infastructure.Configuration
 			builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             //Add MediatR
-            builder.Services.AddMediatR(r =>
-            {
-                r.RegisterServicesFromAssembly(typeof(PaymentDto).Assembly);
-            });
+            builder.Services.AddMediatR(typeof(PaymentDto).Assembly);
+            
 
-			//
+            //
 
         }
 	}
