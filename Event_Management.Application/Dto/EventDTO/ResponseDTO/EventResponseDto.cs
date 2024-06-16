@@ -20,6 +20,10 @@ namespace Event_Management.Application.Dto.EventDTO.ResponseDTO
         public Guid? CreatedBy { get; set; }
         public string? Image { get; set; }
         public string? Location { get; set; }
+        public string? LocationId { get; set; }
+        public string? LocationAddress { get; set; }
+        public string? LocationUrl { get; set; } = null;
+        public string? LocationCoord { get; set; } = null;
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public int? Capacity { get; set; }

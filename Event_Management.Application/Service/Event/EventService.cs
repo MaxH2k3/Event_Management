@@ -3,16 +3,18 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Event_Management.Application.Dto.EventDTO.RequestDTO;
 using Event_Management.Application.Dto.EventDTO.ResponseDTO;
+using Event_Management.Application.Message;
 using Event_Management.Domain;
 using Event_Management.Domain.Constants;
+using Event_Management.Domain.Entity;
 using Event_Management.Domain.Enum;
 using Event_Management.Domain.Helper;
-using Event_Management.Domain.Message;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Models.System;
 using Event_Management.Domain.UnitOfWork;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using System.Security.Principal;
 
 
 namespace Event_Management.Application.Service
@@ -30,13 +32,13 @@ namespace Event_Management.Application.Service
             _config = configuration;
         }
 
-        public async Task<Event> AddEvent(EventRequestDto eventDto)
+        public async Task<EventResponseDto> AddEvent(EventRequestDto eventDto, string userId)// HttpContext context)
         {
 
             bool validate = DateTimeHelper.ValidateStartTimeAndEndTime(eventDto.StartDate, eventDto.EndDate);
             if (!validate)
             {
-                throw new InvalidOperationException("Start date must after current time and end date must after start date 30 mins!!");
+                throw new InvalidOperationException(MessageEvent.StartEndTimeValidation);
             }
             var eventEntity = _mapper.Map<Event>(eventDto);
             eventEntity.EventId = Guid.NewGuid();
@@ -44,18 +46,37 @@ namespace Event_Management.Application.Service
             {
                 eventEntity.Image = await UploadImage2(eventDto.Image, eventEntity.EventId);
             }
+            //string userId = IndentityExtension.GetUserIdFromToken2(context);
+            //string userId = IndentityExtension.GetUserIdFromToken();
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new Exception(MessageCommon.SessionTimeout);
+            } else
+            {
+                eventEntity.CreatedBy = Guid.Parse(userId);
+            }
+         
             eventEntity.CreatedAt = DateTime.Now;
+            eventEntity.Location = eventDto.Location.Location;
+            eventEntity.LocationId = eventDto.Location.LocationId;
+            eventEntity.LocationAddress = eventDto.Location.LocationAddress;
             eventEntity.Status = EventStatus.NotYet.ToString();
             await _unitOfWork.EventRepository.Add(eventEntity);
             if (await _unitOfWork.SaveChangesAsync())
             {
-                return eventEntity;
+                EventResponseDto response = _mapper.Map<EventResponseDto>(eventEntity);
+                return response;
             }
-            throw new Exception("Error while creating event!");
+            throw new Exception(MessageCommon.CreateFailed);
         }
 
         public async Task<bool> DeleteEvent(Guid eventId)
         {
+            Event? existEvent = await _unitOfWork.EventRepository.GetById(eventId);
+            if (existEvent == null || existEvent.Status.Equals(EventStatus.OnGoing))
+            {
+                return false;
+            }
             await _unitOfWork.EventRepository.Delete(eventId);
             return await _unitOfWork.SaveChangesAsync();
         }
@@ -100,9 +121,9 @@ namespace Event_Management.Application.Service
         public async Task<string?> UploadImage2(String base64, Guid EventId)
         {
             var eventExist = await _unitOfWork.EventRepository.GetById(EventId);
-            if (eventExist != null)
+            if (eventExist == null)
             {
-                throw new Exception("Event Image duplicated!");
+                throw new Exception(MessageEvent.EventIdNotExist);
             }
 
             var httpHeaders = new BlobHttpHeaders

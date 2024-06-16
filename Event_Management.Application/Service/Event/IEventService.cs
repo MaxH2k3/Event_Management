@@ -4,6 +4,7 @@ using Event_Management.Application.Dto.EventDTO.ResponseDTO;
 using Event_Management.Domain;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Models.System;
+using Microsoft.AspNetCore.Http;
 
 namespace Event_Management.Application.Service
 {
@@ -14,7 +15,7 @@ namespace Event_Management.Application.Service
         public Task<string?> UploadImage(FileUploadDto dto);
         public Task<List<string>> GetAllBlobUris();
         public Task<string?> GetBlobUri(string blobName);
-        public Task<Event> AddEvent(EventRequestDto eventDto);
+        public Task<EventResponseDto> AddEvent(EventRequestDto eventDto, string userId);// HttpContext http);
         public Task<bool> UpdateEvent(EventRequestDto eventDto);
         public Task<bool> DeleteEvent(Guid eventId);
 

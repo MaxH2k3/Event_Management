@@ -1,5 +1,7 @@
 ﻿using Event_Management.Application.Dto.EventDTO.ResponseDTO;
 using Event_Management.Domain;
+using Event_Management.Domain.Enum;
+using Event_Management.Domain.Entity;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Repository;
 using Event_Management.Domain.Repository.Common;
@@ -28,7 +30,30 @@ namespace Event_Management.Infrastructure.Repository.SQL
             var eventList = _context.Events.AsQueryable();
             eventList = ApplyFilter(eventList, filter).PaginateAndSort(pageNo, elementEachPage, filter.SortBy ?? "EventId", filter.IsAscending);
             //eventList = ApplyFilter(eventList, filter).Skip(skipElements).Take(elementEachPage);
-            var result = await eventList.ToListAsync();
+            var temp = await eventList.ToListAsync();
+            List<Event> result = new List<Event>();
+            if (!string.IsNullOrWhiteSpace(filter.UserCoord))
+            {
+                string[] userCoord = filter.UserCoord.Split(',');
+                double userLat = double.Parse(userCoord[0].Trim());
+                double userLong = double.Parse(userCoord[1].TrimStart());
+                foreach (var item in temp)
+                {
+                    string[] eventCoord = item.LocationCoord!.Split(',');
+                    double eventLat = double.Parse(eventCoord[0].Trim());
+                    double eventLong = double.Parse(eventCoord[1].TrimStart());
+                    double distance = CalculateDistance(userLat, userLong, eventLat, eventLong);
+                    if (distance <= 5000)
+                    {
+                        Console.WriteLine(distance);
+                       result.Add(item); 
+                    }
+                }
+            }
+            else
+            {
+                result = temp.ToList();
+            }
             return new PagedList<Event>(result, totalEle, pageNo, elementEachPage);
         }
 
@@ -154,16 +179,27 @@ namespace Event_Management.Infrastructure.Repository.SQL
             return eventCreate;
         }
 
-        public async void UpdateEventStatusToOnGoing()
+        public double UpdateEventStatusToOnGoing()
         {
             try
             {
-                var events = await _context.Events.Where(e => e.StartDate >= DateTime.Now).ToListAsync();
-                foreach (var e in events)
+                var ongoingEvents = _context.Events/*.Where(e => e.StartDate >= DateTime.Now)*/.ToList();
+                if(ongoingEvents.Any())
                 {
-                    e.Status = "Ongoing";
+                    return ongoingEvents.Count;
                 }
-                await _context.SaveChangesAsync();
+                else
+                {
+                    /*ongoingEvents.ForEach(e => e.Status = EventStatus.OnGoing.ToString());
+                    _context.UpdateRange(ongoingEvents);
+                    await _context.SaveChangesAsync();
+                    if (await _context.SaveChangesAsync() > 0)
+                    {
+                        return true;
+                    }*/
+                    return 0;
+                }
+                
             }
             catch (Exception ex)
             {
@@ -171,21 +207,48 @@ namespace Event_Management.Infrastructure.Repository.SQL
             }
         }
 
-        public async void UpdateEventStatusToEnded()
+        public double UpdateEventStatusToEnded()
         {
             try
             {
-                var events = await _context.Events.Where(e => e.EndDate >= DateTime.Now).ToListAsync();
-                foreach (var e in events)
+                var endedEvents =  _context.Events/*.Where(e => e.EndDate >= DateTime.Now)*/.ToList();
+                if (endedEvents.Any())
                 {
-                    e.Status = "Ended";
+                    return endedEvents.Count;
                 }
-                await _context.SaveChangesAsync();
+                else
+                {
+                    /*endedEvents.ForEach(e => e.Status = EventStatus.Ended.ToString());
+                    _context.UpdateRange(endedEvents);
+                    if (await _context.SaveChangesAsync() > 0)
+                    {
+                        return true;
+                    }*/
+                    return 0;
+                }
             }
+
             catch (Exception ex)
             {
                 throw new Exception(ex.Message, ex);
             }
+        }
+        double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
+        {
+            var R = 6371.0; // Earth's radius in kilometers
+            var dLat = ToRadians(lat2 - lat1);
+            var dLon = ToRadians(lon2 - lon1);
+            var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                   Math.Cos(ToRadians(lat1)) * Math.Cos(ToRadians(lat2)) *
+                   Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+            var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+            var distance = R * c;
+            return distance*1000;//convert from kilometer to meter
+        }
+
+        private double ToRadians(double angle)
+        {
+            return Math.PI * angle / 180.0;
         }
     }
 }

@@ -4,6 +4,7 @@ using Event_Management.Infrastructure.DBContext;
 using Event_Management.Infrastructure.Repository.Common;
 using Microsoft.EntityFrameworkCore;
 using Event_Management.Domain.Enum;
+using Event_Management.Domain.Entity;
 
 namespace Event_Management.Infrastructure.Repository.SQL
 {

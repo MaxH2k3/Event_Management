@@ -8,6 +8,7 @@ namespace Event_Management.Domain.Models.Common
 {
     public class EventFilterObject
     {
+        public string? UserCoord { get; set; } = null;
         public string? EventName { get; set; } = null;
         public string? Status { get; set; } = null ;
         public long? StartDateFrom { get; set; } = null;

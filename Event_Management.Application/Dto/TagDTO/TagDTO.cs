@@ -1,6 +1,6 @@
 ﻿namespace Event_Management.Application.Dto
 {
-	public class TagDTO
+	public class TagDto
     {
         //public int TagId { get; set; }
         public string TagName { get; set; } = null!;

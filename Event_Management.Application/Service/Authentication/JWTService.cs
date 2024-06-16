@@ -1,10 +1,14 @@
 ﻿using Event_Management.Application.Dto.AuthenticationDTO;
 using Event_Management.Application.Dto.UserDTO.Request;
+using Event_Management.Application.Message;
 using Event_Management.Domain;
 using Event_Management.Domain.Constants;
+using Event_Management.Domain.Entity;
+using Event_Management.Domain.Models.JWT;
 using Event_Management.Domain.Models.System;
 using Event_Management.Domain.UnitOfWork;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -15,13 +19,13 @@ namespace Event_Management.Application.Service
 {
     public class JWTService : IJWTService
     {
-        //private readonly JWTSetting _jwtSettings; //violence dependecy inversion principle
+        private readonly JWTSetting _jwtSettings; //violence dependecy inversion principle
         private readonly IConfiguration _configuration;
         private readonly IUnitOfWork _unitOfWork;
 
-        public JWTService(/*JWTSetting jwtSetting,*/IConfiguration configuration, IUnitOfWork unitOfWork)
+        public JWTService(IOptions<JWTSetting> jwtSetting,IConfiguration configuration, IUnitOfWork unitOfWork)
         {
-            //_jwtSettings = jwtSetting;
+            _jwtSettings = jwtSetting.Value;
             _configuration = configuration;
             _unitOfWork = unitOfWork;
         }
@@ -84,13 +88,13 @@ namespace Event_Management.Application.Service
                 //ValidateIssuer = true,
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWTSetting:Securitykey"]!)),
-                ValidateLifetime = false
+                ValidateLifetime = true //false
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
             if (securityToken is not JwtSecurityToken jwtSecurityToken || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
-                throw new SecurityTokenException("Invalid token");
+                throw new SecurityTokenException(MessageUser.TokenInvalid);
 
             return principal;
         }
@@ -108,7 +112,7 @@ namespace Event_Management.Application.Service
                 return new APIResponse
                 {
                     StatusResponse = System.Net.HttpStatusCode.Unauthorized,
-                    Message = "Invalid access token",
+                    Message = MessageUser.TokenInvalid,
                     Data = null
                 };
             }
@@ -120,7 +124,7 @@ namespace Event_Management.Application.Service
                 return new APIResponse
                 {
                     StatusResponse = System.Net.HttpStatusCode.Unauthorized,
-                    Message = "Invalid token",
+                    Message = MessageUser.TokenInvalid,
                     Data = null
                 };
             }
@@ -132,7 +136,7 @@ namespace Event_Management.Application.Service
                 return new APIResponse
                 {
                     StatusResponse = System.Net.HttpStatusCode.Unauthorized,
-                    Message = "Refresh token has expired",
+                    Message = MessageUser.TokenExpired,
                     Data = null
                 };
             }
@@ -161,16 +165,13 @@ namespace Event_Management.Application.Service
             return new APIResponse
             {
                 StatusResponse = System.Net.HttpStatusCode.OK,
-                Message = "Token refreshed successfully",
+                Message = MessageUser.TokenRefreshSuccess,
                 Data = new TokenResponseDTO
                 {
                     AccessToken = newAccessToken,
                     RefreshToken = newRefreshToken
                 }
             };
-
-            
-
         }
 
         //generate refresh token

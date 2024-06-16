@@ -17,14 +17,9 @@ namespace Event_Management.Domain.Models.System
 
         //public APIResponse() { }
 
-        //public APIResponse(HttpStatusCode statusResponse, string? message, T? data)
-        //{
-        //    StatusResponse = statusResponse;
-        //    Message = message;
-        //    Data = data;
-        //}
+       
 
-        
+
 
 
     }

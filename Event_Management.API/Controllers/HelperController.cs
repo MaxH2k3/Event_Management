@@ -67,5 +67,30 @@ namespace Event_Management.API.Controllers
 
 			return Ok(constantDictionary);
 		}
-	}
+        [HttpGet("reponse-message")]
+		public IActionResult GetAllResponseMessage()
+		{
+            // Định nghĩa namespace chứa các constants
+            string constantNamespace = "Event_Management.Application.Message";
+            var assembly = Assembly.Load("Event_Management.Application");
+            var constantTypes = assembly.GetTypes()
+                                        .Where(t => t.IsClass && t.Namespace == constantNamespace);
+
+            var constantDictionary = new Dictionary<string, Dictionary<string, object>>();
+
+            foreach (var constantType in constantTypes)
+            {
+                var fields = constantType.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
+                                         .Where(fi => fi.IsLiteral && !fi.IsInitOnly)
+                                         .ToDictionary(fi => fi.Name, fi => fi.GetRawConstantValue());
+
+                if (fields.Any())
+                {
+                    constantDictionary.Add(constantType.Name, fields!);
+                }
+            }
+
+            return Ok(constantDictionary);
+        }
+    }
 }

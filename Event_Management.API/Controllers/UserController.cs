@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Net;
 using Event_Management.Application.Service;
-using Event_Management.Domain.Message;
+using Event_Management.Application.Message;
 using Event_Management.Domain.Models.System;
 using Microsoft.AspNetCore.Mvc;
 

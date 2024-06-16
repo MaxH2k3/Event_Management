@@ -33,9 +33,9 @@ namespace Event_Management.Application.Validators
             RuleFor(x => x.EndDate)
                 .NotEmpty().WithMessage("EndDate is required.");
 
-            RuleFor(x => x.Location)
+            /*RuleFor(x => x.Location)
                 .NotEmpty().WithMessage("Location is required!")
-                .Length(5, 1000).WithMessage("Location must be between 5 and 1000 characters.");
+                .Length(5, 1000).WithMessage("Location must be between 5 and 1000 characters.");*/
 
             RuleFor(x => x.Capacity)
                 .NotEmpty().WithMessage("Capacity is required.")

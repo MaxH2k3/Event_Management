@@ -11,13 +11,8 @@ using System.Threading.Tasks;
 
 namespace Event_Management.Infrastructure.Repository.SQL
 {
-    public class EventPaymentRepository : SQLExtendRepository<EventPayment>, IEventPaymentRepository
+    public class EventPaymentRepository 
     {
-        private readonly EventManagementContext _context;
-
-        public EventPaymentRepository(EventManagementContext context) : base(context)
-        {
-            _context = context;
-        }
+        
     }
 }

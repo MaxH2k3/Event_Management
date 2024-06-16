@@ -1,15 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
-		<Nullable>enable</Nullable>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<PreserveCompilationContext>true</PreserveCompilationContext>
-		<PreserveCompilationReferences>true</PreserveCompilationReferences>
-	</PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+	<PreserveCompilationContext>true</PreserveCompilationContext>
+	<PreserveCompilationReferences>true</PreserveCompilationReferences>
+</PropertyGroup>
 
 	<ItemGroup>
 	  <Content Remove="Views\Template\VerifyAccount.cshtml" />
+	  <Content Remove="Views\Template\VerifyWithOTP.cshtml" />
 	  <Content Remove="wwwroot\Images\Sunset.png" />
 	</ItemGroup>
 
@@ -17,7 +19,12 @@
 	  <EmbeddedResource Include="Views\Template\VerifyAccount.cshtml">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </EmbeddedResource>
-	  <EmbeddedResource Include="wwwroot\Images\Sunset.png" />
+	  <EmbeddedResource Include="Views\Template\VerifyWithOTP.cshtml">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="wwwroot\Images\Sunset.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
 	</ItemGroup>
 
 	<ItemGroup>

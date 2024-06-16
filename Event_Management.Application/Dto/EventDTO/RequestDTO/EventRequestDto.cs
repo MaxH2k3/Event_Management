@@ -34,9 +34,7 @@ namespace Event_Management.Application
         public string? Image { get; set; }
 
         [Required(ErrorMessage = "Location is required!")]
-        [MaxLength(500, ErrorMessage = "Location is too long!")]
-        [MinLength(5, ErrorMessage = "Location is too short!")]
-        public string Location { get; set; } = "FPTUHCM";
+        public EventLocation? Location { get; set; }
 
         [Required(ErrorMessage = "Capacity is required!")]
         public int? Capacity { get; set; } = 30;

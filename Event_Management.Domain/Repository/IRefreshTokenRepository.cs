@@ -1,4 +1,5 @@
-﻿using Event_Management.Domain.Repository.Common;
+﻿using Event_Management.Domain.Entity;
+using Event_Management.Domain.Repository.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;

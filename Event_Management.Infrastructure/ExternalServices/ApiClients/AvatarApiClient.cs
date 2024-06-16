@@ -23,10 +23,9 @@ namespace Event_Management.Infrastructure.ExternalServices.ApiClients
             return $"{_baseUrl}/public/girl";
         }
 
-        public string GetAvatarUrlWithName(string firstName, string lastName)
+        public string GetAvatarUrlWithName(string fullName)
         {
-            var username = $"{firstName}+{lastName}";
-            return $"{_baseUrl}/username?username={username}";
+            return $"{_baseUrl}/username?username={fullName}";
         }
     }
 }

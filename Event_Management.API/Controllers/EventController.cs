@@ -1,6 +1,6 @@
 ﻿using Event_Management.Application;
 using Event_Management.Application.Service;
-using Event_Management.Domain.Message;
+using Event_Management.Application.Message;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Models.System;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +10,8 @@ using Event_Management.Application.Dto.EventDTO.RequestDTO;
 using Microsoft.AspNetCore.Authorization;
 using Event_Management.Domain.Constants;
 using Event_Management.Domain.Enum;
+using Event_Management.Domain.Helper;
+using Event_Management.Domain.UnitOfWork;
 
 namespace Event_Management.API.Controllers
 {
@@ -18,13 +20,14 @@ namespace Event_Management.API.Controllers
     public class EventController : Controller
     {
         private readonly IEventService _eventService;
-
-		public EventController(IEventService eventService)
+        private readonly IUnitOfWork _unitOfWork;
+		public EventController(IEventService eventService, IUnitOfWork unitOfWork)
         {
             _eventService = eventService;
+            _unitOfWork = unitOfWork;
 		}
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpGet("GetAll")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -42,14 +45,14 @@ namespace Event_Management.API.Controllers
                 return Ok(new APIResponse
                 {
                     StatusResponse = HttpStatusCode.OK,
-                    Message = "Get all events!",
+                    Message = MessageEvent.GetAllEvent,
                     Data = response
                 });
             }
             return BadRequest(new APIResponse
             {
                 StatusResponse = HttpStatusCode.NotFound,
-                Message = "Not found!",
+                Message = MessageCommon.NotFound,
             });
         }
 
@@ -71,17 +74,18 @@ namespace Event_Management.API.Controllers
                 return Ok(new APIResponse
                 {
                     StatusResponse = HttpStatusCode.OK,
-                    Message = "Get all user participated events!",
+                    Message = MessageEvent.UserParticipatedEvent,
                     Data = response
                 });
             }
             return BadRequest(new APIResponse
             {
                 StatusResponse = HttpStatusCode.NotFound,
-                Message = "Not found!",
+                Message = MessageCommon.NotFound,
             });
         }
 
+        [Authorize]
         [HttpPost("")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -89,23 +93,21 @@ namespace Event_Management.API.Controllers
         public async Task<IActionResult> AddEvent(EventRequestDto eventDto)
         {
             APIResponse response = new APIResponse();
-            try
-            {
-                var result = await _eventService.AddEvent(eventDto);
+            
+                string userId = User.GetUserIdFromToken();
+                var result = await _eventService.AddEvent(eventDto, userId);
                 if(result != null)
                 {
                     response.StatusResponse = HttpStatusCode.OK;
                     response.Data = result;
                     response.Message = MessageCommon.Complete;
                     return Ok(response);
-                }
-            } catch(Exception ex)
+                }            
+            return BadRequest(new APIResponse
             {
-                response.Message = ex.Message;
-                response.StatusResponse = HttpStatusCode.BadRequest;
-                return BadRequest(response);
-            }
-            return BadRequest();
+                StatusResponse = HttpStatusCode.BadRequest,
+                Message = MessageCommon.CreateFailed
+            });
         }
 
         [HttpPut("")]
@@ -192,6 +194,13 @@ namespace Event_Management.API.Controllers
                 Data = result
             });
 
+        }
+        [HttpGet("test-repo")]
+        public async Task<IActionResult> test()
+        {
+            double a1 = _unitOfWork.EventRepository.UpdateEventStatusToEnded();
+            double a2 = _unitOfWork.EventRepository.UpdateEventStatusToOnGoing();
+            return Ok(a1 + a2);
         }
     }
 }

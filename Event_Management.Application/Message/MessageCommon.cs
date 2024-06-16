@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Event_Management.Domain.Message
+namespace Event_Management.Application.Message
 {
     public static class MessageCommon
     {
@@ -14,6 +14,8 @@ namespace Event_Management.Domain.Message
         public const string DeleteFailed = "Delete Failed";
         public const string UpdateSuccesfully = "Update Successfully";
         public const string UpdateFailed = "Update Failed";
+        public const string CreateSuccesfully = "Create Successfully";
+        public const string CreateFailed = "Create Failed";
 
         public const string ValidateSuccessfully = "Validate Successfully!";
         public const string NationNotFound = "Nation not found!";
@@ -21,9 +23,12 @@ namespace Event_Management.Domain.Message
 
         public const string NotFound = "Not Found!";
         public const string Complete = "Complete!";
+        public const string NotComplete = "Not Complete";
 
         public const string ServerError = "Somethings have wrong!";
+        public const string SessionTimeout = "Session Timeout!";
 
-        public const string UserNotFound = "User not found!";
+        
+        
     }
 }

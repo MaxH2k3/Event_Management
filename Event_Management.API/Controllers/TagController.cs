@@ -1,7 +1,8 @@
 ﻿using Event_Management.Application.Dto;
-using Event_Management.Domain.Message;
+using Event_Management.Application.Message;
 using Event_Management.Domain.Models.System;
 using Event_Management.Domain.Service;
+using Event_Management.Domain.Service.TagEvent;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
@@ -51,7 +52,7 @@ namespace Event_Management.API.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-        public async Task<APIResponse> AddTag([FromBody] TagDTO tagDTO)
+        public async Task<APIResponse> AddTag([FromBody] TagDto tagDTO)
         {
             APIResponse response = new APIResponse();
             var result = await _tagService.AddTag(tagDTO);
@@ -74,7 +75,7 @@ namespace Event_Management.API.Controllers
         [HttpPut("")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<APIResponse> UpdateTag([FromBody] TagDTO tagDTO)
+        public async Task<APIResponse> UpdateTag([FromBody] TagDto tagDTO)
         {
             APIResponse response = new APIResponse();
             var result = await _tagService.UpdateTag(tagDTO);

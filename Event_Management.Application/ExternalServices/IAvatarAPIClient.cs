@@ -6,6 +6,6 @@ namespace Event_Management.Application.ExternalServices
         string GetRandomAvatarUrl();
         string GetRandomBoyAvatarUrl();
         string GetRandomGirlAvatarUrl();
-        string GetAvatarUrlWithName(string firstName, string lastName);
+        string GetAvatarUrlWithName(string FullName);
     }
 }

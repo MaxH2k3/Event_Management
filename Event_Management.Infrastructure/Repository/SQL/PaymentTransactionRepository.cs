@@ -7,14 +7,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
+using Event_Management.Domain;
+using Event_Management.Domain.Entity;
 
 namespace Event_Management.Infrastructure.Repository.SQL
 {
-    public class TransactionRepository : SQLRepository<Transaction>, ITransactionRepository
+    public class PaymentTransactionRepository : SQLRepository<PaymentTransaction>, IPaymentTransactionRepository
     {
         private readonly EventManagementContext _context;
 
-        public TransactionRepository(EventManagementContext context) : base(context)
+        public PaymentTransactionRepository(EventManagementContext context) : base(context)
         {
             _context = context;
         }

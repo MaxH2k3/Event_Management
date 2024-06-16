@@ -14,15 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<GlobalException>();
 
 
-//builder.Services.AddScoped<IRegisterEventService, RegisterEventService>();
-//builder.Services.AddScoped<ITagService, TagService>();
-//builder.Services.AddScoped<IEventService, EventService>();
-//builder.Services.AddScoped<IUserService, UserService>();
-//builder.Services.AddScoped<IJWTService, JWTService>();
-//builder.Services.AddScoped<IPackageService, PackageService>();
-//builder.Services.AddScoped<IEmailService, EmailService>();
-//builder.Services.AddSingleton<IVNPAYService, VNPAYService>();
-//builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
 
 // Add services to the container.
 

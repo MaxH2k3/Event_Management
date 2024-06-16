@@ -1,26 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Event_Management.Domain
+namespace Event_Management.Domain.Entity
 {
     public partial class Payment
     {
         public Payment()
         {
-            Transactions = new HashSet<Transaction>();
+            PaymentSignatures = new HashSet<PaymentSignature>();
+            PaymentTransactions = new HashSet<PaymentTransaction>();
         }
 
         public Guid PaymentId { get; set; }
-        public int? PaymentMethodId { get; set; }
-        public string? PaymentOwner { get; set; }
-        public Guid? UserId { get; set; }
-        public string? SerialNumber { get; set; }
-        public bool? PaymentStatus { get; set; }
+        public string? PaymentContent { get; set; }
+        public string? PaymentCurrency { get; set; }
+        public string? PaymentRefId { get; set; }
+        public decimal? RequiredAmount { get; set; }
+        public DateTime? PaymentDate { get; set; }
+        public DateTime? ExpireDate { get; set; }
+        public string? PaymentLanguage { get; set; }
+        public string? PaymentDestinationId { get; set; }
+        public string? PaymentStatus { get; set; }
+        public decimal? PaidAmount { get; set; }
+        public string? PaymentLastMessage { get; set; }
+        public Guid? CreatedBy { get; set; }
         public DateTime? CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
 
-        public virtual PaymentMethod? PaymentMethod { get; set; }
-        public virtual User? User { get; set; }
-        public virtual ICollection<Transaction> Transactions { get; set; }
+        public virtual User? CreatedByNavigation { get; set; }
+        public virtual ICollection<PaymentSignature> PaymentSignatures { get; set; }
+        public virtual ICollection<PaymentTransaction> PaymentTransactions { get; set; }
     }
 }

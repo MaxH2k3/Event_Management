@@ -1,15 +1,20 @@
 using AutoMapper;
 using Event_Management.Application;
 using Event_Management.Application.Dto;
+using Event_Management.Domain;
 using Event_Management.Application.Dto.EventDTO.ResponseDTO;
 using Event_Management.Application.Dto.UserDTO.Response;
 using Event_Management.Domain.Models.Common;
+using Event_Management.Application.Dto.PaymentDTO;
 using Event_Management.Domain.Models.EventDTO.ResponseDTO;
 using Event_Management.Domain.Models.ParticipantDTO;
+using Event_Management.Application.Dto.FeedbackDTO;
+using Event_Management.Domain.Entity;
+using Event_Management.Application.Dto.UserDTO.Request;
 
 namespace Event_Management.Domain.Configuration
 {
-	public class MapperConfig : Profile
+    public class MapperConfig : Profile
     {
         public MapperConfig()
         {
@@ -17,31 +22,39 @@ namespace Event_Management.Domain.Configuration
             CreateMap<User, UserResponseDto>()
                 .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role.RoleName))
                 .ReverseMap();
-
+    
             //Mapper Event
             CreateMap<Event, EventResponseDto>().ReverseMap();
             CreateMap<EventRequestDto, Event>().ReverseMap();
             CreateMap<PagedList<Event>, PagedList<EventResponseDto>>();
 
             //Mapper Tag
-            CreateMap<TagDTO, Tag>().ReverseMap();
+            CreateMap<TagDto, Tag>().ReverseMap();
 
-         
-            
+            //Mapper Feedback
+            CreateMap<FeedbackDto, Feedback>().ReverseMap();
+
             CreateMap<Event, EventPreview>().ReverseMap();
             CreateMap<PagedList<Event>, PagedList<EventPreview>>().ReverseMap();
 
-			//Participant
-			CreateMap<Participant, ParticipantEventModel>()
-                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.User.FirstName))
-                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.User.LastName))
+            //Mapper Payment
+
+            CreateMap<Payment, PaymentDto>().ReverseMap();
+            //CreateMap<PaymentDto, Payment>()
+            //.ForMember(dest => dest.ID, opt => opt.MapFrom(src => Guid.NewGuid().ToString())); // �nh x? Id
+
+
+            //Participant
+            CreateMap<Participant, ParticipantEventModel>()
+
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email))
                 .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.User.Phone))
-				.ReverseMap();
+                .ReverseMap();
 
-			CreateMap<PagedList<Participant>, PagedList<ParticipantEventModel>>().ReverseMap();
+            CreateMap<PagedList<Participant>, PagedList<ParticipantEventModel>>().ReverseMap();
 
-		}
-        
+
+
+        }
     }
 }

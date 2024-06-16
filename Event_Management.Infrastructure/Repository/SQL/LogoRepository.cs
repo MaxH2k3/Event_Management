@@ -1,4 +1,5 @@
 ﻿using Event_Management.Domain;
+using Event_Management.Domain.Entity;
 using Event_Management.Domain.Repository;
 using Event_Management.Infrastructure.DBContext;
 using Event_Management.Infrastructure.Repository.Common;

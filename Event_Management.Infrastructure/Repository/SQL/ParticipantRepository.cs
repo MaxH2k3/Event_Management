@@ -8,6 +8,7 @@ using Event_Management.Infrastructure.DBContext;
 using Event_Management.Infrastructure.Extensions;
 using Event_Management.Infrastructure.Repository.Common;
 using Microsoft.EntityFrameworkCore;
+using Event_Management.Domain.Entity;
 
 namespace Event_Management.Infrastructure.Repository.SQL
 {
@@ -71,9 +72,9 @@ namespace Event_Management.Infrastructure.Repository.SQL
 		{
 			switch (sortBy)
 			{
-				case ParticipantSortBy.Name:
-					participants = participants.OrderBy(p => p.User.FirstName + p.User.LastName);
-					break;
+				//case ParticipantSortBy.Name:
+				//	participants = participants.OrderBy(p => p.User.FirstName + p.User.LastName);
+				//	break;
 				case ParticipantSortBy.CheckedIn:
 					participants = participants.OrderByDescending(p => p.CheckedIn);
 					break;

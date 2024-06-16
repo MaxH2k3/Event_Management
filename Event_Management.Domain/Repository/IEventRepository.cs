@@ -6,6 +6,7 @@ using Event_Management.Domain.Models.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Event_Management.Domain.Entity;
 
 namespace Event_Management.Domain.Repository
 {
@@ -19,8 +20,8 @@ namespace Event_Management.Domain.Repository
         public Task<Event> CreateEvent(Event eventCreate);
         //AUTO update status for event
         //Update status: On going
-        public void UpdateEventStatusToOnGoing();
+        public double UpdateEventStatusToOnGoing();
         //Update status: Ended
-        public void UpdateEventStatusToEnded();
+        public double UpdateEventStatusToEnded();
     }
 }

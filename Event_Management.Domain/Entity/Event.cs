@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
-namespace Event_Management.Domain
+namespace Event_Management.Domain.Entity
 {
     public partial class Event
     {
@@ -9,7 +10,6 @@ namespace Event_Management.Domain
         {
             Feedbacks = new HashSet<Feedback>();
             Participants = new HashSet<Participant>();
-            Transactions = new HashSet<Transaction>();
             Logos = new HashSet<Logo>();
             Tags = new HashSet<Tag>();
         }
@@ -28,11 +28,13 @@ namespace Event_Management.Domain
         public int? Capacity { get; set; }
         public bool? Approval { get; set; }
         public double? Ticket { get; set; }
-
+        public string? LocationUrl { get; set; }
+        public string? LocationCoord { get; set; }
+        public string? LocationId { get; set; }
+        public string? LocationAddress { get; set; }
         public virtual User? CreatedByNavigation { get; set; }
         public virtual ICollection<Feedback> Feedbacks { get; set; }
         public virtual ICollection<Participant> Participants { get; set; }
-        public virtual ICollection<Transaction> Transactions { get; set; }
 
         public virtual ICollection<Logo> Logos { get; set; }
         public virtual ICollection<Tag> Tags { get; set; }

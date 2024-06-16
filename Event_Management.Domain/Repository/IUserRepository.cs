@@ -1,4 +1,5 @@
-﻿using Event_Management.Domain.Enum;
+﻿using Event_Management.Domain.Entity;
+using Event_Management.Domain.Enum;
 using Event_Management.Domain.Repository.Common;
 
 namespace Event_Management.Domain.Repository

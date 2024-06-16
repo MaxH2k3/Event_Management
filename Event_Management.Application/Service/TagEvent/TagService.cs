@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Event_Management.Application.Dto;
+using Event_Management.Domain.Entity;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.UnitOfWork;
 using Microsoft.Extensions.Configuration;
+using System.Linq.Expressions;
 
 namespace Event_Management.Domain.Service.TagEvent
 {
@@ -17,7 +19,7 @@ namespace Event_Management.Domain.Service.TagEvent
             _mapper = mapper;
         }
 
-        public async Task<bool> AddTag(TagDTO tagDTO)
+        public async Task<bool> AddTag(TagDto tagDTO)
         {
             var tagEntity = _mapper.Map<Tag>(tagDTO);
 
@@ -37,13 +39,11 @@ namespace Event_Management.Domain.Service.TagEvent
         public async Task<PagedList<Tag>> GetAllTag(int page, int eachPage)
         {
             return await _unitOfWork.TagRepository.GetAll(page, eachPage, "TagName");
-
-            
         }
 
+       
 
-
-        public async Task<bool> UpdateTag(TagDTO tagDTO)
+        public async Task<bool> UpdateTag(TagDto tagDTO)
         {
             var tagEntity = _mapper.Map<Tag>(tagDTO);
             await _unitOfWork.TagRepository.Update(tagEntity);

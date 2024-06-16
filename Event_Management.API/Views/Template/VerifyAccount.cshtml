@@ -114,7 +114,9 @@
                     Please click the button below to confirm your email address and
                     activate your account.
                 </p>
-                <a href="#" class="confirm-button" style="color: white; font-family: 'Playfair'">Confirm Email</a>
+                @* <a href="https://localhost:7153/api/v1/Auth/verify?token=@Model.Token&userId=@Model.UserId" *@
+                <a href="https://fpt-event-management.azurewebsites.net/api/v1/Auth/verify?token=@Model.Token&userId=@Model.UserId"
+                 class="confirm-button" style="color: white; font-family: 'Playfair'">Confirm Email</a>
                 <p>
                     If you received this in error, simply ignore this email and do not
                     click the button.

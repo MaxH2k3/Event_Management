@@ -1,4 +1,5 @@
-﻿using Event_Management.Domain.Repository;
+﻿using Event_Management.Domain;
+using Event_Management.Domain.Repository;
 using Event_Management.Domain.Repository.Common;
 using Event_Management.Domain.UnitOfWork;
 using Event_Management.Infrastructure.DBContext;
@@ -19,16 +20,20 @@ namespace Event_Management.Infrastructure.UnitOfWork
         private readonly IParticipantRepository _participantRepository = null!;
         private readonly IPaymentMethodRepository _paymentMethodRepository = null!;
         private readonly IPaymentRepository _paymentReposiotry = null!;
+        private readonly IPaymentTransactionRepository _paymentTransactionRepository = null!;
         private readonly ISponsorEventRepository _sponsorEventRepository = null!;
         private readonly IPermissionRepository _policyRepository = null!;
         private readonly IRoleEventRepository _roleEventRepository = null!;
         private readonly IRoleRepository _roleRepository = null!;
         private readonly ISponsorMethodRepository _sponsorMethodRepository = null!;
         private readonly ITagRepository _tagRepository = null!;
-        private readonly ITransactionRepository _transactionRepository = null!;
+        private readonly IPaymentTransactionRepository _transactionRepository = null!;
         private readonly IUserRepository _userRepository = null!;
+        private readonly IUserValidationRepository _userValidationRepository = null!;
         private readonly IRefreshTokenRepository _refreshTokenRepository = null!;
-
+        public UnitOfWork()
+        {
+        }
         public UnitOfWork(EventManagementContext context, ICacheRepository cacheRepository)
         {
 			_context = context;
@@ -44,7 +49,7 @@ namespace Event_Management.Infrastructure.UnitOfWork
 
         public IEventMailRepository EventMailRepository => _eventMailRepository ?? new EventMailRepository(_context);
 
-        public IEventPaymentRepository EventPaymentRepository => _eventPaymentRepository ?? new EventPaymentRepository(_context);
+        //public IEventPaymentRepository EventPaymentRepository => _eventPaymentRepository ?? new EventPaymentRepository(_context);
 
         public IEventRepository EventRepository => _eventRepository ?? new EventRepository(_context);
 
@@ -57,6 +62,7 @@ namespace Event_Management.Infrastructure.UnitOfWork
         public IPaymentMethodRepository PaymentMethodRepository => _paymentMethodRepository ?? new PaymentMethodRepository(_context);
 
         public IPaymentRepository PaymentRepository => _paymentReposiotry ?? new PaymentRepository(_context);
+        public IPaymentTransactionRepository PaymentTransactionRepository => _paymentTransactionRepository ?? new PaymentTransactionRepository(_context);
 
         public ISponsorEventRepository SponsorEventRepository => _sponsorEventRepository ?? new SponsorEventRepository(_context);
 
@@ -70,10 +76,10 @@ namespace Event_Management.Infrastructure.UnitOfWork
 
         public ITagRepository TagRepository => _tagRepository ?? new TagRepository(_context);
 
-        public ITransactionRepository TransactionRepository => _transactionRepository ?? new TransactionRepository(_context);
+        public IPaymentTransactionRepository TransactionRepository => _transactionRepository ?? new PaymentTransactionRepository(_context);
 
         public IUserRepository UserRepository => _userRepository ?? new UserRepository(_context);
-
+        public IUserValidationRepository UserValidationRepository => _userValidationRepository ?? new UserValidationRepository(_context);
         public IRefreshTokenRepository RefreshTokenRepository => _refreshTokenRepository ?? new RefreshTokenRepository(_context);
 
         public void Dispose()
