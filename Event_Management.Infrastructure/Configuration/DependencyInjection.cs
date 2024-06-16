@@ -127,9 +127,6 @@ namespace Event_Management.Infastructure.Configuration
             //Add MediatR
             builder.Services.AddMediatR(typeof(PaymentDto).Assembly);
             
-
-            //
-
         }
 	}
 }
