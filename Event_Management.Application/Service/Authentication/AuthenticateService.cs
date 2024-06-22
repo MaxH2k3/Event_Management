@@ -87,6 +87,7 @@ namespace Event_Management.Application.Service.Authentication
             return await GenerateAndSendOTP(user.Email!, user.FullName!, user.UserId);
 
         }
+
         public async Task<APIResponse> SignInWithGoogle(LoginInWithGoogleDto googleUser)
         {
             var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(googleUser.Email);
@@ -96,14 +97,13 @@ namespace Event_Management.Application.Service.Authentication
 
             };
             return await Login(googleUser);
-
-
         }
+
         private async Task<APIResponse> CreateUserWithGoogleAccount(LoginInWithGoogleDto googleUser)
         {
             var newUser = new User
             {
-                UserId = Guid.Parse(googleUser.gguid!),
+                UserId = Guid.NewGuid(),
                 Email = googleUser.Email,
                 FullName = googleUser.FullName,
                 Status = AccountStatus.Active.ToString(),
@@ -156,8 +156,7 @@ namespace Event_Management.Application.Service.Authentication
                 Email = user.Email!,
                 Token = token
             });
-
-            //validation whether user data insert successfully in db
+            
             if (isAdded)
             {
                 await _unitOfWork.SaveChangesAsync();
@@ -327,6 +326,7 @@ namespace Event_Management.Application.Service.Authentication
             };
         }
 
+        //Generate and sending email with OTP
         private async Task<APIResponse> GenerateAndSendOTP(string email, string userName, Guid userId)
         {
             var otp = AuthenHelper.GenerateOTP();

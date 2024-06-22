@@ -18,11 +18,14 @@ namespace Event_Management.Domain.Configuration
     {
         public MapperConfig()
         {
-            //Mapper User
+            //Mapper User 
             CreateMap<User, UserResponseDto>()
                 .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role.RoleName))
                 .ReverseMap();
-    
+
+            CreateMap<PagedList<User>, PagedList<UserResponseDto>>()
+                .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items)).ReverseMap();
+
             //Mapper Event
             CreateMap<Event, EventResponseDto>()
                 .ReverseMap();

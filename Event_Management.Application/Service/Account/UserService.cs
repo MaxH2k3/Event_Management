@@ -1,44 +1,91 @@
 ﻿using AutoMapper;
-using Event_Management.Application.Dto.AuthenticationDTO;
 using Event_Management.Application.Dto.UserDTO.Request;
 using Event_Management.Application.Dto.UserDTO.Response;
-using Event_Management.Application.ExternalServices;
-using Event_Management.Application.Message;
-using Event_Management.Domain;
-using Event_Management.Domain.Constants;
 using Event_Management.Domain.Entity;
 using Event_Management.Domain.Enum;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Models.System;
-using Event_Management.Domain.Models.User;
 using Event_Management.Domain.UnitOfWork;
-using Microsoft.Extensions.Configuration;
 using System.Net;
-using System.Security.Cryptography;
 
 namespace Event_Management.Application.Service
 {
     public class UserService : IUserService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public UserService(IUnitOfWork unitOfWork)
+        public UserService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
 
-        public Task<User?> GetUser(Guid userId)
+        public async Task<User?> GetUser(Guid userId)
         {
-            throw new NotImplementedException();
-        }
-        
-        public async Task<PagedList<User>> GetAllUser(int page, int eachPage)
-        {
-            return await _unitOfWork.UserRepository.GetAll(page, eachPage, "Email");
+            return await _unitOfWork.UserRepository.GetUser(userId);
         }
 
-        
+        public async Task<APIResponse> GetAllUser(int page, int eachPage)
+        {
+            PagedList<User> users = await _unitOfWork.UserRepository.GetAllUser(page, eachPage, "Email");
+            return new APIResponse
+            {
+                StatusResponse = HttpStatusCode.OK,
+                Message = "Ok",
+                Data = _mapper.Map<PagedList<UserResponseDto>>(users),
+            };
+        }
+
+        public async Task<APIResponse> UpdateUser(UpdateDeleteUserDto updateUser)
+        {
+            var existUsers = await _unitOfWork.UserRepository.GetUserByEmailAsync(updateUser.Email!);
+            if (existUsers == null)
+            {
+                return new APIResponse
+                {
+                    StatusResponse = HttpStatusCode.NotFound,
+                    Message = "User not existed",
+                    Data = null,
+                };
+            }
+            existUsers.FullName = updateUser.FullName;
+            existUsers.Phone = updateUser.Phone;
+            existUsers.Avatar = updateUser.Avatar;
+            await _unitOfWork.UserRepository.Update(existUsers);
+            await _unitOfWork.SaveChangesAsync();
+            return new APIResponse
+            {
+                StatusResponse = HttpStatusCode.OK,
+                Message = "Update successfully",
+                Data = existUsers,
+            };
+        }
+
+        public async Task<APIResponse> DeleteUser(UpdateDeleteUserDto deleteUser)
+        {
+            var existUsers = await _unitOfWork.UserRepository.GetUserByEmailAsync(deleteUser.Email!);
+            if (existUsers == null)
+            {
+                return new APIResponse
+                {
+                    StatusResponse = HttpStatusCode.NotFound,
+                    Message = "User not existed",
+                    Data = null,
+                };
+            }
+            existUsers.Status = AccountStatus.Blocked.ToString();
+            await _unitOfWork.UserRepository.Update(existUsers);
+            await _unitOfWork.SaveChangesAsync();
+            return new APIResponse
+            {
+                StatusResponse = HttpStatusCode.OK,
+                Message = "Delete successfully",
+                Data = null,
+            };
+        }
+
     }
 
 }

@@ -9,8 +9,11 @@ namespace Event_Management.Application.Service
 {
     public interface IUserService
     {
-        Task<PagedList<User>> GetAllUser(int page, int eachPage);
+        Task<APIResponse> GetAllUser(int page, int eachPage);
         Task<User?> GetUser(Guid userId);
-        
+        Task<APIResponse> UpdateUser(UpdateDeleteUserDto updateUser);
+        Task<APIResponse> DeleteUser(UpdateDeleteUserDto deleteUser);
+
+
     }
 }

@@ -38,6 +38,7 @@ namespace Event_Management.Application.Service
                 return "Error! Unauthorized.";
             }
 
+            //Define information in the payload
             List<Claim> claims = new List<Claim>
             {
                 new Claim(UserClaimType.UserId, existUser.UserId.ToString()),
@@ -103,6 +104,7 @@ namespace Event_Management.Application.Service
             //validate the token if it's a jwt token or not, then extract information to create new token
             var principal = GetPrincipalFromExpiredToken(token.AccessToken);
 
+            //extract userId and email from payload
             var userIdClaim = principal!.Claims.FirstOrDefault(c => c.Type == UserClaimType.UserId);
             var emailClaim = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
             if (userIdClaim == null || emailClaim == null)

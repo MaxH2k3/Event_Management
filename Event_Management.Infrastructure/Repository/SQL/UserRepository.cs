@@ -5,6 +5,9 @@ using Event_Management.Infrastructure.Repository.Common;
 using Microsoft.EntityFrameworkCore;
 using Event_Management.Domain.Enum;
 using Event_Management.Domain.Entity;
+using Event_Management.Domain.Repository.Common;
+using Event_Management.Domain.Models.Common;
+using Event_Management.Infrastructure.Extensions;
 
 namespace Event_Management.Infrastructure.Repository.SQL
 {
@@ -57,9 +60,25 @@ namespace Event_Management.Infrastructure.Repository.SQL
             return true;
         }
 
-        //public async Task<bool?> CheckRefreshTokenByUser(UserFieldType field, string value)
+        public async Task<PagedList<User>> GetAllUser(int page, int pagesize, string sortBy, bool isAscending = false)
+        {
+            var cacheKey = $"GetAllUser_{page}_{pagesize}_{sortBy}_{isAscending}";
+            var entities = await _context.Users.Include(a => a.Role).PaginateAndSort(page, pagesize, sortBy, isAscending).ToListAsync();
+
+            return new PagedList<User>(entities, entities.Count, page, pagesize);
+
+        }
+
+        //private async Task<List<User>> GetAllUsersCached()
         //{
-        //   return await _context.Users
+        //    var users = await _uni_cacheRepository.GetAsync<List<User>>(UserCacheKey);
+        //    if (users == null || !users.Any())
+        //    {
+        //        users = await _context.Users.ToListAsync();
+        //        await _cacheRepository.SetAsync(UserCacheKey, users);
+        //    }
+
+        //    return users;
         //}
     }
 }
