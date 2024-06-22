@@ -53,6 +53,7 @@ namespace Event_Management.Infrastructure.Repository.SQL
                 return false;
             }
             await _context.Users.AddAsync(newUser);
+            await _context.SaveChangesAsync();
             return true;
         }
 

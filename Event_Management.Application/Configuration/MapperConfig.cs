@@ -24,7 +24,8 @@ namespace Event_Management.Domain.Configuration
                 .ReverseMap();
     
             //Mapper Event
-            CreateMap<Event, EventResponseDto>().ReverseMap();
+            CreateMap<Event, EventResponseDto>()
+                .ReverseMap();
             CreateMap<EventRequestDto, Event>().ReverseMap();
             CreateMap<PagedList<Event>, PagedList<EventResponseDto>>();
 

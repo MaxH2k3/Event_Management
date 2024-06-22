@@ -3,6 +3,7 @@ using Event_Management.Application.Dto.FeedbackDTO;
 using Event_Management.Application.Message;
 using Event_Management.Application.Service.FeedbackEvent;
 using Event_Management.Domain;
+using Event_Management.Domain.Helper;
 using Event_Management.Domain.Models.System;
 using Event_Management.Domain.Service.TagEvent;
 using Microsoft.AspNetCore.Http;
@@ -33,7 +34,8 @@ namespace Event_Management.API.Controllers
         public async Task<APIResponse> AddTag([FromBody] FeedbackDto feedbackDto)
         {
             APIResponse response = new APIResponse();
-            var result = await _feedbackService.AddFeedback(feedbackDto);
+            string userId = User.GetUserIdFromToken();
+            var result = await _feedbackService.AddFeedback(feedbackDto, userId);
 
             if (result)
             {
@@ -55,7 +57,8 @@ namespace Event_Management.API.Controllers
         public async Task<APIResponse> UpdateTag([FromBody] FeedbackDto feedback)
         {
             APIResponse response = new APIResponse();
-            var result = await _feedbackService.UpdateFeedback(feedback);
+            string userId = User.GetUserIdFromToken();
+            var result = await _feedbackService.UpdateFeedback(feedback, userId);
             if (result)
             {
                 response.StatusResponse = HttpStatusCode.OK;

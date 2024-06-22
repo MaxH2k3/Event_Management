@@ -18,8 +18,8 @@ namespace Event_Management.Domain.Entity
         public string EventName { get; set; } = null!;
         public string? Description { get; set; }
         public string? Status { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
         public Guid? CreatedBy { get; set; }
         public string? Image { get; set; }
         public string? Location { get; set; }

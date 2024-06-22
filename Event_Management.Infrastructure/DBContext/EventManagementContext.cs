@@ -1,5 +1,4 @@
-﻿using Event_Management.Domain;
-using Event_Management.Domain.Entity;
+﻿using Event_Management.Domain.Entity;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +26,7 @@ namespace Event_Management.Infrastructure.DBContext
         public virtual DbSet<Logo> Logos { get; set; } = null!;
         public virtual DbSet<Notification> Notifications { get; set; } = null!;
         public virtual DbSet<Participant> Participants { get; set; } = null!;
-        public virtual DbSet<Payment> Payments { get; set; } = null!;
+       
         public virtual DbSet<PaymentMethod> PaymentMethods { get; set; } = null!;
         public virtual DbSet<PaymentSignature> PaymentSignatures { get; set; } = null!;
         public virtual DbSet<PaymentTransaction> PaymentTransactions { get; set; } = null!;
@@ -50,14 +49,14 @@ namespace Event_Management.Infrastructure.DBContext
         }
         private static string GetConnectionString()
         {
-            IWebHostEnvironment environment = new HttpContextAccessor().HttpContext!.RequestServices
+            IWebHostEnvironment? environment = new HttpContextAccessor().HttpContext?.RequestServices
                                     .GetRequiredService<IWebHostEnvironment>();
             IConfiguration config = new ConfigurationBuilder()
 
             .AddJsonFile("appsettings.json", true, true)
 
             .Build();
-            if (environment.IsProduction())
+            if (environment?.IsProduction() ?? true)
             {
                 return config["ConnectionStrings:SQL"]!;
             }
@@ -78,9 +77,9 @@ namespace Event_Management.Infrastructure.DBContext
                     .ValueGeneratedNever()
                     .HasColumnName("EventID");
 
-                entity.Property(e => e.CreatedAt).HasColumnType("date");
+                entity.Property(e => e.CreatedAt).HasColumnType("datetime");
 
-                entity.Property(e => e.EndDate).HasColumnType("date");
+                entity.Property(e => e.EndDate).HasColumnType("datetime");
 
                 entity.Property(e => e.EventName).HasMaxLength(250);
 
@@ -104,13 +103,13 @@ namespace Event_Management.Infrastructure.DBContext
                     .HasMaxLength(2000)
                     .IsUnicode(false);
 
-                entity.Property(e => e.StartDate).HasColumnType("date");
+                entity.Property(e => e.StartDate).HasColumnType("datetime");
 
                 entity.Property(e => e.Status)
                     .HasMaxLength(10)
                     .IsUnicode(false);
 
-                entity.Property(e => e.UpdatedAt).HasColumnType("date");
+                entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
 
                 entity.HasOne(d => d.CreatedByNavigation)
                     .WithMany(p => p.Events)
@@ -290,7 +289,7 @@ namespace Event_Management.Infrastructure.DBContext
                     .ValueGeneratedNever()
                     .HasColumnName("PaymentID");
 
-                entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+                
 
                 entity.Property(e => e.ExpireDate).HasColumnType("datetime");
 
@@ -323,6 +322,10 @@ namespace Event_Management.Infrastructure.DBContext
                 entity.Property(e => e.PaymentStatus)
                     .HasMaxLength(50)
                     .IsUnicode(false);
+
+                entity.Property(e => e.PaymentPurpose)
+                   .HasMaxLength(50)
+                   .IsUnicode(false);
 
                 entity.Property(e => e.RequiredAmount).HasColumnType("decimal(19, 2)");
 
@@ -363,10 +366,7 @@ namespace Event_Management.Infrastructure.DBContext
                     .HasMaxLength(100)
                     .IsUnicode(false);
 
-                entity.HasOne(d => d.Payment)
-                    .WithMany(p => p.PaymentSignatures)
-                    .HasForeignKey(d => d.PaymentId)
-                    .HasConstraintName("FK__PaymentSi__Payme__6E01572D");
+               
             });
 
             modelBuilder.Entity<PaymentTransaction>(entity =>
@@ -381,7 +381,7 @@ namespace Event_Management.Infrastructure.DBContext
 
                 entity.Property(e => e.TranMessage).IsUnicode(false);
 
-                entity.Property(e => e.TranPayload).IsUnicode(false);
+                
 
                 entity.Property(e => e.TranStatus)
                     .HasMaxLength(50)

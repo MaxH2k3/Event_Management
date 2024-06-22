@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Event_Management.Application.Dto.FeedbackDTO;
+using Event_Management.Application.Message;
 using Event_Management.Domain;
 using Event_Management.Domain.Entity;
 using Event_Management.Domain.UnitOfWork;
@@ -22,16 +23,26 @@ namespace Event_Management.Application.Service.FeedbackEvent
             _mapper = mapper;
         }
 
-        public async Task<bool> AddFeedback(FeedbackDto feedbackDto)
+        public async Task<bool> AddFeedback(FeedbackDto feedbackDto, string userId)
         {
             var feedbackEntity = _mapper.Map<Feedback>(feedbackDto);
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                feedbackEntity.UserId = Guid.Parse(userId);
+            }
+
             await _unitOfWork.FeedbackRepository.Add(feedbackEntity);
             return await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task<bool> UpdateFeedback(FeedbackDto feedbackDto)
+        public async Task<bool> UpdateFeedback(FeedbackDto feedbackDto, string userId)
         {
             var feedbackEntity = _mapper.Map<Feedback>(feedbackDto);
+            if (!string.IsNullOrEmpty(userId))
+            {
+                feedbackEntity.UserId = Guid.Parse(userId);
+            }
             await _unitOfWork.FeedbackRepository.Update(feedbackEntity);
             return await _unitOfWork.SaveChangesAsync();
         }

@@ -27,9 +27,9 @@ namespace Event_Management.Application
         //public Guid? CreatedBy { get; set; }
 
         [Required(ErrorMessage = "StartDate is required")]
-        public DateTime StartDate { get; set; } = DateTime.Now.AddDays(1);
+        public long StartDate { get; set; } = DateTime.Now.AddDays(1).Ticks;
         [Required(ErrorMessage = "EndDate is required")]
-        public DateTime EndDate { get; set; } = DateTime.Now.AddDays(2);
+        public long EndDate { get; set; } = DateTime.Now.AddDays(2).Ticks;
 
         public string? Image { get; set; }
 

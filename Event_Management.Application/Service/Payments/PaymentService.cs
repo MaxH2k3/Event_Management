@@ -21,21 +21,17 @@ namespace Event_Management.Application.Service.Payments
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
-        public async Task<bool> AddPayment(PaymentDto paymentDto)
-        {
-            var paymentEntity = _mapper.Map<Payment>(paymentDto);
-            await _unitOfWork.PaymentRepository.Add(paymentEntity);
-            return await _unitOfWork.SaveChangesAsync();
-        }
+        //public async Task<bool> AddPayment(PaymentDto paymentDto)
+        //{
+        //    var paymentEntity = _mapper.Map<Payment>(paymentDto);
+        //    await _unitOfWork.PaymentRepository.Add(paymentEntity);
+        //    return await _unitOfWork.SaveChangesAsync();
+        //}
 
-        public async Task<bool> GetPaymentById(string id)
+        public async Task<Payment?> GetPaymentById(Guid id)
         {
-            var payment = await _unitOfWork.PaymentRepository.GetById(id);
-            if (payment != null)
-            {
-                return true;
-            }
-            return false;
+            return await _unitOfWork.PaymentRepository.GetById(id);
+           
         }
     }
 }

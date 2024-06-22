@@ -5,6 +5,7 @@ namespace Event_Management.Application.Service
 {
 	public class EmailService : IEmailService
     {
+
         private readonly IFluentEmail _fluentEmail;
 
         public EmailService (IFluentEmail fluentEmail)

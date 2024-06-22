@@ -7,7 +7,7 @@ namespace Event_Management.Application.Service
 {
     public interface IJWTService
     {
-        Task<string> GenerateAccessToken(LoginUserDto user);
+        Task<string> GenerateAccessToken(string email);
         string GenerateRefreshToken();
         Task<APIResponse> RefreshToken(TokenResponseDTO token);
     }

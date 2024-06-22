@@ -7,7 +7,7 @@ namespace Event_Management.Domain.Entity
     {
         public Payment()
         {
-            PaymentSignatures = new HashSet<PaymentSignature>();
+          
             PaymentTransactions = new HashSet<PaymentTransaction>();
         }
 
@@ -24,10 +24,11 @@ namespace Event_Management.Domain.Entity
         public decimal? PaidAmount { get; set; }
         public string? PaymentLastMessage { get; set; }
         public Guid? CreatedBy { get; set; }
-        public DateTime? CreatedAt { get; set; }
+        //public DateTime? CreatedAt { get; set; }
+        public string? PaymentPurpose {  get; set; }
 
         public virtual User? CreatedByNavigation { get; set; }
-        public virtual ICollection<PaymentSignature> PaymentSignatures { get; set; }
+       
         public virtual ICollection<PaymentTransaction> PaymentTransactions { get; set; }
     }
 }

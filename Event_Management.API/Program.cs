@@ -34,7 +34,12 @@ builder.Services.Configure<KestrelServerOptions>(options =>
 	options.Limits.MaxRequestBodySize = 1073741824; // 1GB
 });
 
-
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromSeconds(10);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
 // Default services
 builder.Services.AddControllers();
@@ -66,6 +71,7 @@ app.UseStaticFiles();
 app.UseAuthorization();
 
 app.MapControllers();
+app.UseSession();
 
 app.ConfigureExceptionHandler();
 

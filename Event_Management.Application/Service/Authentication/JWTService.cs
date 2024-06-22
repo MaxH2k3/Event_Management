@@ -19,22 +19,20 @@ namespace Event_Management.Application.Service
 {
     public class JWTService : IJWTService
     {
-        private readonly JWTSetting _jwtSettings; //violence dependecy inversion principle
-        private readonly IConfiguration _configuration;
+        private readonly JWTSetting _jwtSettings; 
         private readonly IUnitOfWork _unitOfWork;
 
-        public JWTService(IOptions<JWTSetting> jwtSetting,IConfiguration configuration, IUnitOfWork unitOfWork)
+        public JWTService(IOptions<JWTSetting> jwtSetting, IUnitOfWork unitOfWork)
         {
             _jwtSettings = jwtSetting.Value;
-            _configuration = configuration;
             _unitOfWork = unitOfWork;
         }
 
         //generate access token
-        public async Task<string> GenerateAccessToken(LoginUserDto userDto)
+        public async Task<string> GenerateAccessToken(string email)
         {
 
-            var existUser = await _unitOfWork.UserRepository.GetUserByEmailAsync(userDto.Email!);
+            var existUser = await _unitOfWork.UserRepository.GetUserByEmailAsync(email);
             if (existUser == null)
             {
                 return "Error! Unauthorized.";
@@ -48,7 +46,7 @@ namespace Event_Management.Application.Service
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-                _configuration["JWTSetting:Securitykey"] ?? throw new InvalidOperationException("Secret not configured")));
+                _jwtSettings.SecurityKey ?? throw new InvalidOperationException("Secret not configured")));
 
             var tokenhandler = new JwtSecurityTokenHandler();
 
@@ -63,9 +61,9 @@ namespace Event_Management.Application.Service
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddDays(Convert.ToDouble(_configuration["JWTSetting:TokenExpiry"])),
-                Issuer = _configuration["JWTSetting:Issuer"],
-                Audience = _configuration["JWTSetting:Audience"],
+                Expires = DateTime.UtcNow.AddDays(Convert.ToDouble(_jwtSettings.TokenExpiry)),
+                Issuer = _jwtSettings.Issuer,
+                Audience = _jwtSettings.Audience,
                 SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
             };
             var securityToken = tokenhandler.CreateToken(tokenDescriptor);
@@ -87,7 +85,7 @@ namespace Event_Management.Application.Service
                 //ValidateAudience = true,
                 //ValidateIssuer = true,
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWTSetting:Securitykey"]!)),
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecurityKey)),
                 ValidateLifetime = true //false
             };
 
@@ -148,7 +146,7 @@ namespace Event_Management.Application.Service
             await _unitOfWork.RefreshTokenRepository.RemoveRefreshTokenAsync(existingRefreshToken.Token);
 
             // generate new tokens
-            var newAccessToken = await GenerateAccessToken(new LoginUserDto { Email = emailClaim.Value });
+            var newAccessToken = await GenerateAccessToken(emailClaim.Value);
             var newRefreshToken = GenerateRefreshToken();
 
             var refreshTokenEntity = new RefreshToken

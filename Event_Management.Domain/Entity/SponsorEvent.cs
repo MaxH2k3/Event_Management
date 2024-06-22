@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Event_Management.Domain.Entity
+﻿namespace Event_Management.Domain.Entity
 {
     public partial class SponsorEvent
     {

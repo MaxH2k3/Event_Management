@@ -1,33 +1,31 @@
 ﻿using Event_Management.Application;
-using Event_Management.Application.Service;
+using Event_Management.Application.Dto.EventDTO.RequestDTO;
 using Event_Management.Application.Message;
+using Event_Management.Application.Service;
+using Event_Management.Domain.Helper;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Models.System;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 using Event_Management.Application.Dto.EventDTO.RequestDTO;
 using Microsoft.AspNetCore.Authorization;
-using Event_Management.Domain.Constants;
-using Event_Management.Domain.Enum;
 using Event_Management.Domain.Helper;
-using Event_Management.Domain.UnitOfWork;
 
 namespace Event_Management.API.Controllers
 {
-	[Route("api/v1/events")]
+    [Route("api/v1/events")]
     [ApiController]
     public class EventController : Controller
     {
         private readonly IEventService _eventService;
-        private readonly IUnitOfWork _unitOfWork;
-		public EventController(IEventService eventService, IUnitOfWork unitOfWork)
+        public EventController(IEventService eventService)
         {
             _eventService = eventService;
-            _unitOfWork = unitOfWork;
 		}
 
-        [Authorize(Roles = "Admin")]
+        
         [HttpGet("GetAll")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -85,7 +83,7 @@ namespace Event_Management.API.Controllers
             });
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpPost("")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -110,13 +108,15 @@ namespace Event_Management.API.Controllers
             });
         }
 
+        [Authorize]
         [HttpPut("")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<APIResponse> UpdateEvent([FromBody] EventRequestDto eventDto)
         {
             APIResponse response = new APIResponse();
-            var result = await _eventService.UpdateEvent(eventDto);
+            string userId = User.GetUserIdFromToken();
+            var result = await _eventService.UpdateEvent(eventDto, userId);
             if (result)
             {
                 response.StatusResponse = HttpStatusCode.OK;
@@ -194,13 +194,6 @@ namespace Event_Management.API.Controllers
                 Data = result
             });
 
-        }
-        [HttpGet("test-repo")]
-        public async Task<IActionResult> test()
-        {
-            double a1 = _unitOfWork.EventRepository.UpdateEventStatusToEnded();
-            double a2 = _unitOfWork.EventRepository.UpdateEventStatusToOnGoing();
-            return Ok(a1 + a2);
         }
     }
 }

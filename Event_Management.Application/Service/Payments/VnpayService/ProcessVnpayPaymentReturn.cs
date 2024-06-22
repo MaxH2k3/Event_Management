@@ -1,11 +1,13 @@
-﻿using Event_Management.Application.Dto.PaymentDTO;
+﻿using AutoMapper;
+using Event_Management.Application.Dto.PaymentDTO;
 using Event_Management.Application.Helper;
-using Event_Management.Domain.Model.VnpayPayment;
+using Event_Management.Domain.Entity;
+using Event_Management.Domain.Models.Payment.VnpayPayment;
 using Event_Management.Domain.UnitOfWork;
 using MediatR;
 using Microsoft.Extensions.Options;
 
-namespace Event_Management.Application.Service.Payments.VnpayService
+namespace Event_Management.Application.Service.Payments
 {
     public class ProcessVnpayPaymentReturn : VnpayPayResponse,
         IRequest<PaymentReturnDto>
@@ -15,58 +17,83 @@ namespace Event_Management.Application.Service.Payments.VnpayService
     public class ProcessVnpayPaymentReturnHandler : IRequestHandler<ProcessVnpayPaymentReturn, PaymentReturnDto>
     {
         
+        
         private readonly VnpaySetting _vnpaySetting;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IPaymentService _paymentService;
+        private readonly IMapper _mapper;
+        private readonly PaymentHandler _paymentHandler;
 
-        public ProcessVnpayPaymentReturnHandler(IUnitOfWork unitOfWork,
-            IOptions<VnpaySetting> vnpaySettingOptions)
+        public ProcessVnpayPaymentReturnHandler(IUnitOfWork unitOfWork, IPaymentService paymentService, IMapper mapper,
+            IOptions<VnpaySetting> vnpaySettingOptions, PaymentHandler paymentHandler)
         {
-            _unitOfWork = unitOfWork;     
+            _unitOfWork = unitOfWork;
+            _paymentService = paymentService;
+            _mapper = mapper;
+            _paymentHandler = paymentHandler;
             _vnpaySetting = vnpaySettingOptions.Value;
         }
 
-        public Task<PaymentReturnDto> Handle(
+        public async Task<PaymentReturnDto> Handle(
             ProcessVnpayPaymentReturn request, CancellationToken cancellationToken)
         {
             //string returnUrl = string.Empty;
             //var result = new PaymentReturnDto();
 
-            var resultData = new PaymentReturnDto();
-            resultData.PaymentStatus = "01";
+            var paymentReturnDto = new PaymentReturnDto();
 
-           
+
+            var payment = _paymentHandler.currentPayment;
             var isValidSignature = request.IsValidSignature(_vnpaySetting.HashSecret);
 
             if (isValidSignature)
             {
-                var payment = _unitOfWork.PaymentRepository.GetById(request.vnp_TxnRef);
+                paymentReturnDto.PaymentStatus = "01";
+                paymentReturnDto.PaymentId = Guid.Parse(request.vnp_TxnRef);
+                paymentReturnDto.RequiredAmount = request.vnp_Amount;
+                paymentReturnDto.PaymentDate = payment.PaymentDate;
+                paymentReturnDto.PaymentRefId = payment.PaymentRefId;
 
                 if (payment == null)
                 {
-                    resultData.PaymentStatus = "11";
-                    resultData.PaymentMessage = "Can't find payment at payment service";
-                }
+                    paymentReturnDto.PaymentStatus = "11";
+                    paymentReturnDto.PaymentMessage = "Can't find payment at payment service";
+                } 
 
                 if (request.vnp_ResponseCode == "00")
                 {
-                    resultData.PaymentStatus = "00";
-                    resultData.PaymentId = request.vnp_TxnRef;
+                    paymentReturnDto.PaymentStatus = "00";
+                    paymentReturnDto.PaymentMessage = "Payment Successfully";
+
+                   
+
                     ///TODO: Make signature
-                    resultData.Signature = Guid.NewGuid().ToString();
+                    //paymentReturnDto.Signature = Guid.NewGuid().ToString();
                 }
                 else
                 {
-                    resultData.PaymentStatus = "10";
-                    resultData.PaymentMessage = "Payment process failed";
+                    paymentReturnDto.PaymentStatus = "10";
+                    paymentReturnDto.PaymentMessage = "Payment process failed";
                 }
             }
             else
             {
-                resultData.PaymentStatus = "99";
-                resultData.PaymentMessage = "Invalid signature in response";
+                paymentReturnDto.PaymentStatus = "99";
+                paymentReturnDto.PaymentMessage = "Invalid signature in response";
             }
 
-            return Task.FromResult(resultData);
+            var paymentTransaction = new PaymentTransaction
+            {
+                Id = Guid.NewGuid(),
+                TranMessage = paymentReturnDto.PaymentMessage,
+                TranStatus = paymentReturnDto.PaymentStatus,
+                TranAmount = request.vnp_Amount,
+                TranDate = DateTime.Now,
+                PaymentId = payment.PaymentId,
+            };
+            await _unitOfWork.PaymentTransactionRepository.Add(paymentTransaction);
+
+            return paymentReturnDto;
         }
 
 

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Net.WebRequestMethods;
 
-namespace Event_Management.Domain.Model.VnpayPayment
+namespace Event_Management.Domain.Models.Payment.VnpayPayment
 {
     public class VnpaySetting
     {
@@ -13,7 +13,7 @@ namespace Event_Management.Domain.Model.VnpayPayment
         public string Version { get; set; } = "2.1.0";
         public string TmnCode { get; set; } = "XDI3OIRC";
         public string HashSecret { get; set; } = "EM98KV6UQQ5O7IEDJEQNDLNORN6S976J";
-        public string ReturnUrl { get; set; } = "http://localhost:7153/api/payment/vnpay-return";
+        public string ReturnUrl { get; set; } = "https://localhost:7153/api/payment/vnpay-return";
         public string PaymentUrl { get; set; } = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
 
 

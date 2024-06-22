@@ -1,17 +1,15 @@
-﻿using Event_Management.API.Utilities;
-using Event_Management.Application.Dto.PaymentDTO;
+﻿using Event_Management.Application.Dto.PaymentDTO;
 using Event_Management.Application.Helper;
 using Event_Management.Application.Message;
 using Event_Management.Application.Service;
-using Event_Management.Application.Service.Payments.VnpayService;
-using Event_Management.Domain.Model.VnpayPayment;
+using Event_Management.Application.Service.Payments;
+using Event_Management.Domain.Helper;
+using Event_Management.Domain.Models.Payment.VnpayPayment;
 using Event_Management.Domain.Models.System;
 using Mapster;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Org.BouncyCastle.Asn1.Ocsp;
 using System.Net;
 
 namespace Event_Management.API.Controllers
@@ -22,6 +20,7 @@ namespace Event_Management.API.Controllers
     {
         private readonly IMediator _mediator;
         private readonly VnpaySetting _vnpaySetting;
+        private readonly IEventService _eventService;
      
 
         /// <summary>
@@ -29,11 +28,11 @@ namespace Event_Management.API.Controllers
         /// </summary>
         /// <param name="mediator"></param>
         /// <param name="vnpayConfigOptions"></param>
-        public PaymentController(IMediator mediator,
+        public PaymentController(IMediator mediator, IEventService eventService,
             IOptions<VnpaySetting> vnpayConfigOptions)
         {
            _mediator = mediator;
-      
+           _eventService = eventService;
            _vnpaySetting = vnpayConfigOptions.Value;
         }
 
@@ -47,7 +46,10 @@ namespace Event_Management.API.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Create([FromBody] PaymentDto request)
         {
-           
+
+            string userId = User.GetUserIdFromToken();
+            request.CreatedBy = Guid.Parse(userId)
+                ;
             var response = new PaymentLinkDto();
             response = await _mediator.Send(request);
             return Ok(response);
@@ -55,11 +57,11 @@ namespace Event_Management.API.Controllers
 
         [HttpGet]
         [Route("vnpay-return")]
-        public async Task<IActionResult> VnpayReturn([FromQuery] VnpayPayResponse vnpayresponse)
+        public async Task<APIResponse> VnpayReturn([FromQuery] VnpayPayResponse vnpayresponse)
         {
-            //var response = new APIResponse();
-            string returnUrl = string.Empty;
-            var returnModel = new PaymentReturnDto();
+            var response = new APIResponse();
+            //string returnUrl = string.Empty;
+            //var returnModel = new PaymentReturnDto();
             var vnpaySetting = new VnpaySetting();
             var processResult = await _mediator.Send(vnpayresponse.Adapt<ProcessVnpayPaymentReturn>());
 
@@ -78,12 +80,24 @@ namespace Event_Management.API.Controllers
 
             if(processResult != null)
             {
-                returnModel = processResult;
-                returnUrl = vnpaySetting.ReturnUrl;
+                
+                //returnUrl = vnpaySetting.ReturnUrl as string;
+                response.StatusResponse = HttpStatusCode.OK;
+                response.Message = MessageCommon.Complete;
+                response.Data = processResult as PaymentReturnDto;
             }
-            if (returnUrl.EndsWith("/"))
-                returnUrl = returnUrl.Remove(returnUrl.Length - 1, 1);
-            return Redirect($"{returnUrl}?{returnModel.ToQueryString()}");
+            else
+            {
+                response.StatusResponse = HttpStatusCode.BadRequest;
+                response.Message = MessageCommon.NotComplete;
+                response.Data = processResult as PaymentReturnDto;
+            }
+
+            return response;
+            //if (!string.IsNullOrEmpty(returnUrl) && returnUrl.EndsWith("/"))
+            //    returnUrl = returnUrl.Remove(returnUrl.Length - 1, 1);
+            ////Console.WriteLine($"{returnUrl}?{returnModel.ToQueryString()}");
+            //return Redirect($"{returnUrl}?{returnModel.ToQueryString()}");
 
 
         }

@@ -2,6 +2,7 @@
 using Event_Management.Application.Dto.AuthenticationDTO;
 using Event_Management.Application.Dto.UserDTO.Request;
 using Event_Management.Application.Service;
+using Event_Management.Application.Service.Authentication;
 using Event_Management.Domain.Helper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,22 +14,22 @@ namespace Event_Management.API.Controllers
     [ApiController]
     public class AuthenticateController : Controller
     {
-        private readonly IUserService _userService;
+        private readonly IAuthenticateService _authenService;
         private readonly IJWTService _jWTService;
 
-        public AuthenticateController(IUserService userService, IJWTService jWTService)
+        public AuthenticateController(IAuthenticateService authenticateService, IJWTService jWTService)
         {
-            _userService = userService;
+            _authenService = authenticateService;
             _jWTService = jWTService;
         }
 
-        
+
         // [HttpPost("login")]
         // [ProducesResponseType(StatusCodes.Status200OK)]
         // [ProducesResponseType(StatusCodes.Status400BadRequest)]
         // public async Task<IActionResult> Login([FromBody] LoginUserDto loginUser)
         // {
-        //     var response = await _userService.Login(loginUser);
+        //     var response = await _authenService.Login(loginUser);
         //     if (response.StatusResponse != HttpStatusCode.OK)
         //     {
         //         return BadRequest(response);
@@ -41,7 +42,7 @@ namespace Event_Management.API.Controllers
         // [ProducesResponseType(StatusCodes.Status400BadRequest)]
         // public async Task<IActionResult> SignInWithGoogle([FromBody] LoginUserDto loginUser)
         // {
-        //     var response = await _userService.Login(loginUser);
+        //     var response = await _authenService.Login(loginUser);
         //     if (response.StatusResponse != HttpStatusCode.OK)
         //     {
         //         return BadRequest(response);
@@ -49,13 +50,26 @@ namespace Event_Management.API.Controllers
         //     return Ok(response);
         // }
 
+        [HttpPost("SignInWithGoogle")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> SignInWithGoogle([FromBody] LoginInWithGoogleDto loginInWithGoogle)
+        {
+            var response = await _authenService.SignInWithGoogle(loginInWithGoogle);
+            if (response.StatusResponse != HttpStatusCode.OK)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
+
 
         [HttpPost("SignInWithOTP")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> SignInWithOTP([FromBody] LoginUserDto loginUser)
         {
-            var response = await _userService.SignInWithOTP(loginUser.Email!);
+            var response = await _authenService.SignInWithOTP(loginUser.Email!);
             if (response.StatusResponse != HttpStatusCode.OK)
             {
                 return NotFound(response);
@@ -69,21 +83,21 @@ namespace Event_Management.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> SignUpWithOTP([FromBody] RegisterUserDto registerUser)
         {
-            var response = await _userService.SignUpWithOTP(registerUser);
+            var response = await _authenService.SignUpWithOTP(registerUser);
             if (response.StatusResponse != HttpStatusCode.OK)
             {
                 return BadRequest(response);
             }
             return Ok(response);
         }
-        
+
 
         [HttpPost("ValidateOTP")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> ValidateOTP([FromBody] ValidateOtpDTO validateOtp)
         {
-            var response = await _userService.ValidateOTP(validateOtp);
+            var response = await _authenService.ValidateOTP(validateOtp);
             if (response.StatusResponse != HttpStatusCode.OK)
             {
                 return NotFound(response);
@@ -97,7 +111,7 @@ namespace Event_Management.API.Controllers
         // [ProducesResponseType(StatusCodes.Status400BadRequest)]
         // public async Task<IActionResult> RegisterUser([FromBody] RegisterUserDto registerUser)
         // {
-        //     var response = await _userService.Register(registerUser);
+        //     var response = await _authenService.Register(registerUser);
         //     if (response.StatusResponse != HttpStatusCode.Created)
         //     {
         //         return BadRequest(response);
@@ -106,12 +120,11 @@ namespace Event_Management.API.Controllers
         // }
 
         // [HttpPost("verify")]
-        // [HttpGet("verify")]
         // [ProducesResponseType(StatusCodes.Status200OK)]
         // [ProducesResponseType(StatusCodes.Status404NotFound)]
         // public async Task<IActionResult> VerifyAccount([FromQuery] string token, [FromQuery] Guid userId)
         // {
-        //    var response = await _userService.verifyAccount(token, userId);
+        //    var response = await _authenService.ValidateAccountWithToken(token, userId);
         //    if (response.StatusResponse != HttpStatusCode.OK)
         //    {
         //        return BadRequest(response);
@@ -120,20 +133,20 @@ namespace Event_Management.API.Controllers
         // }
 
 
-        // [Authorize]
-        // [HttpPost("logout")]
-        // [ProducesResponseType(StatusCodes.Status200OK)]
-        // [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        // public async Task<IActionResult> Logout()
-        // {
-        //     var userId = User.GetUserIdFromToken();
-        //     var response = await _userService.Logout(userId);
-        //     if (response.StatusResponse != HttpStatusCode.OK)
-        //     {
-        //         return BadRequest(response);
-        //     }
-        //     return Ok(response);
-        // }
+        [Authorize]
+        [HttpPost("logout")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Logout()
+        {
+            var userId = User.GetUserIdFromToken();
+            var response = await _authenService.Logout(userId);
+            if (response.StatusResponse != HttpStatusCode.OK)
+            {
+                return BadRequest(response);
+            }
+            return Ok(response);
+        }
 
         [HttpPost("refresh")]
         [ProducesResponseType(StatusCodes.Status200OK)]

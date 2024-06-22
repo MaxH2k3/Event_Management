@@ -15,8 +15,8 @@ namespace Event_Management.Application.Dto.EventDTO.ResponseDTO
         public string EventName { get; set; } = null!;
         public string? Description { get; set; }
         public string? Status { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
+        public long StartDate { get; set; }
+        public long EndDate { get; set; }
         public Guid? CreatedBy { get; set; }
         public string? Image { get; set; }
         public string? Location { get; set; }
@@ -24,8 +24,8 @@ namespace Event_Management.Application.Dto.EventDTO.ResponseDTO
         public string? LocationAddress { get; set; }
         public string? LocationUrl { get; set; } = null;
         public string? LocationCoord { get; set; } = null;
-        public DateTime? CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
+        public long CreatedAt { get; set; }
+        public long? UpdatedAt { get; set; }
         public int? Capacity { get; set; }
         public bool? Approval { get; set; }
         public double? Ticket { get; set; }

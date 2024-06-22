@@ -1,4 +1,5 @@
 ﻿using Event_Management.Application.Dto.PaymentDTO;
+using Event_Management.Domain.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace Event_Management.Application.Service
 {
     public interface IPaymentService
     {
-        Task<bool> AddPayment(PaymentDto paymentDto);
-        Task<bool> GetPaymentById(string id);
+        //Task<bool> AddPayment(PaymentDto paymentDto);
+        Task<Payment?> GetPaymentById(Guid id);
     }
 }

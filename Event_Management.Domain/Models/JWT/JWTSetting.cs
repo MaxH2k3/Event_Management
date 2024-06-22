@@ -14,27 +14,27 @@ namespace Event_Management.Domain.Models.JWT
 		public string Audience { get; set; } = null!;
 		public int TokenExpiry { get; set; }
 
-        //public JWTSetting()
-        //{
-        //    GetSettingConfig();
-        //}
+        public JWTSetting()
+        {
+           GetSettingConfig();
+        }
 
-        //private void GetSettingConfig()
-        //{
-        //    IConfiguration config = new ConfigurationBuilder()
+        private void GetSettingConfig()
+        {
+           IConfiguration config = new ConfigurationBuilder()
 
-        //    .SetBasePath(Directory.GetCurrentDirectory())
+           .SetBasePath(Directory.GetCurrentDirectory())
 
-        //    .AddJsonFile("appsettings.json", true, true)
+           .AddJsonFile("appsettings.json", true, true)
 
-        //    .Build();
+           .Build();
 
-        //    this.SecurityKey = config["JWTSetting:Securitykey"];
-        //    this.Issuer = config["JWTSetting:Issuer"];
-        //    this.Audience = config["JWTSetting:Audience"];
-        //    this.TokenExpiry = Convert.ToDouble(config["JWTSetting:TokenExpiry"]);
+           this.SecurityKey = config["JWTSetting:Securitykey"]!;
+           this.Issuer = config["JWTSetting:Issuer"]!;
+           this.Audience = config["JWTSetting:Audience"]!;
+           this.TokenExpiry = Convert.ToInt32(config["JWTSetting:TokenExpiry"]);
 
-        //}
+        }
     }
 
 

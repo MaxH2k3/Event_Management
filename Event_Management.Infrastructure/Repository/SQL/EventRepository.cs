@@ -14,14 +14,14 @@ using System.Globalization;
 
 namespace Event_Management.Infrastructure.Repository.SQL
 {
-	public class EventRepository : SQLExtendRepository<Event>, IEventRepository
+    public class EventRepository : SQLExtendRepository<Event>, IEventRepository
     {
         private readonly EventManagementContext _context;
 
-		public EventRepository(EventManagementContext context) : base(context)
+        public EventRepository(EventManagementContext context) : base(context)
         {
             _context = context;
-		}
+        }
 
         public async Task<PagedList<Event>> GetAllEvents(EventFilterObject filter, int pageNo, int elementEachPage)
         {
@@ -30,33 +30,18 @@ namespace Event_Management.Infrastructure.Repository.SQL
             var eventList = _context.Events.AsQueryable();
             eventList = ApplyFilter(eventList, filter).PaginateAndSort(pageNo, elementEachPage, filter.SortBy ?? "EventId", filter.IsAscending);
             //eventList = ApplyFilter(eventList, filter).Skip(skipElements).Take(elementEachPage);
-            var temp = await eventList.ToListAsync();
+            List<Event> temp = await eventList.ToListAsync();
             List<Event> result = new List<Event>();
             if (!string.IsNullOrWhiteSpace(filter.UserCoord))
             {
-                string[] userCoord = filter.UserCoord.Split(',');
-                double userLat = double.Parse(userCoord[0].Trim());
-                double userLong = double.Parse(userCoord[1].TrimStart());
-                foreach (var item in temp)
-                {
-                    string[] eventCoord = item.LocationCoord!.Split(',');
-                    double eventLat = double.Parse(eventCoord[0].Trim());
-                    double eventLong = double.Parse(eventCoord[1].TrimStart());
-                    double distance = CalculateDistance(userLat, userLong, eventLat, eventLong);
-                    if (distance <= 5000)
-                    {
-                        Console.WriteLine(distance);
-                       result.Add(item); 
-                    }
-                }
+                result = FilterEventsByDistance(temp, filter.UserCoord);
             }
             else
             {
-                result = temp.ToList();
+                result = temp;
             }
             return new PagedList<Event>(result, totalEle, pageNo, elementEachPage);
         }
-
         private async Task<List<Event>?> ApplySearch(string keyword)
         {
             if (string.IsNullOrWhiteSpace(keyword))
@@ -70,11 +55,12 @@ namespace Event_Management.Infrastructure.Repository.SQL
         }
         private IQueryable<Event> ApplyFilter(IQueryable<Event> eventList, EventFilterObject filter)
         {
-            if(!string.IsNullOrWhiteSpace(filter.EventName))
+            if (!string.IsNullOrWhiteSpace(filter.EventName))
+            
             {
-                eventList = from e in eventList
-                            where e.EventName.Contains(filter.EventName)
-                            select e;
+                    eventList = from e in eventList
+                                where e.EventName!.Contains(filter.EventName)
+                                select e;
             }
             if (!string.IsNullOrWhiteSpace(filter.Location))
             {
@@ -88,10 +74,10 @@ namespace Event_Management.Infrastructure.Repository.SQL
                 // get DateTime from DateTimeOffset
                 DateTime startDateFrom = dateTimeOffset.DateTime;
                 eventList = from e in eventList
-                                where e.StartDate >= startDateFrom
-                                select e;
+                            where e.StartDate >= startDateFrom
+                            select e;
             }
-            if(filter.StartDateTo != null)
+            if (filter.StartDateTo != null)
             {
                 DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeMilliseconds((long)filter.StartDateTo);
                 // get DateTime from DateTimeOffset
@@ -106,9 +92,9 @@ namespace Event_Management.Infrastructure.Repository.SQL
                 // get DateTime from DateTimeOffset
                 DateTime endDateFrom = dateTimeOffset.DateTime;
                 eventList = from e in eventList
-                                where e.EndDate >= endDateFrom
-                                select e;
-                
+                            where e.EndDate >= endDateFrom
+                            select e;
+
             }
             if ((filter.EndDateTo != null))
             {
@@ -120,7 +106,7 @@ namespace Event_Management.Infrastructure.Repository.SQL
                             select e;
             }
             {
-                
+
             }
             if (!string.IsNullOrWhiteSpace(filter.Status))
             {
@@ -128,7 +114,7 @@ namespace Event_Management.Infrastructure.Repository.SQL
                             where e.Status == filter.Status
                             select e;
             }
-            if(filter.TicketFrom != null)
+            if (filter.TicketFrom != null)
             {
                 eventList = from e in eventList
                             where e.Ticket >= filter.TicketFrom
@@ -140,13 +126,13 @@ namespace Event_Management.Infrastructure.Repository.SQL
                             where e.Ticket <= filter.TicketTo
                             select e;
             }
-            if(filter.Approval != null)
+            if (filter.Approval != null)
             {
                 eventList = from e in eventList
                             where e.Approval == filter.Approval
                             select e;
             }
-                          
+
             //eventList = filter.IsAscending ? eventList.OrderBy(s => s.EndDate) : eventList.OrderByDescending(s => s.StartDate);               
             return eventList;
         }
@@ -166,12 +152,28 @@ namespace Event_Management.Infrastructure.Repository.SQL
             //int skipElements = (pageNo - 1) * elementEachPage;
             var events = await GetUserParticipatedEventsQuery(userId);
             var totalEle = await events.CountAsync();
-            events =  ApplyFilter(events, filter).PaginateAndSort(pageNo, elementEachPage, filter.SortBy ?? "EventId", filter.IsAscending);
+            events = ApplyFilter(events, filter).PaginateAndSort(pageNo, elementEachPage, filter.SortBy ?? "EventId", filter.IsAscending);
             //events = ApplyFilter(events, filter).Skip(skipElements).Take(elementEachPage);
             var result = await events.ToListAsync();
             return new PagedList<Event>(result, totalEle, pageNo, elementEachPage);
         }
-
+        public async Task<PagedList<Event>> GetAllEventsByStatus(EventFilterObject filter, int pageNo, int elementEachPage, EventStatus status)
+        {
+            var totalEle = await _context.Events.CountAsync();
+            var eventList = _context.Events.Where(e => e.Status == status.ToString()).AsQueryable();
+            eventList = ApplyFilter(eventList, filter).PaginateAndSort(pageNo, elementEachPage, filter.SortBy ?? "EventId", filter.IsAscending);
+            List<Event> result = new List<Event>();
+            List<Event> temp = await eventList.ToListAsync();
+            if (!string.IsNullOrWhiteSpace(filter.UserCoord))
+            {
+                result = FilterEventsByDistance(temp, filter.UserCoord);
+            }
+            else
+            {
+                result = temp;
+            }
+            return new PagedList<Event>(result, totalEle, pageNo, elementEachPage);
+        }
         public async Task<Event> CreateEvent(Event eventCreate)
         {
             await _context.AddAsync(eventCreate);
@@ -179,59 +181,26 @@ namespace Event_Management.Infrastructure.Repository.SQL
             return eventCreate;
         }
 
-        public double UpdateEventStatusToOnGoing()
+        public bool UpdateEventStatusToOnGoing()
         {
-            try
-            {
-                var ongoingEvents = _context.Events/*.Where(e => e.StartDate >= DateTime.Now)*/.ToList();
-                if(ongoingEvents.Any())
-                {
-                    return ongoingEvents.Count;
-                }
-                else
-                {
-                    /*ongoingEvents.ForEach(e => e.Status = EventStatus.OnGoing.ToString());
-                    _context.UpdateRange(ongoingEvents);
-                    await _context.SaveChangesAsync();
-                    if (await _context.SaveChangesAsync() > 0)
-                    {
-                        return true;
-                    }*/
-                    return 0;
-                }
-                
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message, ex);
-            }
+            var ongoingEvents = _context.Events.Where(e => e.StartDate <= DateTime.Now).ToList();
+            ongoingEvents.ForEach(e => e.Status = EventStatus.OnGoing.ToString());
+                _context.UpdateRange(ongoingEvents);
+               return _context.SaveChanges() > 0;
         }
 
-        public double UpdateEventStatusToEnded()
+        public bool UpdateEventStatusToEnded()
         {
-            try
-            {
-                var endedEvents =  _context.Events/*.Where(e => e.EndDate >= DateTime.Now)*/.ToList();
-                if (endedEvents.Any())
-                {
-                    return endedEvents.Count;
-                }
-                else
-                {
-                    /*endedEvents.ForEach(e => e.Status = EventStatus.Ended.ToString());
-                    _context.UpdateRange(endedEvents);
-                    if (await _context.SaveChangesAsync() > 0)
-                    {
-                        return true;
-                    }*/
-                    return 0;
-                }
-            }
-
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message, ex);
-            }
+            var endedEvent = _context.Events.Where(e => e.EndDate <= DateTime.Now).ToList();
+            endedEvent.ForEach(e => e.Status = EventStatus.Ended.ToString());
+            _context.UpdateRange(endedEvent);
+                return _context.SaveChanges() > 0;
+        }
+        public async Task<bool> DeleteEvent(Guid eventId)
+        {
+            var deleteEvent = await _context.Events.FindAsync(eventId);
+            deleteEvent.Status = EventStatus.Deleted.ToString();
+            return await _context.SaveChangesAsync() > 0;
         }
         double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
         {
@@ -243,12 +212,43 @@ namespace Event_Management.Infrastructure.Repository.SQL
                    Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
             var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
             var distance = R * c;
-            return distance*1000;//convert from kilometer to meter
+            return distance * 1000;//convert from kilometer to meter
         }
 
         private double ToRadians(double angle)
         {
             return Math.PI * angle / 180.0;
+        }
+        private List<Event> FilterEventsByDistance(List<Event> events, string userCoord)
+        {
+            List<Event> result = new List<Event>();
+
+            if (!string.IsNullOrWhiteSpace(userCoord))
+            {
+                string[] userCoordParts = userCoord.Split(',');
+                double userLat = double.Parse(userCoordParts[0].Trim());
+                double userLong = double.Parse(userCoordParts[1].TrimStart());
+
+                foreach (var item in events)
+                {
+                    string[] eventCoordParts = item.LocationCoord!.Split(',');
+                    double eventLat = double.Parse(eventCoordParts[0].Trim());
+                    double eventLong = double.Parse(eventCoordParts[1].TrimStart());
+                    double distance = CalculateDistance(userLat, userLong, eventLat, eventLong);
+
+                    if (distance <= 5000)
+                    {
+                        Console.WriteLine($"event {item.EventName} distance: " + distance);
+                        result.Add(item);
+                    }
+                }
+            }
+            else
+            {
+                result = events.ToList();
+            }
+
+            return result;
         }
     }
 }

@@ -7,8 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Feature\**" />
     <Compile Remove="Service\VNPay\**" />
+    <EmbeddedResource Remove="Feature\**" />
     <EmbeddedResource Remove="Service\VNPay\**" />
+    <None Remove="Feature\**" />
     <None Remove="Service\VNPay\**" />
   </ItemGroup>
 
@@ -24,18 +27,14 @@
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.5.0" />
     <PackageReference Include="Mapster" Version="7.4.0" />
     <PackageReference Include="MediatR" Version="11.1.0" />
-    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="MimeKit" Version="2.10.1" />
+    <PackageReference Include="Quartz" Version="3.9.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.35.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Feature\Payment\Commands\" />
-    <Folder Include="Feature\Payment\Queries\" />
   </ItemGroup>
 
 </Project>
