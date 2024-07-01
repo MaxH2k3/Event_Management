@@ -14,7 +14,7 @@ using System.Net;
 
 namespace Event_Management.API.Controllers
 {
-    [Route("api/payment")]
+    [Route("api/v1/payment")]
     [ApiController]
     public class PaymentController : ControllerBase
     {

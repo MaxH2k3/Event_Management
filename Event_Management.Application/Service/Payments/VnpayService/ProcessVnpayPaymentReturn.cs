@@ -20,15 +20,14 @@ namespace Event_Management.Application.Service.Payments
         
         private readonly VnpaySetting _vnpaySetting;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IPaymentService _paymentService;
+       
         private readonly IMapper _mapper;
         private readonly PaymentHandler _paymentHandler;
 
-        public ProcessVnpayPaymentReturnHandler(IUnitOfWork unitOfWork, IPaymentService paymentService, IMapper mapper,
+        public ProcessVnpayPaymentReturnHandler(IUnitOfWork unitOfWork, IMapper mapper,
             IOptions<VnpaySetting> vnpaySettingOptions, PaymentHandler paymentHandler)
         {
             _unitOfWork = unitOfWork;
-            _paymentService = paymentService;
             _mapper = mapper;
             _paymentHandler = paymentHandler;
             _vnpaySetting = vnpaySettingOptions.Value;
@@ -89,7 +88,7 @@ namespace Event_Management.Application.Service.Payments
                 TranStatus = paymentReturnDto.PaymentStatus,
                 TranAmount = request.vnp_Amount,
                 TranDate = DateTime.Now,
-                PaymentId = payment.PaymentId,
+                
             };
             await _unitOfWork.PaymentTransactionRepository.Add(paymentTransaction);
 

@@ -5,7 +5,7 @@ namespace Event_Management.Domain.Entity
 {
     public partial class Notification
     {
-        public int NotificationId { get; set; }
+        public int NotificationIdD { get; set; }
         public Guid? UserId { get; set; }
         public string? Description { get; set; }
         public DateTime? CreatedAt { get; set; }

@@ -117,13 +117,13 @@ namespace Event_Management.Infrastructure.Repository.SQL
             if (filter.TicketFrom != null)
             {
                 eventList = from e in eventList
-                            where e.Ticket >= filter.TicketFrom
+                            where e.Fare >= filter.TicketFrom
                             select e;
             }
             if (filter.TicketTo != null)
             {
                 eventList = from e in eventList
-                            where e.Ticket <= filter.TicketTo
+                            where e.Fare <= filter.TicketTo
                             select e;
             }
             if (filter.Approval != null)
@@ -140,6 +140,17 @@ namespace Event_Management.Infrastructure.Repository.SQL
         {
             var participants = await _context.Participants
                 .Where(p => p.UserId.Equals(userId) && p.CheckedIn != null)
+                .Select(p => p.EventId)
+                .ToListAsync();
+
+            return _context.Events
+                .Where(e => participants.Contains(e.EventId))
+                .AsNoTracking();
+        }
+        private async Task<IQueryable<Event>> GetUserRegisterdEventsQuery(Guid userId)
+        {
+            var participants = await _context.Participants
+                .Where(p => p.UserId.Equals(userId))
                 .Select(p => p.EventId)
                 .ToListAsync();
 
@@ -181,20 +192,59 @@ namespace Event_Management.Infrastructure.Repository.SQL
             return eventCreate;
         }
 
+        public async Task<List<Event>> UserPastEvents(Guid userId)
+        {
+            var events = await GetUserRegisterdEventsQuery(userId);
+            return events.Where(e => e.EndDate.Date < DateTime.Now)
+                
+                .OrderByDescending(e => e.EndDate)
+                .ToList();
+        }
+        public async Task<List<Event>> UserIncomingEvents(Guid userId)
+        {
+            var incomingEvents = await GetUserRegisterdEventsQuery(userId);
+            return incomingEvents.Where(e => e.StartDate.Date >= DateTime.Now)
+                .OrderByDescending(e => e.StartDate)
+                .ToList();
+        }
+
+        public bool UpdateEventStatusToOnGoing(Guid eventId)
+        {
+            var ongoingEvent = _context.Events.Find(eventId);
+            ongoingEvent.Status = EventStatus.OnGoing.ToString();
+            _context.Update(ongoingEvent);
+            /*var ongoingEvents = _context.Events.Where(e => e.StartDate <= DateTime.Now).ToList();
+            ongoingEvents.ForEach(e => e.Status = EventStatus.OnGoing.ToString());
+                _context.UpdateRange(ongoingEvents);*/
+               return _context.SaveChanges() > 0;
+        }
+
+        public bool UpdateEventStatusToEnded(Guid eventId)
+        {
+            var endedEvent = _context.Events.Find(eventId);
+            endedEvent.Status = EventStatus.Ended.ToString();
+            _context.Update(endedEvent);
+            /*var endedEvents = _context.Events.Where(e => e.EndDate <= DateTime.Now).ToList();
+            endedEvents.ForEach(e => e.Status = EventStatus.Ended.ToString());
+            _context.UpdateRange(endedEvents);*/
+                return _context.SaveChanges() > 0;
+        }
         public bool UpdateEventStatusToOnGoing()
         {
-            var ongoingEvents = _context.Events.Where(e => e.StartDate <= DateTime.Now).ToList();
+            var ongoingEvents = _context.Events.Where(e => e.StartDate <= DateTime.Now &&
+            e.Status!.Equals(EventStatus.NotYet.ToString())).ToList();
             ongoingEvents.ForEach(e => e.Status = EventStatus.OnGoing.ToString());
                 _context.UpdateRange(ongoingEvents);
-               return _context.SaveChanges() > 0;
+            return _context.SaveChanges() > 0;
         }
 
         public bool UpdateEventStatusToEnded()
         {
-            var endedEvent = _context.Events.Where(e => e.EndDate <= DateTime.Now).ToList();
-            endedEvent.ForEach(e => e.Status = EventStatus.Ended.ToString());
-            _context.UpdateRange(endedEvent);
-                return _context.SaveChanges() > 0;
+            var endedEvents = _context.Events.Where(e => e.EndDate <= DateTime.Now &&
+            e.Status!.Equals(EventStatus.OnGoing.ToString())).ToList();
+            endedEvents.ForEach(e => e.Status = EventStatus.Ended.ToString());
+            _context.UpdateRange(endedEvents);
+            return _context.SaveChanges() > 0;
         }
         public async Task<bool> DeleteEvent(Guid eventId)
         {
@@ -249,6 +299,73 @@ namespace Event_Management.Infrastructure.Repository.SQL
             }
 
             return result;
+        }
+        public List<EventCreatorLeaderBoardDto> GetTop10CreatorsByEventCount()
+        {
+            List<EventCreatorLeaderBoardDto> userInfos = new List<EventCreatorLeaderBoardDto>(); 
+            var result = _context.Events
+                .AsEnumerable()
+                .GroupBy(e => e.CreatedBy!)
+                .OrderByDescending(g => g.Count())
+                .Take(10)
+                .ToDictionary(g => _context.Users.Find(g.Key)!.UserId.ToString(), g => g.Count());
+            foreach (var item in result)
+            {
+                var temp = _context.Users.Find(Guid.Parse(item.Key!));
+                var userInfo = new EventCreatorLeaderBoardDto();
+                userInfo.totalevent = item.Value;
+                userInfo.FullName = temp.FullName;
+                userInfo.Avatar = temp.Avatar;
+                userInfo.userId = temp.UserId;
+                userInfos.Add(userInfo);
+            }
+            return userInfos;
+        }
+        public List<EventLocationLeaderBoardDto> GetTop10LocationByEventCount()
+        {
+            List<EventLocationLeaderBoardDto> result = new List<EventLocationLeaderBoardDto>();
+            var temp = _context.Events
+                .AsEnumerable()
+                .GroupBy(e => e.Location!)
+                .OrderByDescending(g => g.Count())
+                .Take(10)
+                .ToDictionary(g => g.Key, g => g.Count());
+            foreach (var item in temp)
+            {
+                EventLocationLeaderBoardDto locationInfo = new EventLocationLeaderBoardDto();
+                var eventTemp = _context.Events.FirstOrDefault(e => e.Location.Equals(item.Key));
+                locationInfo.totalevent = item.Value;
+                locationInfo.Location = item.Key;
+                locationInfo.LocationId = eventTemp.LocationId;
+                locationInfo.LocationUrl = eventTemp.LocationUrl;
+                locationInfo.LocationCoord = eventTemp.LocationCoord;
+                locationInfo.LocationAddress = eventTemp.LocationAddress;
+                result.Add(locationInfo);
+            }
+            return result!;
+        }
+        public List<EventCreatorLeaderBoardDto> GetTop20SpeakerEventCount()
+        {
+            List<EventCreatorLeaderBoardDto> userInfos = new List<EventCreatorLeaderBoardDto>();
+            var result = _context.Participants
+                .AsEnumerable()
+                .Where(p => p.RoleEventId == 1)
+                .GroupBy(p => p.UserId)
+                .OrderByDescending(g => g.Count())
+                .Take(20)
+                .ToDictionary(g => _context.Users.Find(g.Key)!.UserId.ToString(), g => g.Count());
+            foreach (var item in result)
+            {
+                var temp = _context.Users.Find(Guid.Parse(item.Key!));
+                var userInfo = new EventCreatorLeaderBoardDto();
+                userInfo.totalevent = item.Value;
+                userInfo.FullName = temp.FullName;
+                userInfo.Avatar = temp.Avatar;
+                userInfo.userId = temp.UserId;
+                userInfos.Add(userInfo);
+            }
+            return userInfos;
+                
         }
     }
 }

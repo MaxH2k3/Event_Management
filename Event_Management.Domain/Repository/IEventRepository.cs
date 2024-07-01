@@ -2,6 +2,7 @@ using Event_Management.Domain.Repository.Common;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Entity;
 using Event_Management.Domain.Enum;
+using Event_Management.Application.Dto.EventDTO.ResponseDTO;
 
 namespace Event_Management.Domain.Repository
 {
@@ -18,15 +19,21 @@ namespace Event_Management.Domain.Repository
 
         //Create Event
         public Task<Event> CreateEvent(Event eventCreate);
-
+        //User past and incoming events
+        public Task<List<Event>> UserPastEvents(Guid userId);
+        public Task<List<Event>> UserIncomingEvents(Guid userId);
 
         //AUTO update status for event
         //Update status: On going
+        public bool UpdateEventStatusToOnGoing(Guid eventId);
         public bool UpdateEventStatusToOnGoing();
         //Update status: Ended
+        public bool UpdateEventStatusToEnded(Guid eventId);
         public bool UpdateEventStatusToEnded();
 
-
         public Task<bool> DeleteEvent(Guid eventId);
+        public List<EventCreatorLeaderBoardDto> GetTop10CreatorsByEventCount();
+        public List<EventLocationLeaderBoardDto> GetTop10LocationByEventCount();
+        public List<EventCreatorLeaderBoardDto> GetTop20SpeakerEventCount();
     }
 }

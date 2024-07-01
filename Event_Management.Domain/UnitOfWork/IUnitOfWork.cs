@@ -11,12 +11,12 @@ namespace Event_Management.Domain.UnitOfWork
         ILogoRepository LogoRepository { get; }
         IParticipantRepository ParticipantRepository { get; }
         IPaymentMethodRepository PaymentMethodRepository { get; }
-        IPaymentRepository PaymentRepository { get; }
+        
         ISponsorEventRepository SponsorEventRepository { get; }
-        IPermissionRepository PolicyRepository { get; }
+       
         IRoleEventRepository RoleEventRepository { get; }
         IRoleRepository RoleRepository { get; }
-        ISponsorMethodRepository SponsorMethodRepository { get; }
+       
         ITagRepository TagRepository { get; }
         IPaymentTransactionRepository PaymentTransactionRepository { get; }
         IUserRepository UserRepository { get; }

@@ -2,6 +2,7 @@
 using Event_Management.Application.Dto.EventDTO.RequestDTO;
 using Event_Management.Application.Message;
 using Event_Management.Application.Service;
+using Event_Management.Application.Service.FileService;
 using Event_Management.Domain.Helper;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Models.System;
@@ -9,32 +10,31 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
-using Event_Management.Application.Dto.EventDTO.RequestDTO;
-using Microsoft.AspNetCore.Authorization;
-using Event_Management.Domain.Helper;
 
 namespace Event_Management.API.Controllers
 {
     [Route("api/v1/events")]
     [ApiController]
-    public class EventController : Controller
+    public class EventController : ControllerBase
     {
         private readonly IEventService _eventService;
-        public EventController(IEventService eventService)
+        private readonly IImageService _fileService;
+        public EventController(IEventService eventService, IImageService fileService)
         {
             _eventService = eventService;
-		}
+            _fileService = fileService;
+        }
 
-        
-        [HttpGet("GetAll")]
+
+        [HttpGet("")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetAllEvents([FromQuery] EventFilterObject filterObject, 
-                                                      [FromQuery, Range(1, int.MaxValue)] int pageNo = 1, 
+        public async Task<IActionResult> GetAllEvents([FromQuery] EventFilterObject filterObject,
+                                                      [FromQuery, Range(1, int.MaxValue)] int pageNo = 1,
                                                       [FromQuery, Range(1, int.MaxValue)] int elementEachPage = 10)
         {
             var response = await _eventService.GetAllEvents(filterObject, pageNo, elementEachPage);
-            if(response.TotalItems > 0)
+            if (response.TotalItems > 0)
             {
 
                 Response.Headers.Add("X-Total-Element", response.TotalItems.ToString());
@@ -54,16 +54,17 @@ namespace Event_Management.API.Controllers
             });
         }
 
-        //[Authorize(Roles = "Organizer")]
-        [HttpGet("UserParticipated")]
+        [Authorize]
+        [HttpGet("user-participated")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetUserParticipatedEvents([FromQuery] EventFilterObject filter, [FromQuery, Required] string userId, 
-                                                                   [FromQuery, Range(1, int.MaxValue)] int pageNo = 1, 
+        public async Task<IActionResult> GetUserParticipatedEvents([FromQuery] EventFilterObject filter,
+                                                                   [FromQuery, Range(1, int.MaxValue)] int pageNo = 1,
                                                                    [FromQuery, Range(1, int.MaxValue)] int elementEachPage = 10)
         {
+            string userId = User.GetUserIdFromToken();
             var response = await _eventService.GetUserParticipatedEvents(filter, userId, pageNo, elementEachPage);
-            if(response.TotalItems > 0)
+            if (response.TotalItems > 0)
             {
 
                 Response.Headers.Add("X-Total-Element", response.TotalItems.ToString());
@@ -82,8 +83,22 @@ namespace Event_Management.API.Controllers
                 Message = MessageCommon.NotFound,
             });
         }
-
-        //[Authorize]
+        [Authorize]
+        [HttpGet("user-past-and-incoming")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetUserPastAndIncomingEvent()
+        {
+            Guid userId = Guid.Parse(User.GetUserIdFromToken());
+            var response = await _eventService.GetUserPastAndFutureEvents(userId);
+            return Ok(new APIResponse
+            {
+                StatusResponse = HttpStatusCode.OK,
+                Message = MessageCommon.Complete,
+                Data = response
+            });
+        }
+        [Authorize]
         [HttpPost("")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -91,16 +106,16 @@ namespace Event_Management.API.Controllers
         public async Task<IActionResult> AddEvent(EventRequestDto eventDto)
         {
             APIResponse response = new APIResponse();
-            
-                string userId = User.GetUserIdFromToken();
-                var result = await _eventService.AddEvent(eventDto, userId);
-                if(result != null)
-                {
-                    response.StatusResponse = HttpStatusCode.OK;
-                    response.Data = result;
-                    response.Message = MessageCommon.Complete;
-                    return Ok(response);
-                }            
+
+            string userId = User.GetUserIdFromToken();
+            var result = await _eventService.AddEvent(eventDto, userId);
+            if (result != null)
+            {
+                response.StatusResponse = HttpStatusCode.OK;
+                response.Data = result;
+                response.Message = MessageCommon.Complete;
+                return Ok(response);
+            }
             return BadRequest(new APIResponse
             {
                 StatusResponse = HttpStatusCode.BadRequest,
@@ -132,6 +147,7 @@ namespace Event_Management.API.Controllers
             return response;
         }
 
+        [Authorize]
         [HttpDelete("")]
         public async Task<APIResponse> DeleteEvent(Guid packageId)
         {
@@ -154,8 +170,8 @@ namespace Event_Management.API.Controllers
         [HttpPost("file-upload")]
         public async Task<IActionResult> UploadEventImage([FromBody] FileUploadDto dto)
         {
-            var result = await _eventService.UploadImage(dto);
-            if(result != null)
+            var result = await _fileService.UploadImage2(dto);
+            if (result != null)
             {
                 return Ok(new APIResponse
                 {
@@ -171,10 +187,10 @@ namespace Event_Management.API.Controllers
             });
 
         }
-        [HttpGet("get-file")]
+        [HttpGet("/image")]
         public async Task<IActionResult> GetBlobUri([FromQuery] string blobName)
         {
-            var result = await _eventService.GetBlobUri(blobName);
+            var result = await _fileService.GetBlobUri(blobName);
             return Ok(new APIResponse
             {
                 StatusResponse = HttpStatusCode.OK,
@@ -183,10 +199,10 @@ namespace Event_Management.API.Controllers
             });
 
         }
-        [HttpGet("get-all-file")]
+        [HttpGet("/image/all")]
         public async Task<IActionResult> GetAllBlobUri()
         {
-            var result = await _eventService.GetAllBlobUris();
+            var result = await _fileService.GetAllBlobUris();
             return Ok(new APIResponse
             {
                 StatusResponse = HttpStatusCode.OK,
@@ -195,16 +211,55 @@ namespace Event_Management.API.Controllers
             });
 
         }
+        [HttpGet("/image/event-image")]
+        public async Task<IActionResult> GetAllEventBlobUri([FromQuery] Guid eventId)
+        {
+            var result = await _fileService.GetAllEventBlobUris(eventId);
+            return Ok(new APIResponse
+            {
+                StatusResponse = HttpStatusCode.OK,
+                Message = MessageCommon.Complete,
+                Data = result
+            });
+
+        }
+        [HttpGet("popular/organizers")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> PopularOrganizers()
+        {
+            var result = _eventService.GetEventLeaderBoards();
+            return Ok(new APIResponse
+            {
+                StatusResponse = HttpStatusCode.OK,
+                Message = MessageEvent.PopularOrganizers,
+                Data = result
+            });
+        }
+        [HttpGet("popular/locations")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Locations()
+        {
+            var result = _eventService.GetTop10LocationByEventCount();
+            return Ok(new APIResponse
+            {
+                StatusResponse = HttpStatusCode.OK,
+                Message = MessageEvent.PopularLocation,
+                Data = result
+            });
+        }
+
     }
 }
-    
-  //      [HttpGet("GetTest")]
-		//public async Task<IActionResult> GetTest()
-  //      {
-  //          var response = await _eventService.GetAllEventTest();
 
-  //          return Ok(response);
-		//}
+//      [HttpGet("GetTest")]
+//public async Task<IActionResult> GetTest()
+//      {
+//          var response = await _eventService.GetAllEventTest();
+
+//          return Ok(response);
+//}
 
 
 

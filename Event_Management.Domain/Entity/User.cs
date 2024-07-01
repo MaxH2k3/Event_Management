@@ -11,7 +11,7 @@ namespace Event_Management.Domain.Entity
             Feedbacks = new HashSet<Feedback>();
             Notifications = new HashSet<Notification>();
             Participants = new HashSet<Participant>();
-            Payments = new HashSet<Payment>();
+            PaymentTransactions = new HashSet<PaymentTransaction>();
             RefreshTokens = new HashSet<RefreshToken>();
         }
 
@@ -30,7 +30,7 @@ namespace Event_Management.Domain.Entity
         public virtual ICollection<Feedback> Feedbacks { get; set; }
         public virtual ICollection<Notification> Notifications { get; set; }
         public virtual ICollection<Participant> Participants { get; set; }
-        public virtual ICollection<Payment> Payments { get; set; }
+        public virtual ICollection<PaymentTransaction> PaymentTransactions { get; set; }
         public virtual ICollection<RefreshToken> RefreshTokens { get; set; }
     }
 }

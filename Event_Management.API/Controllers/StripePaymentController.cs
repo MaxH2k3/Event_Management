@@ -1,19 +1,20 @@
-﻿using Event_Management.Application;
-using Event_Management.Application.Message;
+﻿using Event_Management.Application.Message;
 using Event_Management.Application.Service;
 using Event_Management.Domain.Models.Payment.StripePayment;
 using Event_Management.Domain.Models.System;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.JSInterop;
+using Quartz;
 using Stripe.Checkout;
+using System;
 using System.Net;
 
 namespace Event_Management.API.Controllers
 {
 
-    [Route("api/stripepayment")]
+    [Route("api/v1/stripepayment")]
     [ApiController]
     public class StripePaymentController : ControllerBase
     {
@@ -32,7 +33,7 @@ namespace Event_Management.API.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-        public async Task<APIResponse> CheckoutOrder([FromBody] Guid eventId, [FromServices] IServiceProvider sp)
+        public async Task CheckoutOrder([FromBody] Guid eventId, [FromServices] IServiceProvider sp)
         {
             var response = new APIResponse();
             var referer = Request.Headers.Referer;
@@ -50,16 +51,17 @@ namespace Event_Management.API.Controllers
                 thisApiUrl = serverAddressesFeature.Addresses.FirstOrDefault();
             }
 
+            var checkoutOrderResponse = new CheckoutOrderResponse();
             if (thisApiUrl is not null)
             {
                 var sessionId = await CheckOut(eventId, thisApiUrl);
                 var pubKey = _configuration["Stripe:PubKey"];
 
-                var checkoutOrderResponse = new CheckoutOrderResponse()
-                {
-                    SessionId = sessionId,
-                    PubKey = pubKey
-                };
+
+
+                checkoutOrderResponse.SessionId = sessionId;
+                checkoutOrderResponse.PubKey = pubKey;
+              
 
                 response.StatusResponse = HttpStatusCode.OK;
                 response.Message = MessageCommon.Complete;
@@ -67,14 +69,27 @@ namespace Event_Management.API.Controllers
 
 
 
-                return response;
+                
             }
             else
             {
                 response.StatusResponse = HttpStatusCode.InternalServerError;
                 response.Message = MessageCommon.NotComplete;
-                return response;
+               
             }
+
+
+            //var responseStripe = JsonConvert.SerializeObject(checkoutOrderResponse);
+
+            //responseStripe.EnsureSuccessStatusCode();
+
+            //var responseBody = await responseStripe.Content.ReadAsStringAsync();
+
+            //var checkoutOrderResponse = JsonConvert.DeserializeObject<CheckoutOrderResponse>(responseBody);
+
+            // Opens up Stripe.
+            
+            //await JsRuntime.InvokeVoidAsync("checkout", checkoutOrderResponse.PubKey, checkoutOrderResponse.SessionId);
         }
 
         [NonAction]
@@ -98,7 +113,7 @@ namespace Event_Management.API.Controllers
                 {
                     PriceData = new SessionLineItemPriceDataOptions
                     {
-                        UnitAmount = (long)eventEntity.Ticket, // Price is in USD cents.
+                        UnitAmount = (long)eventEntity.Fare, // Price is in USD cents.
                         Currency = "VND",
                         ProductData = new SessionLineItemPriceDataProductDataOptions
                         {

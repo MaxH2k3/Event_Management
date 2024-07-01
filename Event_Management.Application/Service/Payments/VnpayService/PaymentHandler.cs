@@ -54,7 +54,7 @@ namespace Event_Management.Application.Service.Payments
                 var eventEntity = await _unitOfWork.EventRepository.GetById(request.EventId);
                 if (eventEntity != null)
                 {
-                    payment.RequiredAmount = (decimal) eventEntity.Ticket;
+                    payment.RequiredAmount = (decimal) eventEntity.Fare;
                 }
             } else if(payment.PaymentPurpose.Equals("Sponsor"))
             {

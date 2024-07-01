@@ -26,6 +26,8 @@ builder.Services.AddHttpContextAccessor();
 // Set up cors
 builder.Services.AddCors();
 
+//builder.Services.AddRazorPages();
+
 // Set up Azure storage
 
 //Set size limit for request
@@ -76,5 +78,6 @@ app.UseSession();
 app.ConfigureExceptionHandler();
 
 app.MapHub<CheckinHub>(DefaultSystem.CheckinHubConnection);
+//app.MapRazorPages();
 
 app.Run();

@@ -13,19 +13,19 @@ namespace Event_Management.Infrastructure.UnitOfWork
 
         private readonly ICacheRepository _cacheRepository;
 		private readonly IEventMailRepository _eventMailRepository = null!;
-        private readonly IEventPaymentRepository _eventPaymentRepository = null!;
+        
         private readonly IEventRepository _eventRepository = null!;
         private readonly IFeedbackRepository _feedbackRepository = null!;
         private readonly ILogoRepository _logoRepository = null!;
         private readonly IParticipantRepository _participantRepository = null!;
         private readonly IPaymentMethodRepository _paymentMethodRepository = null!;
-        private readonly IPaymentRepository _paymentReposiotry = null!;
+        
         private readonly IPaymentTransactionRepository _paymentTransactionRepository = null!;
         private readonly ISponsorEventRepository _sponsorEventRepository = null!;
-        private readonly IPermissionRepository _policyRepository = null!;
+        
         private readonly IRoleEventRepository _roleEventRepository = null!;
         private readonly IRoleRepository _roleRepository = null!;
-        private readonly ISponsorMethodRepository _sponsorMethodRepository = null!;
+        
         private readonly ITagRepository _tagRepository = null!;
         private readonly IPaymentTransactionRepository _transactionRepository = null!;
         private readonly IUserRepository _userRepository = null!;
@@ -61,18 +61,18 @@ namespace Event_Management.Infrastructure.UnitOfWork
 
         public IPaymentMethodRepository PaymentMethodRepository => _paymentMethodRepository ?? new PaymentMethodRepository(_context);
 
-        public IPaymentRepository PaymentRepository => _paymentReposiotry ?? new PaymentRepository(_context);
+       
         public IPaymentTransactionRepository PaymentTransactionRepository => _paymentTransactionRepository ?? new PaymentTransactionRepository(_context);
 
         public ISponsorEventRepository SponsorEventRepository => _sponsorEventRepository ?? new SponsorEventRepository(_context);
 
-        public IPermissionRepository PolicyRepository => _policyRepository ?? new PermissionRepository(_context);
+       
 
         public IRoleEventRepository RoleEventRepository => _roleEventRepository ?? new RoleEventRepository(_context);
 
         public IRoleRepository RoleRepository => _roleRepository ?? new RoleRepository(_context);
 
-        public ISponsorMethodRepository SponsorMethodRepository => _sponsorMethodRepository ?? new SponsorMethodRepository(_context);
+        
 
         public ITagRepository TagRepository => _tagRepository ?? new TagRepository(_context);
 

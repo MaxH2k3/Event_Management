@@ -13,5 +13,7 @@ namespace Event_Management.Application.Message
         public const string EventIdNotExist = "EventId not exist!";
         public const string GetAllEvent = "Get all events!";
         public const string UserParticipatedEvent = "User participated events!";
+        public const string PopularLocation = "Popular locations leaderboard";
+        public const string PopularOrganizers = "Popular organizers(event creators) and speakers leaderboard";
     }
 }

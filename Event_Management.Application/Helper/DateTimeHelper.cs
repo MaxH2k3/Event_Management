@@ -6,6 +6,10 @@ namespace Event_Management.Domain.Helper
     {
         public static DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         public static long epochTime = dateTime.Ticks;
+        public static long ToJsDateType(DateTime dateTime)
+        {
+            return (dateTime.Ticks - epochTime) / 10000;
+        }
         public static DateTime GetDateTimeNow()
         {
             // Lấy múi giờ hiện tại của server
@@ -33,12 +37,11 @@ namespace Event_Management.Domain.Helper
 
             return vietnamTime.ToString("dd/MM/yyyy");
         }
-        public static bool ValidateStartTimeAndEndTime(DateTime startTime, DateTime endTime)
+        public static bool ValidateStartTimeAndEndTime(long startTime, long endTime)
         {
-            long startTimeTick = startTime.AddMinutes(30).Ticks;
-            long endTimeTick = endTime.Ticks;
-            long now = DateTime.Now.Ticks;
-            return startTimeTick > now && endTimeTick > startTimeTick;
+            long startTimeTick = startTime + 60000 * 30;
+            long now = ToJsDateType(DateTime.Now);
+            return startTimeTick > now && endTime > startTimeTick;
         }
         public static DateTime ToDateTime(long tick)
         {

@@ -3,8 +3,10 @@ using Event_Management.Application.ExternalServices;
 using Event_Management.Application.Service;
 using Event_Management.Application.Service.Account;
 using Event_Management.Application.Service.Authentication;
+using Event_Management.Application.Service.FileService;
 using Event_Management.Application.Service.Job;
 using Event_Management.Application.Service.Payments;
+using Event_Management.Application.Service.Payments.PayPalService;
 using Event_Management.Application.Validators;
 using Event_Management.Domain.Repository.Common;
 using Event_Management.Domain.Service;
@@ -67,6 +69,9 @@ namespace Event_Management.Infastructure.Configuration
 			//Set up Stripe
 			builder.Services.AddStripe(builder.Configuration);
 
+            //Set up Paypal
+            builder.Services.AddPayPal(builder.Configuration);
+
             // Set up Swagger
             builder.Services.AddSwagger();
 
@@ -104,13 +109,14 @@ namespace Event_Management.Infastructure.Configuration
             //builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IJWTService, JWTService>();
             
-			builder.Services.AddScoped<IPaymentService, PaymentService>();
+			
+            builder.Services.AddScoped<IPayPalService, PayPalService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
 			
 			builder.Services.AddScoped<ICurrentUser, CurrentUserService>();
 			builder.Services.AddScoped<IEmailService, EmailService>();
 			builder.Services.AddScoped<ICacheRepository, CacheRepository>();
-			
+			builder.Services.AddScoped<IImageService, ImageService>();
 			//builder.Services.AddScoped<ISqlService, SqlService>();
 			//builder.Services.AddScoped<ICurrentUser, CurrentUserService>();
 			builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -133,18 +139,18 @@ namespace Event_Management.Infastructure.Configuration
             {
                 //q.UseMicrosoftDependencyInjectionJobFactory();
                 //name of your job that you created in the Jobs folder.
-                var jobKey = new JobKey("EventStatusToEndedJob");
-                var jobKey2 = new JobKey("EventStatusToOngoingJob");
-                q.AddJob<EventStatusToOngoingJob>(opts => opts.WithIdentity(jobKey2));
-                q.AddJob<EventStatusToEndedJob>(opts => opts.WithIdentity(jobKey));
+                var jobKey = new JobKey("AllEventStatusToEndedJob");
+                var jobKey2 = new JobKey("AllEventStatusToOngoingJob");
+                q.AddJob<AllEventStatusToOngoingJob>(opts => opts.WithIdentity(jobKey2));
+                q.AddJob<AllEventStatusToEndedJob>(opts => opts.WithIdentity(jobKey));
                 
                 q.AddTrigger(opts => opts.ForJob(jobKey2)
                     .WithSimpleSchedule(x => x.WithIntervalInSeconds(3600).WithRepeatCount(1).Build())
-                    .WithDescription("Auto update status for events")
+                    .WithDescription("Auto update status for all events")
                 );
                 q.AddTrigger(opts => opts.ForJob(jobKey)
                     .WithSimpleSchedule(x => x.WithIntervalInSeconds(3600).WithRepeatCount(1).Build())
-                    .WithDescription("Auto update status for events")
+                    .WithDescription("Auto update status for all events")
                 );
                 
             });
@@ -154,6 +160,13 @@ namespace Event_Management.Infastructure.Configuration
                 q.AwaitApplicationStarted = true;
             });
             //builder.Services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
+
+            builder.Services.AddHttpClient(); // Add this line to register the IHttpClientFactory service
+
+            builder.Services.AddHttpClient("PayPal", c =>
+            {
+                c.BaseAddress = new Uri("https://api.sandbox.paypal.com"); // Use "https://api.paypal.com" for live environment
+            });
         }
 	}
 }

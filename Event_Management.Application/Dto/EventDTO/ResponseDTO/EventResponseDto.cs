@@ -19,6 +19,7 @@ namespace Event_Management.Application.Dto.EventDTO.ResponseDTO
         public long EndDate { get; set; }
         public Guid? CreatedBy { get; set; }
         public string? Image { get; set; }
+        public string? Theme { get; set; }
         public string? Location { get; set; }
         public string? LocationId { get; set; }
         public string? LocationAddress { get; set; }
@@ -28,6 +29,6 @@ namespace Event_Management.Application.Dto.EventDTO.ResponseDTO
         public long? UpdatedAt { get; set; }
         public int? Capacity { get; set; }
         public bool? Approval { get; set; }
-        public double? Ticket { get; set; }
+        public decimal? Fare { get; set; }
     }
 }

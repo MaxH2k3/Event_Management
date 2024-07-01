@@ -12,7 +12,7 @@ using System.Net;
 
 namespace Event_Management.API.Controllers
 {
-    [Route("api/feedback")]
+    [Route("api/v1/feedback")]
     [ApiController]
     public class FeedbackController : ControllerBase
     {

@@ -28,8 +28,26 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Include="wwwroot\css\bootstrap\bootstrap.min.css.map" />
+	  <None Include="wwwroot\css\open-iconic\FONT-LICENSE" />
+	  <None Include="wwwroot\css\open-iconic\font\fonts\open-iconic.svg" />
+	  <None Include="wwwroot\css\open-iconic\ICON-LICENSE" />
+	  <None Include="wwwroot\css\open-iconic\README.md" />
+	  <None Include="wwwroot\js\checkout.js" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\Event_Management.Application\Event_Management.Application.csproj" />
 		<ProjectReference Include="..\Event_Management.Domain\Event_Management.Domain.csproj" />
 		<ProjectReference Include="..\Event_Management.Infrastructure\Event_Management.Infrastructure.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Views\Main\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="Microsoft.JSInterop" Version="6.0.28" />
+	  <PackageReference Include="Stripe.net" Version="45.0.0" />
 	</ItemGroup>
 </Project>

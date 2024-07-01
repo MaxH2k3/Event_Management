@@ -30,7 +30,7 @@ namespace Event_Management.Application
         public long StartDate { get; set; } = DateTime.Now.AddDays(1).Ticks;
         [Required(ErrorMessage = "EndDate is required")]
         public long EndDate { get; set; } = DateTime.Now.AddDays(2).Ticks;
-
+        public string? Theme { get; set; }
         public string? Image { get; set; }
 
         [Required(ErrorMessage = "Location is required!")]

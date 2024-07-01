@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Event_Management.Domain.Entity
+namespace Event_Management.Application.Dto.PaymentDTO
 {
-    public partial class Payment
+    public class Payment
     {
-        public Payment()
-        {
-          
-            PaymentTransactions = new HashSet<PaymentTransaction>();
-        }
-
         public Guid PaymentId { get; set; }
         public string? PaymentContent { get; set; }
         public string? PaymentCurrency { get; set; }
@@ -24,11 +21,7 @@ namespace Event_Management.Domain.Entity
         public decimal? PaidAmount { get; set; }
         public string? PaymentLastMessage { get; set; }
         public Guid? CreatedBy { get; set; }
-        //public DateTime? CreatedAt { get; set; }
-        public string? PaymentPurpose {  get; set; }
-
-        public virtual User? CreatedByNavigation { get; set; }
        
-        public virtual ICollection<PaymentTransaction> PaymentTransactions { get; set; }
+        public string? PaymentPurpose { get; set; }
     }
 }

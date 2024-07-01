@@ -15,10 +15,6 @@ namespace Event_Management.Application.Service
 
         public async Task Execute(IJobExecutionContext context)
         {
-            _eventService.UpdateEventStatusOngoing();
-            _eventService.UpdateEventStatusEnded();
-            Console.WriteLine("Task run: Event status changed to Ongoing!");
-
             // get scheduler
             IScheduler scheduler = await _schedulerFactory.GetScheduler();
 
@@ -26,11 +22,15 @@ namespace Event_Management.Application.Service
             IJobDetail currentJob = context.JobDetail;
             ITrigger currentTrigger = context.Trigger;
 
+            _eventService.UpdateEventStatusOngoing(Guid.Parse(currentJob.Key.ToString().Substring(14)));
+            //_eventService.UpdateEventStatusEnded(currentJob.Key.ToString());
+            Console.WriteLine("Task run: Event status changed to Ongoing!");
+
             // delete job and trigger
             await scheduler.DeleteJob(currentJob.Key);
             await scheduler.UnscheduleJob(currentTrigger.Key);
 
-            Console.WriteLine($"DeleteJob and UnscheduledJob: {currentJob.Key}");
+            Console.WriteLine($"DeleteJob Event status changed to Ongoing Job: {currentJob.Key}");
         }
     }
 }

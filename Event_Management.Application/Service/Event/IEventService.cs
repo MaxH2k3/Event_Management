@@ -13,18 +13,19 @@ namespace Event_Management.Application.Service
     {
         public Task<PagedList<EventResponseDto>> GetAllEvents(EventFilterObject filter, int pageNo, int elementEachPage);
         public Task<PagedList<EventResponseDto>> GetUserParticipatedEvents(EventFilterObject filter, string userId, int pageNo, int elementEachPage);
-        public Task<string?> UploadImage(FileUploadDto dto);
-        public Task<List<string>> GetAllBlobUris();
-        public Task<string?> GetBlobUri(string blobName);
+        public Task<Dictionary<string, List<EventResponseDto>>> GetUserPastAndFutureEvents(Guid userId);
         public Task<EventResponseDto> AddEvent(EventRequestDto eventDto, string userId);// HttpContext http);
         public Task<bool> UpdateEvent(EventRequestDto eventDto, string userId);
         public Task<bool> DeleteEvent(Guid eventId);
+        public void UpdateEventStatusEnded(Guid eventId);
+        public void UpdateEventStatusOngoing(Guid eventId);
         public void UpdateEventStatusEnded();
         public void UpdateEventStatusOngoing();
-
         public Task<Event?> GetEventById(Guid eventId);
-
-        
+        public List<EventCreatorLeaderBoardDto> GetTop10CreatorsByEventCount();
+        public List<EventLocationLeaderBoardDto> GetTop10LocationByEventCount();
+        public List<EventCreatorLeaderBoardDto> GetTop20SpeakerEventCount();
+        public Dictionary<string, List<EventCreatorLeaderBoardDto>> GetEventLeaderBoards();
     }
         
         
