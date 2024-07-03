@@ -10,7 +10,7 @@ namespace Event_Management.Domain.UnitOfWork
         IFeedbackRepository FeedbackRepository { get; }
         ILogoRepository LogoRepository { get; }
         IParticipantRepository ParticipantRepository { get; }
-        IPaymentMethodRepository PaymentMethodRepository { get; }
+       
         
         ISponsorEventRepository SponsorEventRepository { get; }
        

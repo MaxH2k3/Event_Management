@@ -72,27 +72,27 @@ namespace Event_Management.API.Controllers
            
         }
 
-        [HttpPut("")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<APIResponse> UpdateTag([FromBody] TagDto tagDTO)
-        {
-            APIResponse response = new APIResponse();
-            var result = await _tagService.UpdateTag(tagDTO);
-            if (result)
-            {
-                response.StatusResponse = HttpStatusCode.OK;
-                response.Message = MessageCommon.UpdateSuccesfully;
-                response.Data = result;
+        //[HttpPut("")]
+        //[ProducesResponseType(StatusCodes.Status204NoContent)]
+        //[ProducesResponseType(StatusCodes.Status404NotFound)]
+        //public async Task<APIResponse> UpdateTag([FromBody] TagDto tagDTO)
+        //{
+        //    APIResponse response = new APIResponse();
+        //    var result = await _tagService.UpdateTag(tagDTO);
+        //    if (result)
+        //    {
+        //        response.StatusResponse = HttpStatusCode.OK;
+        //        response.Message = MessageCommon.UpdateSuccesfully;
+        //        response.Data = result;
 
-            }
-            else
-            {
-                response.StatusResponse = HttpStatusCode.BadRequest;
-                response.Message = MessageCommon.UpdateFailed;
-            }
-            return response;
-        }
+        //    }
+        //    else
+        //    {
+        //        response.StatusResponse = HttpStatusCode.BadRequest;
+        //        response.Message = MessageCommon.UpdateFailed;
+        //    }
+        //    return response;
+        //}
 
         [HttpDelete("")]
         public async Task<APIResponse> DeleteTag(int TagId)
@@ -114,6 +114,26 @@ namespace Event_Management.API.Controllers
             return response;
         }
 
+
+        [HttpGet("keyword")]
+        public async Task<APIResponse> SearchByKeyWord(string searchTerm)
+        {
+            APIResponse response = new APIResponse();
+            var result = await _tagService.SearchTag(searchTerm);
+            if (result.Count() > 0)
+            {
+                response.StatusResponse = HttpStatusCode.OK;
+                response.Message = MessageCommon.ReturnListHasValue;
+                response.Data = result;
+
+            }
+            else
+            {
+                response.StatusResponse = HttpStatusCode.BadRequest;
+                response.Message = MessageCommon.ReturnNullList;
+            }
+            return response;
+        }
 
 
     }

@@ -1,15 +1,10 @@
-﻿using Event_Management.Application.Dto.PaymentDTO;
-using Event_Management.Application.Helper;
-using Event_Management.Application.Message;
+﻿using Event_Management.Application.Message;
 using Event_Management.Application.Service;
-using Event_Management.Application.Service.Payments;
+using Event_Management.Application.Service.Payments.PayPalService;
 using Event_Management.Domain.Helper;
-using Event_Management.Domain.Models.Payment.VnpayPayment;
 using Event_Management.Domain.Models.System;
-using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using System.Net;
 
 namespace Event_Management.API.Controllers
@@ -19,21 +14,64 @@ namespace Event_Management.API.Controllers
     public class PaymentController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly VnpaySetting _vnpaySetting;
+        //private readonly VnpaySetting _vnpaySetting;
         private readonly IEventService _eventService;
-     
+        private readonly IPayPalService _payPalService;
+
+
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="mediator"></param>
         /// <param name="vnpayConfigOptions"></param>
-        public PaymentController(IMediator mediator, IEventService eventService,
-            IOptions<VnpaySetting> vnpayConfigOptions)
+        public PaymentController(IMediator mediator, IEventService eventService, IPayPalService payPalService)
+        //IOptions<VnpaySetting> vnpayConfigOptions
         {
            _mediator = mediator;
            _eventService = eventService;
-           _vnpaySetting = vnpayConfigOptions.Value;
+            //_vnpaySetting = vnpayConfigOptions.Value;
+            _payPalService = payPalService;
+        }
+
+
+        [HttpPost("paypal")]
+        public async Task<APIResponse> CreatePayment(Guid eventId, Guid userId, string description)
+        {
+            APIResponse response = new APIResponse();
+			//Guid userId = Guid.Parse(User.GetUserIdFromToken());
+			var result = await _payPalService.CreatePayment(eventId, userId, description);
+
+            if (result != null)
+            {
+                response.StatusResponse = HttpStatusCode.Created;
+                response.Message = MessageCommon.CreateSuccesfully;
+                response.Data = result;
+            } else
+            {
+				response.StatusResponse = HttpStatusCode.BadRequest;
+				response.Message = MessageCommon.CreateFailed;
+			}
+            return response;
+
+
+
+        }
+
+        [HttpPost("payout")]
+        public async Task<APIResponse> CreatePayout(Guid eventId, string emailReceiver)
+        {
+            APIResponse response = new APIResponse();
+
+            var result = await _payPalService.CreatePayout(eventId, emailReceiver);
+
+            if (result != null)
+            {
+                response.StatusResponse = HttpStatusCode.Created;
+                response.Message = MessageCommon.CreateSuccesfully;
+                response.Data = result;
+            }
+            return response;
         }
 
         /// <summary>
@@ -41,66 +79,66 @@ namespace Event_Management.API.Controllers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        [HttpPost("")]
-        [ProducesResponseType(typeof(PaymentLinkDto), 200)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> Create([FromBody] PaymentDto request)
-        {
+        //[HttpPost("")]
+        //[ProducesResponseType(typeof(PaymentLinkDto), 200)]
+        //[ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        //public async Task<IActionResult> Create([FromBody] PaymentDto request)
+        //{
 
-            string userId = User.GetUserIdFromToken();
-            request.CreatedBy = Guid.Parse(userId)
-                ;
-            var response = new PaymentLinkDto();
-            response = await _mediator.Send(request);
-            return Ok(response);
-        }
+        //    string userId = User.GetUserIdFromToken();
+        //    request.CreatedBy = Guid.Parse(userId)
+        //        ;
+        //    var response = new PaymentLinkDto();
+        //    response = await _mediator.Send(request);
+        //    return Ok(response);
+        //}
 
-        [HttpGet]
-        [Route("vnpay-return")]
-        public async Task<APIResponse> VnpayReturn([FromQuery] VnpayPayResponse vnpayresponse)
-        {
-            var response = new APIResponse();
-            //string returnUrl = string.Empty;
-            //var returnModel = new PaymentReturnDto();
-            var vnpaySetting = new VnpaySetting();
-            var processResult = await _mediator.Send(vnpayresponse.Adapt<ProcessVnpayPaymentReturn>());
+        //[HttpGet]
+        //[Route("vnpay-return")]
+        //public async Task<APIResponse> VnpayReturn([FromQuery] VnpayPayResponse vnpayresponse)
+        //{
+        //    var response = new APIResponse();
+        //    //string returnUrl = string.Empty;
+        //    //var returnModel = new PaymentReturnDto();
+        //    var vnpaySetting = new VnpaySetting();
+        //    var processResult = await _mediator.Send(vnpayresponse.Adapt<ProcessVnpayPaymentReturn>());
 
-            //if(processResult != null)
-            //{
-            //    response.StatusResponse = HttpStatusCode.OK;
-            //    response.Message = MessageCommon.Complete;
-            //    response.Data = processResult.PaymentStatus;
-            //} else
-            //{
-            //    response.StatusResponse = HttpStatusCode.BadRequest;
-            //    response.Message = MessageCommon.NotComplete;
-            //}
+        //    //if(processResult != null)
+        //    //{
+        //    //    response.StatusResponse = HttpStatusCode.OK;
+        //    //    response.Message = MessageCommon.Complete;
+        //    //    response.Data = processResult.PaymentStatus;
+        //    //} else
+        //    //{
+        //    //    response.StatusResponse = HttpStatusCode.BadRequest;
+        //    //    response.Message = MessageCommon.NotComplete;
+        //    //}
 
-            //return response;
+        //    //return response;
 
-            if(processResult != null)
-            {
-                
-                //returnUrl = vnpaySetting.ReturnUrl as string;
-                response.StatusResponse = HttpStatusCode.OK;
-                response.Message = MessageCommon.Complete;
-                response.Data = processResult as PaymentReturnDto;
-            }
-            else
-            {
-                response.StatusResponse = HttpStatusCode.BadRequest;
-                response.Message = MessageCommon.NotComplete;
-                response.Data = processResult as PaymentReturnDto;
-            }
+        //    if(processResult != null)
+        //    {
 
-            return response;
-            //if (!string.IsNullOrEmpty(returnUrl) && returnUrl.EndsWith("/"))
-            //    returnUrl = returnUrl.Remove(returnUrl.Length - 1, 1);
-            ////Console.WriteLine($"{returnUrl}?{returnModel.ToQueryString()}");
-            //return Redirect($"{returnUrl}?{returnModel.ToQueryString()}");
+        //        //returnUrl = vnpaySetting.ReturnUrl as string;
+        //        response.StatusResponse = HttpStatusCode.OK;
+        //        response.Message = MessageCommon.Complete;
+        //        response.Data = processResult as PaymentReturnDto;
+        //    }
+        //    else
+        //    {
+        //        response.StatusResponse = HttpStatusCode.BadRequest;
+        //        response.Message = MessageCommon.NotComplete;
+        //        response.Data = processResult as PaymentReturnDto;
+        //    }
+
+        //    return response;
+        //    //if (!string.IsNullOrEmpty(returnUrl) && returnUrl.EndsWith("/"))
+        //    //    returnUrl = returnUrl.Remove(returnUrl.Length - 1, 1);
+        //    ////Console.WriteLine($"{returnUrl}?{returnModel.ToQueryString()}");
+        //    //return Redirect($"{returnUrl}?{returnModel.ToQueryString()}");
 
 
-        }
+        //}
 
         //[HttpGet]
         //[Route("momo-return")]

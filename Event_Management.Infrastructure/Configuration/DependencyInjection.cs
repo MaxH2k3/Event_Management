@@ -112,7 +112,7 @@ namespace Event_Management.Infastructure.Configuration
 			
             builder.Services.AddScoped<IPayPalService, PayPalService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
-			
+			builder.Services.AddScoped<ISponsorEventService, SponsorEventService>();
 			builder.Services.AddScoped<ICurrentUser, CurrentUserService>();
 			builder.Services.AddScoped<IEmailService, EmailService>();
 			builder.Services.AddScoped<ICacheRepository, CacheRepository>();

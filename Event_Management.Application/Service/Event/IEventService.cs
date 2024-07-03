@@ -14,7 +14,7 @@ namespace Event_Management.Application.Service
         public Task<PagedList<EventResponseDto>> GetAllEvents(EventFilterObject filter, int pageNo, int elementEachPage);
         public Task<PagedList<EventResponseDto>> GetUserParticipatedEvents(EventFilterObject filter, string userId, int pageNo, int elementEachPage);
         public Task<Dictionary<string, List<EventResponseDto>>> GetUserPastAndFutureEvents(Guid userId);
-        public Task<EventResponseDto> AddEvent(EventRequestDto eventDto, string userId);// HttpContext http);
+        public Task<APIResponse> AddEvent(EventRequestDto eventDto, string userId);// HttpContext http);
         public Task<bool> UpdateEvent(EventRequestDto eventDto, string userId);
         public Task<bool> DeleteEvent(Guid eventId);
         public void UpdateEventStatusEnded(Guid eventId);
@@ -26,6 +26,7 @@ namespace Event_Management.Application.Service
         public List<EventLocationLeaderBoardDto> GetTop10LocationByEventCount();
         public List<EventCreatorLeaderBoardDto> GetTop20SpeakerEventCount();
         public Dictionary<string, List<EventCreatorLeaderBoardDto>> GetEventLeaderBoards();
+        Task<bool> IsOwner(Guid eventId, Guid userId);
     }
         
         

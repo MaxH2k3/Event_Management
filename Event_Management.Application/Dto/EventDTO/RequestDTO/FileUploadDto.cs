@@ -8,7 +8,8 @@ namespace Event_Management.Application.Dto.EventDTO.RequestDTO
 {
     public class FileUploadDto
     {
-        public string formFile { get; set; }
+        public string base64 { get; set; } = string.Empty;
         public Guid eventId { get; set; }
+        public string sponsorName { get; set; } = string.Empty;
     }
 }

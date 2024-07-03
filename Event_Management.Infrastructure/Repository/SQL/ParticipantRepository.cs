@@ -35,12 +35,7 @@ namespace Event_Management.Infrastructure.Repository.SQL
 
 		public async Task<PagedList<Participant>> FilterDataParticipant(FilterParticipant filter)
 		{
-			var query = _context.Participants.AsNoTracking().AsQueryable();
-
-			if (filter.EventId.HasValue)
-			{
-				query = query.Where(p => p.EventId.Equals(filter.EventId));
-			}
+			var query = _context.Participants.Where(p => p.EventId.Equals(filter.EventId)).AsNoTracking().AsQueryable();
 
 			if (filter.RoleEventId.HasValue)
 			{

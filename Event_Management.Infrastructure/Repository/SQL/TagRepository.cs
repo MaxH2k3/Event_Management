@@ -23,6 +23,10 @@ namespace Event_Management.Infrastructure.Repository.SQL
             _context = context;
         }
 
-       
-    }
+		public async Task<bool> GetTagByName(string name)
+		{
+			var tag = await _context.Tags.FirstOrDefaultAsync(t => t.TagName.Equals(name));
+			return tag != null;
+		}
+	}
 }

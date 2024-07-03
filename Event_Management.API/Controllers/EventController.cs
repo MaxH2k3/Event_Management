@@ -105,22 +105,13 @@ namespace Event_Management.API.Controllers
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> AddEvent(EventRequestDto eventDto)
         {
-            APIResponse response = new APIResponse();
-
             string userId = User.GetUserIdFromToken();
             var result = await _eventService.AddEvent(eventDto, userId);
-            if (result != null)
+            if (result.StatusResponse == HttpStatusCode.OK)
             {
-                response.StatusResponse = HttpStatusCode.OK;
-                response.Data = result;
-                response.Message = MessageCommon.Complete;
-                return Ok(response);
+                return Ok(result);
             }
-            return BadRequest(new APIResponse
-            {
-                StatusResponse = HttpStatusCode.BadRequest,
-                Message = MessageCommon.CreateFailed
-            });
+            return BadRequest(result);
         }
 
         [Authorize]
@@ -167,10 +158,11 @@ namespace Event_Management.API.Controllers
             }
             return response;
         }
-        [HttpPost("file-upload")]
-        public async Task<IActionResult> UploadEventImage([FromBody] FileUploadDto dto)
+
+        [HttpPost("logo-upload")]
+        public async Task<IActionResult> UploadEventLogoImage([FromBody] FileUploadDto dto)
         {
-            var result = await _fileService.UploadImage2(dto);
+            var result = await _fileService.UploadEventSponsorLogo(dto.base64, dto.eventId, dto.sponsorName);
             if (result != null)
             {
                 return Ok(new APIResponse
@@ -183,14 +175,14 @@ namespace Event_Management.API.Controllers
             return BadRequest(new APIResponse
             {
                 StatusResponse = HttpStatusCode.BadRequest,
-                Message = "Error while create Event Image!"
+                Message = "Logo already exist!"
             });
 
         }
-        [HttpGet("/image")]
-        public async Task<IActionResult> GetBlobUri([FromQuery] string blobName)
+        [HttpGet("/logo")]
+        public async Task<IActionResult> GetBlobUri([FromQuery] string brandName)
         {
-            var result = await _fileService.GetBlobUri(blobName);
+            var result = await _fileService.GetBlobUri(brandName);
             return Ok(new APIResponse
             {
                 StatusResponse = HttpStatusCode.OK,
@@ -199,8 +191,8 @@ namespace Event_Management.API.Controllers
             });
 
         }
-        [HttpGet("/image/all")]
-        public async Task<IActionResult> GetAllBlobUri()
+        [HttpGet("/logo/all")]
+        public async Task<IActionResult> GetAllLogos()
         {
             var result = await _fileService.GetAllBlobUris();
             return Ok(new APIResponse
@@ -211,7 +203,7 @@ namespace Event_Management.API.Controllers
             });
 
         }
-        [HttpGet("/image/event-image")]
+        [HttpGet("/logo/event-logo")]
         public async Task<IActionResult> GetAllEventBlobUri([FromQuery] Guid eventId)
         {
             var result = await _fileService.GetAllEventBlobUris(eventId);

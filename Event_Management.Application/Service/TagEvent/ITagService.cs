@@ -20,7 +20,9 @@ namespace Event_Management.Domain.Service.TagEvent
         
         Task<bool> AddTag(TagDto tagDTO);
         Task<bool> DeleteTag(int TagId);
-        Task<bool> UpdateTag(TagDto tagDTO);
+        Task<Tag> GetById(int TagId);
+        //Task<bool> UpdateTag(TagDto tagDTO);
+        Task<List<TagDto>> SearchTag(string searchTerm);
 
     }
 }

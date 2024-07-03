@@ -28,6 +28,9 @@ namespace Event_Management.Application.Message
         public const string ServerError = "Somethings have wrong!";
         public const string SessionTimeout = "Session Timeout!";
 
+        public const string ReturnListHasValue = "List has value";
+        public const string ReturnNullList = "List is null";
+
         
         
     }

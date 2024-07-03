@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Azure;
 using Event_Management.Application.Dto.EventDTO.ResponseDTO;
 using Event_Management.Application.Message;
 using Event_Management.Application.Service.FileService;
@@ -7,8 +8,11 @@ using Event_Management.Domain.Entity;
 using Event_Management.Domain.Enum;
 using Event_Management.Domain.Helper;
 using Event_Management.Domain.Models.Common;
+using Event_Management.Domain.Models.System;
+using Event_Management.Domain.Service.TagEvent;
 using Event_Management.Domain.UnitOfWork;
 using Microsoft.Extensions.Configuration;
+using System.Net;
 
 
 namespace Event_Management.Application.Service
@@ -17,27 +21,36 @@ namespace Event_Management.Application.Service
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly IConfiguration _config;
         private readonly IQuartzService _quartzService;
         private readonly IImageService _fileService;
+        private readonly ITagService _tagService;
+        private readonly IUserService _userService;
 
-        public EventService(IUnitOfWork unitOfWork, IMapper mapper, 
-            IConfiguration configuration, IQuartzService quartzService, IImageService fileService)
+        public EventService(IUnitOfWork unitOfWork, IMapper mapper, ITagService tagService,
+            IQuartzService quartzService, IImageService fileService, IUserService userService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _config = configuration;
+            _tagService = tagService;
             _quartzService = quartzService;
             _fileService = fileService;
+            _userService = userService;
         }
-
-        public async Task<EventResponseDto> AddEvent(EventRequestDto eventDto, string userId)// HttpContext context)
+        public bool IsValidEmail(string email)
+        {
+            return email.EndsWith("@fpt.edu.vn") || email.EndsWith("@fe.edu.vn") ? true : false;
+        }
+        public async Task<APIResponse> AddEvent(EventRequestDto eventDto, string userId)// HttpContext context)
         {
             
             bool validate = DateTimeHelper.ValidateStartTimeAndEndTime(eventDto.StartDate, eventDto.EndDate);
             if (!validate)
             {
-                throw new InvalidOperationException(MessageEvent.StartEndTimeValidation);
+                return new APIResponse
+                {
+                    Message = MessageEvent.StartEndTimeValidation,
+                    StatusResponse = HttpStatusCode.BadRequest
+                };
             }
             var eventEntity = _mapper.Map<Event>(eventDto);
             eventEntity.EventId = Guid.NewGuid();
@@ -47,15 +60,29 @@ namespace Event_Management.Application.Service
             {
                 eventEntity.Image = await _fileService.UploadImage(eventDto.Image, eventEntity.EventId);
             }
-            //string userId = IndentityExtension.GetUserIdFromToken2(context);
-            //string userId = IndentityExtension.GetUserIdFromToken();
             if (string.IsNullOrEmpty(userId))
             {
-                throw new Exception(MessageCommon.SessionTimeout);
+                return new APIResponse
+                {
+                    Message = MessageCommon.CreateFailed,
+                    StatusResponse = HttpStatusCode.BadRequest
+                };
             }
             else
             {
-                eventEntity.CreatedBy = Guid.Parse(userId);
+                var user = await _unitOfWork.UserRepository.GetById(userId);
+                if (IsValidEmail(user.Email))
+                {
+                    eventEntity.CreatedBy = Guid.Parse(userId);
+                }
+                else
+                {
+                    return new APIResponse
+                {
+                        Message = MessageEvent.UserNotAllow,
+                        StatusResponse = HttpStatusCode.BadRequest
+                };
+                }
             }
 
             eventEntity.CreatedAt = DateTime.Now;
@@ -65,15 +92,29 @@ namespace Event_Management.Application.Service
             eventEntity.LocationUrl = eventDto.Location.LocationUrl;
             eventEntity.LocationCoord = eventDto.Location.LocationCoord;
             eventEntity.Status = EventStatus.NotYet.ToString();
+            foreach(int item in eventDto.TagId)
+            {
+               var tag = await _tagService.GetById(item);
+                eventEntity.Tags.Add(tag);
+            }
             await _unitOfWork.EventRepository.Add(eventEntity);
             if (await _unitOfWork.SaveChangesAsync())
             {
                 await _quartzService.StartEventStatusToOngoingJob(eventEntity.EventId, eventEntity.StartDate);
                 await _quartzService.StartEventStatusToEndedJob(eventEntity.EventId, eventEntity.EndDate);
                 EventResponseDto response = ToResponseDto(eventEntity);
-                return response;
+                return new APIResponse
+                {
+                    Data = response,
+                    Message = MessageCommon.CreateSuccesfully,
+                    StatusResponse = HttpStatusCode.OK
+                };
             }
-            throw new Exception(MessageCommon.CreateFailed);
+            return new APIResponse
+            {
+                Message = MessageCommon.CreateFailed,
+                StatusResponse = HttpStatusCode.BadRequest
+            };
         }
         private EventResponseDto ToResponseDto(Event eventEntity)
         { 
@@ -92,10 +133,19 @@ namespace Event_Management.Application.Service
             response.LocationUrl = eventEntity.LocationUrl;
             response.EventId = eventEntity.EventId;
             response.EventName = eventEntity.EventName;
-            response.CreatedBy = eventEntity.CreatedBy;
+            var user = _userService.GetUserById((Guid)eventEntity.CreatedBy!);
+            response.CreatedBy = user.FullName;
             response.Image = eventEntity.Image;
             response.Theme = eventEntity.Theme;
-            if(eventEntity.UpdatedAt.ToString() != null)
+            foreach(var item in eventEntity.Tags)
+            {
+                response.eventTags.Add(new EventTag
+                {
+                    TagId = item.TagId,
+                    TagName = item.TagName!
+                });
+            }
+            if(eventEntity.UpdatedAt != null)
             {
                 response.UpdatedAt = DateTimeHelper.ToJsDateType((DateTime)eventEntity.UpdatedAt!);
             }
@@ -206,6 +256,11 @@ namespace Event_Management.Application.Service
             result.Add("top 10 event creator", top10EventCreator);
             result.Add("top 20 event speaker", top20Speaker);
             return result;
+        }
+
+        public async Task<bool> IsOwner(Guid eventId, Guid userId)
+        {
+            return await _unitOfWork.EventRepository.IsOwner(userId, eventId);
         }
     }
 }

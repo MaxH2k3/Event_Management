@@ -10,7 +10,7 @@ using System.Net;
 
 namespace Event_Management.API.Controllers
 {
-    [Route("api/v1/Auth")]
+    [Route("api/v1/auth")]
     [ApiController]
     public class AuthenticateController : Controller
     {
@@ -50,7 +50,7 @@ namespace Event_Management.API.Controllers
         //     return Ok(response);
         // }
 
-        [HttpPost("SignInWithGoogle")]
+        [HttpPost("sign-in/google")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> SignInWithGoogle([FromBody] LoginInWithGoogleDto loginInWithGoogle)
@@ -64,7 +64,7 @@ namespace Event_Management.API.Controllers
         }
 
 
-        [HttpPost("SignInWithOTP")]
+        [HttpPost("sign-in/otp")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> SignInWithOTP([FromBody] LoginUserDto loginUser)
@@ -78,7 +78,7 @@ namespace Event_Management.API.Controllers
         }
 
 
-        [HttpPost("SignUpWithOTP")]
+        [HttpPost("sign-up/otp")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> SignUpWithOTP([FromBody] RegisterUserDto registerUser)
@@ -92,7 +92,7 @@ namespace Event_Management.API.Controllers
         }
 
 
-        [HttpPost("ValidateOTP")]
+        [HttpPost("otp/validate")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> ValidateOTP([FromBody] ValidateOtpDTO validateOtp)
@@ -134,7 +134,7 @@ namespace Event_Management.API.Controllers
 
 
         [Authorize]
-        [HttpPost("logout")]
+        [HttpPost("sign-out")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Logout()

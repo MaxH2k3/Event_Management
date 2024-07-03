@@ -18,7 +18,7 @@ namespace Event_Management.Infrastructure.UnitOfWork
         private readonly IFeedbackRepository _feedbackRepository = null!;
         private readonly ILogoRepository _logoRepository = null!;
         private readonly IParticipantRepository _participantRepository = null!;
-        private readonly IPaymentMethodRepository _paymentMethodRepository = null!;
+        
         
         private readonly IPaymentTransactionRepository _paymentTransactionRepository = null!;
         private readonly ISponsorEventRepository _sponsorEventRepository = null!;
@@ -59,7 +59,7 @@ namespace Event_Management.Infrastructure.UnitOfWork
 
         public IParticipantRepository ParticipantRepository => _participantRepository ?? new ParticipantRepository(_context, _cacheRepository);
 
-        public IPaymentMethodRepository PaymentMethodRepository => _paymentMethodRepository ?? new PaymentMethodRepository(_context);
+        
 
        
         public IPaymentTransactionRepository PaymentTransactionRepository => _paymentTransactionRepository ?? new PaymentTransactionRepository(_context);

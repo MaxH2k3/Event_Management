@@ -27,7 +27,7 @@ namespace Event_Management.Infrastructure.Repository.SQL
         {
             //int skipElements = (pageNo - 1) * elementEachPage;
             var totalEle = await _context.Events.CountAsync();
-            var eventList = _context.Events.AsQueryable();
+            var eventList = _context.Events.Include(e => e.Tags).AsQueryable();
             eventList = ApplyFilter(eventList, filter).PaginateAndSort(pageNo, elementEachPage, filter.SortBy ?? "EventId", filter.IsAscending);
             //eventList = ApplyFilter(eventList, filter).Skip(skipElements).Take(elementEachPage);
             List<Event> temp = await eventList.ToListAsync();
@@ -364,8 +364,18 @@ namespace Event_Management.Infrastructure.Repository.SQL
                 userInfo.userId = temp.UserId;
                 userInfos.Add(userInfo);
             }
-            return userInfos;
-                
+            return userInfos;               
         }
+        public async Task<Event> getAllEventInfo(Guid eventId)
+        {
+            Event result = await _context.Events.Include(e => e.Logos).Include(e => e.Tags).FirstOrDefaultAsync(e => e.EventId == eventId);
+            return result != null ? result : null;
+        }
+
+        public async Task<bool> IsOwner(Guid user, Guid eventId)
+        {
+            return await _context.Events.AnyAsync(e => e.EventId.Equals(eventId) && e.CreatedBy.Equals(user));
+        }
+
     }
 }

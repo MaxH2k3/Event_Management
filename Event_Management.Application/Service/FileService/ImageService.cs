@@ -2,9 +2,12 @@
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Event_Management.Application.Dto.EventDTO.RequestDTO;
+using Event_Management.Application.Dto.SponsorLogoDTO;
 using Event_Management.Application.Service.Job;
+using Event_Management.Domain.Entity;
 using Event_Management.Domain.UnitOfWork;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,10 +19,14 @@ namespace Event_Management.Application.Service.FileService
     public class ImageService : IImageService
     {      
         private readonly IConfiguration _config;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public ImageService(IConfiguration configuration)
+        public ImageService(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper)
         {           
             _config = configuration;
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
         private BlobContainerClient GetBlobContainerClient()
         {
@@ -56,37 +63,25 @@ namespace Event_Management.Application.Service.FileService
             return absPath;
         }
         
-        public async Task<List<string>> GetAllBlobUris()
+        public async Task<List<SponsorLogoDto>> GetAllBlobUris()
         {
-            BlobContainerClient blobContainerClient = GetBlobContainerClient();
-            List<string> blobUris = new List<string>();
-
-            await foreach (BlobItem blobItem in blobContainerClient.GetBlobsAsync())
-            {
-                BlobClient blobClient = blobContainerClient.GetBlobClient(blobItem.Name);
-                string absPath = blobClient.Uri.AbsoluteUri;
-                blobUris.Add(absPath);
-            }
-
-            return blobUris;
+            List<SponsorLogoDto> response = new List<SponsorLogoDto>();
+            var logos = await _unitOfWork.LogoRepository.GetAll();
+            response = _mapper.Map<List<SponsorLogoDto>>(logos);
+            return response;
         }
 
         public async Task<Dictionary<string, List<string>>> GetAllEventBlobUris(Guid eventId)
         {
-            BlobContainerClient blobContainerClient = GetBlobContainerClient();
+            Event eventData= await _unitOfWork.EventRepository.getAllEventInfo(eventId);
             List<string> blobUris = new List<string>();
             List<string> eventTheme = new List<string>();
-            await foreach (BlobItem blobItem in blobContainerClient.GetBlobsAsync())
+            if (eventData != null)
             {
-                BlobClient blobClient = blobContainerClient.GetBlobClient(blobItem.Name);
-                string absPath = blobClient.Uri.AbsoluteUri;
-                if (absPath.Contains(eventId.ToString()) && absPath.Contains("logo"))
+                eventTheme.Add(eventData.Image!);
+                foreach(var item in eventData.Logos)
                 {
-                    blobUris.Add(absPath);
-                }
-                if (absPath.Contains(eventId.ToString()) && !absPath.Contains("logo"))
-                {
-                    eventTheme.Add(absPath);
+                    blobUris.Add(item.LogoUrl!);
                 }
             }
             Dictionary<string, List<string>> result = new Dictionary<string, List<string>>
@@ -97,9 +92,9 @@ namespace Event_Management.Application.Service.FileService
             return result;
         }
 
-        public async Task<string?> GetBlobUri(string blobName)
+        public async Task<SponsorLogoDto> GetBlobUri(string blobName)
         {
-            BlobContainerClient blobContainerClient = GetBlobContainerClient();
+            /*BlobContainerClient blobContainerClient = GetBlobContainerClient();
             BlobClient blobClient = blobContainerClient.GetBlobClient(blobName);
             if (!await blobClient.ExistsAsync())
             {
@@ -107,18 +102,51 @@ namespace Event_Management.Application.Service.FileService
             }
 
             string absPath = blobClient.Uri.AbsoluteUri;
-            return absPath;
+            return absPath;*/
+            var result = await _unitOfWork.LogoRepository.GetByName(blobName);
+            SponsorLogoDto response = _mapper.Map<SponsorLogoDto>(result);
+            return response;
         }
 
-        public async Task<string?> UploadImage2(FileUploadDto dto)
-        {
-            return await UploadImage(dto.formFile, dto.eventId);
-        }
+        
 
         // blob name format of the image uploaded by this function: eventId + sponsor name + "logo"
-        public Task<string?> UploadEventSponsorLogo(string base64, Guid EventId)
+        public async Task<string?> UploadEventSponsorLogo(string base64, Guid EventId, string sponsorName)
         {
-            throw new NotImplementedException();
+            var logoTemp = await _unitOfWork.LogoRepository.GetByName(sponsorName);
+            if (logoTemp != null) { 
+                return null;
+            }
+            Event eventData = await _unitOfWork.EventRepository.getAllEventInfo(EventId);
+            if (eventData != null) { 
+            var httpHeaders = new BlobHttpHeaders
+            {
+                ContentType = "image/png" // file type
+            };
+            BlobContainerClient blobContainerClient = GetBlobContainerClient();
+            BlobClient blobClient = blobContainerClient.GetBlobClient(EventId.ToString() + sponsorName + "logo");
+
+            // Decode base64 string to byte array
+            byte[] imageBytes = Convert.FromBase64String(base64);
+
+            using (var memoryStream = new MemoryStream(imageBytes))
+            {
+                await blobClient.UploadAsync(memoryStream, httpHeaders);
+            }
+
+            string absPath = blobClient.Uri.AbsoluteUri;
+
+            Logo newLogo = new Logo
+            {
+                SponsorBrand = sponsorName,
+                LogoUrl = absPath
+            };
+            _unitOfWork.LogoRepository.Add(newLogo);
+            eventData.Logos.Add(newLogo);
+            _unitOfWork.SaveChangesAsync();
+            return absPath;
+            }
+            return null;
         }
     }
 }

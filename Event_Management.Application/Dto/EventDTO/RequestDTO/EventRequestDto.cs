@@ -21,10 +21,7 @@ namespace Event_Management.Application
         [MinLength(3, ErrorMessage = "Event Description is too short!")]
         public string? Description { get; set; } = null!;
 
-        //[Required]
-        //public string? Status { get; set; }
-        //[Required]
-        //public Guid? CreatedBy { get; set; }
+        public List<int> TagId { get; set; } = new List<int>();
 
         [Required(ErrorMessage = "StartDate is required")]
         public long StartDate { get; set; } = DateTime.Now.AddDays(1).Ticks;

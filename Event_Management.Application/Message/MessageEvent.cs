@@ -15,5 +15,6 @@ namespace Event_Management.Application.Message
         public const string UserParticipatedEvent = "User participated events!";
         public const string PopularLocation = "Popular locations leaderboard";
         public const string PopularOrganizers = "Popular organizers(event creators) and speakers leaderboard";
+        public const string UserNotAllow = "User not allowed to create event";
     }
 }

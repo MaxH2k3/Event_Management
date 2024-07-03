@@ -22,9 +22,13 @@ namespace Event_Management.Application.Service
         }
 
 
-        public async Task<User?> GetUser(Guid userId)
+        public User? GetUserById(Guid userId)
         {
-            return await _unitOfWork.UserRepository.GetUser(userId);
+            return _unitOfWork.UserRepository.GetUserById(userId);
+        }
+        public async Task<User?> GetUserByIdAsync(Guid userId)
+        {
+            return await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         }
 
         public async Task<APIResponse> GetAllUser(int page, int eachPage)

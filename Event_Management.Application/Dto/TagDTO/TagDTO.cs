@@ -4,6 +4,6 @@
     {
         //public int TagId { get; set; }
         public string TagName { get; set; } = null!;
-        public Guid EventId { get; set; }
+        //public Guid? EventId { get; set; }
     }
 }

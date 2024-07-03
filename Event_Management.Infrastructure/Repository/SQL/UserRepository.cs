@@ -20,7 +20,12 @@ namespace Event_Management.Infrastructure.Repository.SQL
             _context = context;
         }
 
-        public async Task<User?> GetUser(Guid userId)
+        public User? GetUserById(Guid userId)
+        {
+            return _context.Users.Find(userId);
+        }
+
+        public async Task<User?> GetUserByIdAsync(Guid userId)
         {
             return await _context.Users.FirstOrDefaultAsync(x => x.UserId!.Equals(userId));
         }

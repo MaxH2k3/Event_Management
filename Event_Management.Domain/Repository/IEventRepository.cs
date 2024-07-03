@@ -35,5 +35,9 @@ namespace Event_Management.Domain.Repository
         public List<EventCreatorLeaderBoardDto> GetTop10CreatorsByEventCount();
         public List<EventLocationLeaderBoardDto> GetTop10LocationByEventCount();
         public List<EventCreatorLeaderBoardDto> GetTop20SpeakerEventCount();
+        Task<bool> IsOwner(Guid user, Guid eventId);
+
+        // get Event
+        public Task<Event> getAllEventInfo(Guid eventId);
     }
 }

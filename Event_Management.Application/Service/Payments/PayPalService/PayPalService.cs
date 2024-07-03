@@ -19,14 +19,17 @@ namespace Event_Management.Application.Service.Payments.PayPalService
             _httpClientFactory = httpClientFactory;
             _unitOfWork = unitOfWork;
         }
-        public async Task<PayPal.Api.Payment> CreatePayment(Guid eventId, string description)
+        public async Task<PayPal.Api.Payment> CreatePayment(Guid eventId, Guid userId, string description)
         {
             
             var apiContext = GetApiContext();
             string baseUrl = "https://localhost:7153";
-            var eventEtity = await _unitOfWork.EventRepository.GetById(eventId);
+            var eventEntity = await _unitOfWork.EventRepository.GetById(eventId);
+            var sponsor = await _unitOfWork.SponsorEventRepository.CheckSponsorEvent(eventId, userId);
 
-            var payment = new PayPal.Api.Payment
+			string totalAmount = sponsor?.Amount?.ToString() ?? eventEntity.Fare.ToString();
+
+			var payment = new PayPal.Api.Payment
             {
                 intent = "sale",
                 payer = new Payer { payment_method = "paypal" },
@@ -35,11 +38,12 @@ namespace Event_Management.Application.Service.Payments.PayPalService
                 new Transaction
                 {
                     description = description,
+                    
                     amount = new Amount
                     {
                         currency = "USD",
-                        total = eventEtity.Fare.ToString()
-                    }
+                        total = totalAmount
+					}
                 }
             },
                 redirect_urls = new RedirectUrls
@@ -55,20 +59,28 @@ namespace Event_Management.Application.Service.Payments.PayPalService
             return payment.Create(apiContext); ;
         }
 
-        public async Task<string> CreatePayout(Guid eventId)
+        public async Task<PayoutBatchHeader> CreatePayout(Guid eventId, string emailReceiver)
         {
+            var apiContext = GetApiContext();
             var eventEtity = await _unitOfWork.EventRepository.GetById(eventId);
-            var payoutRequest = new PayoutRequest
+            var payoutBatchHeader = new PayoutBatchHeader();
+            var payoutRequest = new Payout
             {
-                items= new List<PayoutItem>
+                items = new List<PayoutItem>
                 {
+
                     new PayoutItem
                     {
+                        receiver = emailReceiver,
+                        recipient_type = PayoutRecipientType.EMAIL,
                         amount = new Currency
                         {
                             currency = "USD",
-                            value = eventEtity.Fare.ToString(),
-                        }
+                            value = "5.00",
+                        },
+                        note = "Thanks for your participation!",
+                        sender_item_id = $"{DateTime.UtcNow.Ticks}-{new Random().Next(1000, 9999)}",
+                        
                     }
                 },
 
@@ -76,14 +88,32 @@ namespace Event_Management.Application.Service.Payments.PayPalService
                 {
                     sender_batch_id = GenerateSenderBatchId(),
                     email_subject = "You have a payout!",
-                    
+
                 }
             };
 
-            
-            var responseObject = JsonSerializer.Deserialize<PayoutResponse>(payoutRequest.ToString());
+            var createdPayout = payoutRequest.Create(apiContext, false); //createdPayout?.batch_header?.payout_batch_id
+                                                                         //var responseObject = JsonSerializer.Deserialize<PayoutResponse>(payoutRequest.ToString());
 
-            return responseObject?.batch_header?.payout_batch_id;
+
+
+            
+            var payoutBatch = new PayoutBatchHeader
+            {
+                payout_batch_id = createdPayout.batch_header.payout_batch_id,
+                batch_status = createdPayout.batch_header.batch_status,
+                sender_batch_header = new PayoutSenderBatchHeader
+                {
+                    sender_batch_id = payoutRequest.sender_batch_header.sender_batch_id,
+                    email_subject = payoutRequest.sender_batch_header.email_subject,
+                    recipient_type = payoutRequest.items[0].recipient_type,
+                },
+                amount = createdPayout.batch_header.amount,
+
+            };
+
+            
+            return payoutBatch;
         }
 
         private APIContext GetApiContext()

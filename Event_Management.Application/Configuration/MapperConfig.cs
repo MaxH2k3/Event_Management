@@ -11,6 +11,8 @@ using Event_Management.Domain.Models.ParticipantDTO;
 using Event_Management.Application.Dto.FeedbackDTO;
 using Event_Management.Domain.Entity;
 using Event_Management.Application.Dto.UserDTO.Request;
+using Event_Management.Application.Dto.SponsorLogoDTO;
+using Event_Management.Application.Dto.EventDTO.SponsorDTO;
 
 namespace Event_Management.Domain.Configuration
 {
@@ -35,6 +37,9 @@ namespace Event_Management.Domain.Configuration
             //Mapper Tag
             CreateMap<TagDto, Tag>().ReverseMap();
 
+            //Mapper SponsorEvent
+            CreateMap<SponsorDto, SponsorEvent>().ReverseMap();
+
             //Mapper Feedback
             CreateMap<FeedbackDto, Feedback>().ReverseMap();
 
@@ -57,7 +62,8 @@ namespace Event_Management.Domain.Configuration
 
             CreateMap<PagedList<Participant>, PagedList<ParticipantEventModel>>().ReverseMap();
 
-
+            //Logo
+            CreateMap<Logo, SponsorLogoDto>().ReverseMap();
 
         }
     }

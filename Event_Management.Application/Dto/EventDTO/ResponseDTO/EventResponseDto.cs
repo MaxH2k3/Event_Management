@@ -15,9 +15,10 @@ namespace Event_Management.Application.Dto.EventDTO.ResponseDTO
         public string EventName { get; set; } = null!;
         public string? Description { get; set; }
         public string? Status { get; set; }
+        public List<EventTag> eventTags { get; set; } = new List<EventTag>();
         public long StartDate { get; set; }
         public long EndDate { get; set; }
-        public Guid? CreatedBy { get; set; }
+        public string? CreatedBy { get; set; }
         public string? Image { get; set; }
         public string? Theme { get; set; }
         public string? Location { get; set; }

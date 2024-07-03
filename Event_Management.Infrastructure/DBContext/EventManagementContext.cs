@@ -29,7 +29,7 @@ namespace Event_Management.Infrastructure.DBContext
         public virtual DbSet<Logo> Logos { get; set; } = null!;
         public virtual DbSet<Notification> Notifications { get; set; } = null!;
         public virtual DbSet<Participant> Participants { get; set; } = null!;
-        public virtual DbSet<PaymentMethod> PaymentMethods { get; set; } = null!;
+       
         public virtual DbSet<PaymentTransaction> PaymentTransactions { get; set; } = null!;
         public virtual DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
         public virtual DbSet<Role> Roles { get; set; } = null!;
@@ -275,16 +275,7 @@ namespace Event_Management.Infrastructure.DBContext
                     .HasConstraintName("FK__Participa__UserI__4AB81AF0");
             });
 
-            modelBuilder.Entity<PaymentMethod>(entity =>
-            {
-                entity.ToTable("PaymentMethod");
-
-                entity.Property(e => e.PaymentMethodId).HasColumnName("PaymentMethodID");
-
-                entity.Property(e => e.PaymentMethodName)
-                    .HasMaxLength(255)
-                    .IsUnicode(false);
-            });
+           
 
             modelBuilder.Entity<PaymentTransaction>(entity =>
             {
@@ -363,9 +354,9 @@ namespace Event_Management.Infrastructure.DBContext
 
             modelBuilder.Entity<SponsorEvent>(entity =>
             {
-                entity.HasNoKey();
+                entity.HasKey(se => new { se.EventId, se.UserId });
 
-                entity.ToTable("SponsorEvent");
+				entity.ToTable("SponsorEvent");
 
                 entity.Property(e => e.Amount).HasColumnType("decimal(19, 2)");
 
@@ -373,7 +364,7 @@ namespace Event_Management.Infrastructure.DBContext
 
                 entity.Property(e => e.EventId).HasColumnName("EventID");
 
-                entity.Property(e => e.SponsorMethodId).HasColumnName("SponsorMethodID");
+                //entity.Property(e => e.SponsorMethodId).HasColumnName("SponsorMethodID");
 
                 entity.Property(e => e.Status)
                     .HasMaxLength(50)

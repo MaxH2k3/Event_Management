@@ -5,5 +5,6 @@ namespace Event_Management.Domain.Repository
 {
     public interface ILogoRepository : IExtendRepository<Logo>
     {
+        Task<Logo> GetByName(string name);
     }
 }

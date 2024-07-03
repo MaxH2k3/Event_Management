@@ -31,7 +31,7 @@ namespace Event_Management.API.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-        public async Task<APIResponse> AddTag([FromBody] FeedbackDto feedbackDto)
+        public async Task<APIResponse> CreateFeedback([FromBody] FeedbackDto feedbackDto)
         {
             APIResponse response = new APIResponse();
             string userId = User.GetUserIdFromToken();
@@ -54,7 +54,7 @@ namespace Event_Management.API.Controllers
         [HttpPut("")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<APIResponse> UpdateTag([FromBody] FeedbackDto feedback)
+        public async Task<APIResponse> UpdateFeedback([FromBody] FeedbackDto feedback)
         {
             APIResponse response = new APIResponse();
             string userId = User.GetUserIdFromToken();

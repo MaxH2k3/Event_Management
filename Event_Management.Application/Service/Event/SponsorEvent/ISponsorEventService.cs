@@ -1,4 +1,5 @@
-﻿using Event_Management.Domain.Entity;
+﻿using Event_Management.Application.Dto.EventDTO.SponsorDTO;
+using Event_Management.Domain.Entity;
 using Event_Management.Domain.Models.Common;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,10 @@ namespace Event_Management.Application.Service
 {
     public interface ISponsorEventService
     {
-        Task<PagedList<SponsorEvent>> GetSponsorByEventId(Expression<Func<Guid, bool>> eventId, int page, int eachPage);
-    }
+        //Task<PagedList<SponsorEvent>> GetSponsorByEventId(Expression<Func<Guid, bool>> eventId, int page, int eachPage);
+        Task<bool> AddSponsorEventRequest(SponsorDto sponsorEvent);
+        Task<bool> UpdateSponsorEventRequest(SponsorDto sponsorEvent);
+
+		Task<SponsorEvent?> CheckSponsorEvent(Guid eventId, Guid userId);
+	}
 }

@@ -3,6 +3,7 @@ using Event_Management.Domain.Entity;
 using Event_Management.Domain.Repository;
 using Event_Management.Infrastructure.DBContext;
 using Event_Management.Infrastructure.Repository.Common;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +19,12 @@ namespace Event_Management.Infrastructure.Repository.SQL
         public LogoRepository(EventManagementContext context) : base(context)
         {
             _context = context;
+        }
+
+        public async Task<Logo> GetByName(string name)
+        {
+            Logo? logo = await _context.Logos.FirstOrDefaultAsync(lo => lo.SponsorBrand == name);
+            return logo != null ? logo : null;
         }
     }
 }
