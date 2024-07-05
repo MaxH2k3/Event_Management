@@ -31,11 +31,13 @@ namespace Event_Management.Domain.Configuration
             //Mapper Event
             CreateMap<Event, EventResponseDto>()
                 .ReverseMap();
+            CreateMap<Event, EventDetailDto>().ReverseMap();
             CreateMap<EventRequestDto, Event>().ReverseMap();
             CreateMap<PagedList<Event>, PagedList<EventResponseDto>>();
 
             //Mapper Tag
             CreateMap<TagDto, Tag>().ReverseMap();
+            CreateMap<EventTag, Tag>().ReverseMap();
 
             //Mapper SponsorEvent
             CreateMap<SponsorDto, SponsorEvent>().ReverseMap();

@@ -118,6 +118,7 @@ namespace Event_Management.API.Controllers
 		[HttpGet("qrcode")]
 		public async Task<IActionResult> QRCode(string data)
 		{
+			await _registerEventService.SendTest();
 			var bytes = QRCodeHelper.GenerateQRCode(data);
 
             return File(bytes, "image/png");

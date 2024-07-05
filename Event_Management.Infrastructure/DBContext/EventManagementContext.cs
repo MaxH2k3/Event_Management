@@ -55,6 +55,7 @@ namespace Event_Management.Infrastructure.DBContext
             .AddJsonFile("appsettings.json", true, true)
 
             .Build();
+
             //if (environment?.IsProduction() ?? true)
             //{
                 return config["ConnectionStrings:SQL"]!;

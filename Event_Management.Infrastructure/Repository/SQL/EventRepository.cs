@@ -368,7 +368,9 @@ namespace Event_Management.Infrastructure.Repository.SQL
         }
         public async Task<Event> getAllEventInfo(Guid eventId)
         {
-            Event result = await _context.Events.Include(e => e.Logos).Include(e => e.Tags).FirstOrDefaultAsync(e => e.EventId == eventId);
+            Event result = await _context.Events.Include(e => e.Logos).Include(e => e.Tags).Include(e => e.Participants)
+                .Include(e => e.Feedbacks).Include(e => e.PaymentTransactions)
+                .FirstOrDefaultAsync(e => e.EventId == eventId);
             return result != null ? result : null;
         }
 

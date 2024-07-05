@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using Event_Management.Application.Helper;
 using Event_Management.Application.Message;
+using Event_Management.Application.Service;
 using Event_Management.Domain.Entity;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Models.ParticipantDTO;
@@ -14,12 +16,15 @@ namespace Event_Management.Domain.Service
 	{
 		private readonly IUnitOfWork _unitOfWork;
 		private readonly IMapper _mapper;
+		private readonly IEmailService _emailService;
 
-		public RegisterEventService(IUnitOfWork unitOfWork, IMapper mapper)
+        public RegisterEventService(IUnitOfWork unitOfWork, IMapper mapper,
+			IEmailService emailService)
 		{
 			_unitOfWork = unitOfWork;
 			_mapper = mapper;
-		}
+            _emailService = emailService;
+        }
 
 		public async Task<APIResponse> DeleteParticipant(Guid userId, Guid eventId)
 		{
@@ -161,6 +166,16 @@ namespace Event_Management.Domain.Service
 
 			return _mapper.Map<PagedList<ParticipantEventModel>>(participants);
 		}
+
+		public async Task SendTest()
+		{
+
+            var bytes = QRCodeHelper.GenerateQRCode("okokok");
+			await _emailService.SendEmailTicket("Views/Template/TicketUser.cshtml", "Your Ticket", new TicketModel()
+			{
+				Email = "huy110903@gmail.com"
+			});
+        }
 
 	}
 }

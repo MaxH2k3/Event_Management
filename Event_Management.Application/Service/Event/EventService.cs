@@ -1,6 +1,9 @@
 ﻿using AutoMapper;
 using Azure;
+using Event_Management.Application.Dto;
 using Event_Management.Application.Dto.EventDTO.ResponseDTO;
+using Event_Management.Application.Dto.FeedbackDTO;
+using Event_Management.Application.Dto.SponsorLogoDTO;
 using Event_Management.Application.Message;
 using Event_Management.Application.Service.FileService;
 using Event_Management.Application.Service.Job;
@@ -8,11 +11,13 @@ using Event_Management.Domain.Entity;
 using Event_Management.Domain.Enum;
 using Event_Management.Domain.Helper;
 using Event_Management.Domain.Models.Common;
+using Event_Management.Domain.Models.ParticipantDTO;
 using Event_Management.Domain.Models.System;
 using Event_Management.Domain.Service.TagEvent;
 using Event_Management.Domain.UnitOfWork;
 using Microsoft.Extensions.Configuration;
 using System.Net;
+using System.Reflection;
 
 
 namespace Event_Management.Application.Service
@@ -35,6 +40,49 @@ namespace Event_Management.Application.Service
             _quartzService = quartzService;
             _fileService = fileService;
             _userService = userService;
+        }
+        public async Task<APIResponse> GetEventInfo(Guid eventId)
+        {
+            var eventInfo = await _unitOfWork.EventRepository.getAllEventInfo(eventId);
+            if(eventInfo != null)
+            {
+                EventDetailDto eventDetailDto = new EventDetailDto();
+                eventDetailDto.EventId = eventId;
+                eventDetailDto.EventName = eventInfo.EventName;
+                eventDetailDto.Description = eventInfo.Description;
+                eventDetailDto.Status = eventInfo.Status;
+                eventDetailDto.StartDate = DateTimeHelper.ToJsDateType(eventInfo.StartDate);
+                eventDetailDto.EndDate = DateTimeHelper.ToJsDateType((DateTime)eventInfo.EndDate);
+                var user = _userService.GetUserById((Guid)eventInfo.CreatedBy!);
+                eventDetailDto.CreatedBy = user.FullName;
+                eventDetailDto.Image = eventDetailDto.Image;
+                eventDetailDto.Theme = eventDetailDto.Theme;
+                eventDetailDto.Approval = eventDetailDto.Approval;
+                eventDetailDto.Capacity = eventDetailDto.Capacity;
+                eventDetailDto.CreatedAt = DateTimeHelper.ToJsDateType((DateTime)eventInfo.CreatedAt!);
+                eventDetailDto.Location = eventDetailDto.Location;
+                eventDetailDto.LocationId = eventInfo.LocationId;
+                eventDetailDto.LocationCoord = eventInfo.LocationCoord;
+                eventDetailDto.LocationAddress = eventInfo.LocationAddress;
+                eventDetailDto.LocationUrl = eventInfo.LocationUrl;
+                eventDetailDto.Fare = eventInfo.Fare;
+                eventDetailDto.UpdatedAt = eventInfo.UpdatedAt.HasValue ? DateTimeHelper.ToJsDateType(eventInfo.UpdatedAt.Value) : null;
+                eventDetailDto.eventTags = _mapper.Map<List<EventTag>>(eventInfo.Tags);
+                eventDetailDto.feedbacks = _mapper.Map<List<FeedbackDto>>(eventInfo.Feedbacks);
+                eventDetailDto.sponsorLogos = _mapper.Map<List<SponsorLogoDto>>(eventInfo.Logos);
+                eventDetailDto.participants = _mapper.Map<List< ParticipantEventModel>>(eventInfo.Participants);
+                return new APIResponse
+                {
+                    Message = MessageCommon.Complete,
+                    StatusResponse = HttpStatusCode.OK,
+                    Data = eventDetailDto
+                };
+            }
+            return new APIResponse
+            {
+                Message = MessageCommon.NotFound,
+                StatusResponse = HttpStatusCode.BadRequest,
+            };
         }
         public bool IsValidEmail(string email)
         {
@@ -70,7 +118,7 @@ namespace Event_Management.Application.Service
             }
             else
             {
-                var user = await _unitOfWork.UserRepository.GetById(userId);
+                var user = await _unitOfWork.UserRepository.GetById(Guid.Parse(userId));
                 if (IsValidEmail(user.Email))
                 {
                     eventEntity.CreatedBy = Guid.Parse(userId);
@@ -137,22 +185,8 @@ namespace Event_Management.Application.Service
             response.CreatedBy = user.FullName;
             response.Image = eventEntity.Image;
             response.Theme = eventEntity.Theme;
-            foreach(var item in eventEntity.Tags)
-            {
-                response.eventTags.Add(new EventTag
-                {
-                    TagId = item.TagId,
-                    TagName = item.TagName!
-                });
-            }
-            if(eventEntity.UpdatedAt != null)
-            {
-                response.UpdatedAt = DateTimeHelper.ToJsDateType((DateTime)eventEntity.UpdatedAt!);
-            }
-            else
-            {
-                response.UpdatedAt = null;
-            }
+            response.eventTags = _mapper.Map<List<EventTag>>(eventEntity.Tags);
+            response.UpdatedAt = eventEntity.UpdatedAt.HasValue ? DateTimeHelper.ToJsDateType(eventEntity.UpdatedAt.Value) : null;  
             response.Fare = eventEntity.Fare;
             response.Capacity = eventEntity.Capacity;
             return response;

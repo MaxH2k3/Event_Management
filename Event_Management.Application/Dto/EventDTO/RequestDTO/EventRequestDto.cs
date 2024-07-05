@@ -12,13 +12,11 @@ namespace Event_Management.Application
     {
 
         [Required(ErrorMessage = "EventName is required!")]
-        [MaxLength(250, ErrorMessage = "Event name is too long!")]
-        [MinLength(3, ErrorMessage = "Event name is too short!")]
+        [Range(3, 250, ErrorMessage = "Event name must be between 3 and 250 characters!")]
         public string EventName { get; set; } = null!;
 
         [Required(ErrorMessage = "Event Description is required!")]
-        [MaxLength(5000, ErrorMessage = "Event Description is too long!")]
-        [MinLength(3, ErrorMessage = "Event Description is too short!")]
+        [Range(3, 5000, ErrorMessage = "Event Description must be between 3 and 5000 characters!")]
         public string? Description { get; set; } = null!;
 
         public List<int> TagId { get; set; } = new List<int>();

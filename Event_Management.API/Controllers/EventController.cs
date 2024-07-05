@@ -24,7 +24,16 @@ namespace Event_Management.API.Controllers
             _eventService = eventService;
             _fileService = fileService;
         }
-
+        [HttpGet("info")]
+        public async Task<IActionResult> GetEventInfo([FromQuery, Required] Guid eventId)
+        {
+            var response = await _eventService.GetEventInfo(eventId);
+            if(response.StatusResponse == HttpStatusCode.OK)
+            {
+                return Ok(response);
+            }
+            return BadRequest(response);
+        }
 
         [HttpGet("")]
         [ProducesResponseType(StatusCodes.Status200OK)]

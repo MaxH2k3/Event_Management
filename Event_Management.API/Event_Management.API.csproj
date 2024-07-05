@@ -10,6 +10,7 @@
 </PropertyGroup>
 
 	<ItemGroup>
+	  <Content Remove="Views\Template\TicketUser.cshtml" />
 	  <Content Remove="Views\Template\VerifyAccount.cshtml" />
 	  <Content Remove="Views\Template\VerifyWithOTP.cshtml" />
 	  <Content Remove="wwwroot\Images\Sunset.png" />
@@ -28,6 +29,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <EmbeddedResource Include="Views\Template\TicketUser.cshtml">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </EmbeddedResource>
 	  <None Include="wwwroot\css\bootstrap\bootstrap.min.css.map" />
 	  <None Include="wwwroot\css\open-iconic\FONT-LICENSE" />
 	  <None Include="wwwroot\css\open-iconic\font\fonts\open-iconic.svg" />

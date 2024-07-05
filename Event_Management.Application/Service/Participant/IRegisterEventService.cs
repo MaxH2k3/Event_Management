@@ -20,5 +20,7 @@ namespace Event_Management.Domain.Service
 
 		// Get all participant on event
 		Task<PagedList<ParticipantEventModel>> GetParticipantOnEvent(FilterParticipant filter);
-	}
+		Task SendTest();
+
+    }
 }
