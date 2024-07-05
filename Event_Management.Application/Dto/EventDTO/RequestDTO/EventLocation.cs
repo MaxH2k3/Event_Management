@@ -10,22 +10,22 @@ namespace Event_Management.Application
     public class EventLocation
     {
         [Required(ErrorMessage = "Location is required!")]
-        [MaxLength(500, ErrorMessage = "Location is too long!")]
-        [MinLength(5, ErrorMessage = "Location is too short!")]
-        public string Location { get; set; } = "FPTUHCM";
+        [MaxLength(500, ErrorMessage = "Location must be between 3 and 250 characters!")]
+        [MinLength(5, ErrorMessage = "Location must be between 3 and 250 characters!")]
+        public string Name { get; set; } = "FPTUHCM";
 
 
         [Required(ErrorMessage = "LocationId is required!")]
-        public string? LocationId { get; set; } = null;
+        public string? Id { get; set; } = null;
 
 
         [Required(ErrorMessage = "LocationAddress is required!")]
-        public string? LocationAddress { get; set; } = null;
+        public string? Address { get; set; } = null;
 
         [Required(ErrorMessage = "LocationUrl is required!")]
-        public string? LocationUrl { get; set; } = null;
+        public string? Url { get; set; } = null;
 
         [Required(ErrorMessage = "LocationCoord is required!")]
-        public string? LocationCoord { get; set; } = null;
+        public string? Coord { get; set; } = null;
     }
 }

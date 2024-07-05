@@ -1,6 +1,7 @@
 ﻿using Event_Management.Application.Dto.FeedbackDTO;
 using Event_Management.Application.Dto.PaymentDTO;
 using Event_Management.Application.Dto.SponsorLogoDTO;
+using Event_Management.Application.Dto.UserDTO.Response;
 using Event_Management.Domain.Entity;
 using Event_Management.Domain.Models.ParticipantDTO;
 using System;
@@ -20,14 +21,10 @@ namespace Event_Management.Application.Dto.EventDTO.ResponseDTO
         public List<EventTag> eventTags { get; set; } = new List<EventTag>();
         public long StartDate { get; set; }
         public long EndDate { get; set; }
-        public string? CreatedBy { get; set; }
+        public CreatedByUserDto? Host { get; set; } = new CreatedByUserDto();
         public string? Image { get; set; }
         public string? Theme { get; set; }
-        public string? Location { get; set; }
-        public string? LocationId { get; set; }
-        public string? LocationAddress { get; set; }
-        public string? LocationUrl { get; set; } = null;
-        public string? LocationCoord { get; set; } = null;
+        public EventLocation? location { get; set; } = new EventLocation();
         public long CreatedAt { get; set; }
         public long? UpdatedAt { get; set; }
         public int? Capacity { get; set; }

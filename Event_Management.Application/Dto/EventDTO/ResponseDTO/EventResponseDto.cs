@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Event_Management.Application.Dto.UserDTO.Response;
 
 namespace Event_Management.Application.Dto.EventDTO.ResponseDTO
 {
@@ -18,14 +19,10 @@ namespace Event_Management.Application.Dto.EventDTO.ResponseDTO
         public List<EventTag> eventTags { get; set; } = new List<EventTag>();
         public long StartDate { get; set; }
         public long EndDate { get; set; }
-        public string? CreatedBy { get; set; }
+        public CreatedByUserDto? Host { get; set; } = new CreatedByUserDto();
         public string? Image { get; set; }
         public string? Theme { get; set; }
-        public string? Location { get; set; }
-        public string? LocationId { get; set; }
-        public string? LocationAddress { get; set; }
-        public string? LocationUrl { get; set; } = null;
-        public string? LocationCoord { get; set; } = null;
+        public EventLocation? Location { get; set; } = new EventLocation();
         public long CreatedAt { get; set; }
         public long? UpdatedAt { get; set; }
         public int? Capacity { get; set; }

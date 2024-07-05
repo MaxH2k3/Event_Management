@@ -10,6 +10,7 @@ using Event_Management.Domain.Enum;
 using Event_Management.Domain.Models.System;
 using Event_Management.Domain.Models.User;
 using Event_Management.Domain.UnitOfWork;
+using FluentEmail.Core;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -29,8 +30,8 @@ namespace Event_Management.Application.Service.Authentication
         private readonly IEmailService _emailService;
         private readonly IConfiguration _configuration;
         private readonly IAvatarApiClient _avatarApiClient;
-
-        public AuthenticateService(IUnitOfWork unitOfWork , IMapper mapper, IJWTService jWTService, IEmailService emailService, IConfiguration configuration, IAvatarApiClient avatarApiClient)
+        private readonly IGoogleTokenValidation _googleTokenValidation;
+        public AuthenticateService(IUnitOfWork unitOfWork , IMapper mapper, IJWTService jWTService, IEmailService emailService, IConfiguration configuration, IAvatarApiClient avatarApiClient, IGoogleTokenValidation googleTokenValidation)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -38,6 +39,7 @@ namespace Event_Management.Application.Service.Authentication
             _emailService = emailService;
             _configuration = configuration;
             _avatarApiClient = avatarApiClient;
+            _googleTokenValidation = googleTokenValidation;
         }
 
         public async Task<APIResponse> SignInWithOTP(string email)
@@ -90,6 +92,14 @@ namespace Event_Management.Application.Service.Authentication
 
         public async Task<APIResponse> SignInWithGoogle(LoginInWithGoogleDto googleUser)
         {
+            var tokenValidationResponse = await _googleTokenValidation.ValidateGoogleTokenAsync(googleUser.Token!);
+            if (tokenValidationResponse.StatusResponse != HttpStatusCode.OK)
+            {
+                return tokenValidationResponse;
+            }
+
+            //var email = tokenValidationResponse.Data!.ToString();
+            
             var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(googleUser.Email);
             if (user == null)
             {
@@ -123,7 +133,7 @@ namespace Event_Management.Application.Service.Authentication
             return new APIResponse
             {
                 StatusResponse = HttpStatusCode.OK,
-                Message = MessageUser.LoginSuccess,
+                Message = MessageUser.RegisterSuccess,
                 Data = new LoginResponseDto
                 {
                     UserData = userDTO,
@@ -132,52 +142,7 @@ namespace Event_Management.Application.Service.Authentication
             };
         }
 
-        public async Task<APIResponse> Register(RegisterUserDto newUser)
-        {
-            // CreatePasswordHash(newUser.Password!, out byte[] passwordHash, out byte[] passwordSalt);
-            string token = Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
-            var id = Guid.NewGuid();
-            var user = new User()
-            {
-                UserId = id,
-                Email = newUser.Email,
-                FullName = newUser.FullName,
-                Status = AccountStatus.Active.ToString(),
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = null,
-            };
-            bool isAdded = await _unitOfWork.UserRepository.AddUser(user);
-
-
-            var result = await _emailService.SendEmailWithTemplate("Views/Template/VerifyAccount.cshtml", "Testing", new UserMailDto()
-            {
-                UserName = newUser.FullName!,
-                UserId = id.ToString(),
-                Email = user.Email!,
-                Token = token
-            });
-            
-            if (isAdded)
-            {
-                await _unitOfWork.SaveChangesAsync();
-                return new APIResponse
-                {
-                    StatusResponse = HttpStatusCode.Created,
-                    Message = "User registered successfully",
-                    Data = user
-                };
-            }
-            else
-            {
-                return new APIResponse
-                {
-                    StatusResponse = HttpStatusCode.BadRequest,
-                    Message = "Failed to register user",
-                    Data = null
-                };
-            }
-
-        }
+        
         public async Task<APIResponse> Login(LoginInWithGoogleDto loginUser)
         {
             var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(loginUser.Email!);
@@ -224,6 +189,7 @@ namespace Event_Management.Application.Service.Authentication
                 }
             };
         }
+
         public async Task<APIResponse> Logout(string userId)
         {
 
@@ -422,5 +388,53 @@ namespace Event_Management.Application.Service.Authentication
                 RefreshToken = refreshToken
             };
         }
+
+
+        //public async Task<APIResponse> Register(RegisterUserDto newUser)
+        //{
+        //    // CreatePasswordHash(newUser.Password!, out byte[] passwordHash, out byte[] passwordSalt);
+        //    string token = Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
+        //    var id = Guid.NewGuid();
+        //    var user = new User()
+        //    {
+        //        UserId = id,
+        //        Email = newUser.Email,
+        //        FullName = newUser.FullName,
+        //        Status = AccountStatus.Active.ToString(),
+        //        CreatedAt = DateTime.UtcNow,
+        //        UpdatedAt = null,
+        //    };
+        //    bool isAdded = await _unitOfWork.UserRepository.AddUser(user);
+
+
+        //    var result = await _emailService.SendEmailWithTemplate("Views/Template/VerifyAccount.cshtml", "Testing", new UserMailDto()
+        //    {
+        //        UserName = newUser.FullName!,
+        //        UserId = id.ToString(),
+        //        Email = user.Email!,
+        //        Token = token
+        //    });
+
+        //    if (isAdded)
+        //    {
+        //        await _unitOfWork.SaveChangesAsync();
+        //        return new APIResponse
+        //        {
+        //            StatusResponse = HttpStatusCode.Created,
+        //            Message = "User registered successfully",
+        //            Data = user
+        //        };
+        //    }
+        //    else
+        //    {
+        //        return new APIResponse
+        //        {
+        //            StatusResponse = HttpStatusCode.BadRequest,
+        //            Message = "Failed to register user",
+        //            Data = null
+        //        };
+        //    }
+
+        //}
     }
 }

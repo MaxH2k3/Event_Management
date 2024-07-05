@@ -78,7 +78,7 @@ namespace Event_Management.Infrastructure.UnitOfWork
 
         public IPaymentTransactionRepository TransactionRepository => _transactionRepository ?? new PaymentTransactionRepository(_context);
 
-        public IUserRepository UserRepository => _userRepository ?? new UserRepository(_context);
+        public IUserRepository UserRepository => _userRepository ?? new UserRepository(_context, _cacheRepository);
         public IUserValidationRepository UserValidationRepository => _userValidationRepository ?? new UserValidationRepository(_context);
         public IRefreshTokenRepository RefreshTokenRepository => _refreshTokenRepository ?? new RefreshTokenRepository(_context);
 

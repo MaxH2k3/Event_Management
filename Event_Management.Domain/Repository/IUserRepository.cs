@@ -14,7 +14,7 @@ namespace Event_Management.Domain.Repository
         Task<bool> AddUser(User newUser);
         User? GetByEmail(string email);
         User? GetUserById(Guid userId);
-        Task<PagedList<User>> GetAllUser(int page, int eachPage, string sortBy, bool isAscending = false);
+        Task<IEnumerable<User>> GetAllUser(int page, int eachPage, string sortBy, bool isAscending = false);
         //Task<bool?> CheckRefreshTokenByUser(UserFieldType field, string value);
     }
 }

@@ -15,9 +15,12 @@ namespace Event_Management.Infrastructure.Repository.SQL
     {
         private readonly EventManagementContext _context;
 
-        public UserRepository(EventManagementContext context) : base(context)
+        private readonly ICacheRepository _cacheRepository;
+
+        public UserRepository(EventManagementContext context, ICacheRepository cacheRepository) : base(context)
         {
             _context = context;
+            _cacheRepository = cacheRepository;
         }
 
         public User? GetUserById(Guid userId)
@@ -65,25 +68,21 @@ namespace Event_Management.Infrastructure.Repository.SQL
             return true;
         }
 
-        public async Task<PagedList<User>> GetAllUser(int page, int pagesize, string sortBy, bool isAscending = false)
+        public async Task<IEnumerable<User>> GetAllUser(int page, int pagesize, string sortBy, bool isAscending = false)
         {
             var cacheKey = $"GetAllUser_{page}_{pagesize}_{sortBy}_{isAscending}";
-            var entities = await _context.Users.Include(a => a.Role).PaginateAndSort(page, pagesize, sortBy, isAscending).ToListAsync();
+            var cachedUsers = await _cacheRepository.GetAsync<IEnumerable<User>>(cacheKey);
 
-            return new PagedList<User>(entities, entities.Count, page, pagesize);
+            if (cachedUsers != null)
+            {
+                return cachedUsers;
+            }
 
+            IEnumerable<User> entities = await _context.Users.Include(a => a.Role).PaginateAndSort(page, pagesize, sortBy, isAscending).ToListAsync();
+            await _cacheRepository.SetAsync(cacheKey, entities);
+            return entities;
         }
 
-        //private async Task<List<User>> GetAllUsersCached()
-        //{
-        //    var users = await _uni_cacheRepository.GetAsync<List<User>>(UserCacheKey);
-        //    if (users == null || !users.Any())
-        //    {
-        //        users = await _context.Users.ToListAsync();
-        //        await _cacheRepository.SetAsync(UserCacheKey, users);
-        //    }
-
-        //    return users;
-        //}
+      
     }
 }

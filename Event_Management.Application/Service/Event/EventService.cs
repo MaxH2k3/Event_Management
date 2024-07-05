@@ -18,6 +18,7 @@ using Event_Management.Domain.UnitOfWork;
 using Microsoft.Extensions.Configuration;
 using System.Net;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 
 namespace Event_Management.Application.Service
@@ -54,17 +55,18 @@ namespace Event_Management.Application.Service
                 eventDetailDto.StartDate = DateTimeHelper.ToJsDateType(eventInfo.StartDate);
                 eventDetailDto.EndDate = DateTimeHelper.ToJsDateType((DateTime)eventInfo.EndDate);
                 var user = _userService.GetUserById((Guid)eventInfo.CreatedBy!);
-                eventDetailDto.CreatedBy = user.FullName;
-                eventDetailDto.Image = eventDetailDto.Image;
-                eventDetailDto.Theme = eventDetailDto.Theme;
-                eventDetailDto.Approval = eventDetailDto.Approval;
-                eventDetailDto.Capacity = eventDetailDto.Capacity;
+                eventDetailDto.Host.Name = user.FullName;
+                eventDetailDto.Host.Id = eventInfo.CreatedBy.HasValue ? eventInfo.CreatedBy.Value : null;
+                eventDetailDto.Image = eventInfo.Image;
+                eventDetailDto.Theme = eventInfo.Theme;
+                eventDetailDto.Approval = eventInfo.Approval.HasValue? eventInfo.Approval.Value: false;
+                eventDetailDto.Capacity = eventInfo.Capacity.HasValue ? eventInfo.Capacity.Value : 0;
                 eventDetailDto.CreatedAt = DateTimeHelper.ToJsDateType((DateTime)eventInfo.CreatedAt!);
-                eventDetailDto.Location = eventDetailDto.Location;
-                eventDetailDto.LocationId = eventInfo.LocationId;
-                eventDetailDto.LocationCoord = eventInfo.LocationCoord;
-                eventDetailDto.LocationAddress = eventInfo.LocationAddress;
-                eventDetailDto.LocationUrl = eventInfo.LocationUrl;
+                eventDetailDto.location.Name = eventInfo.Location;
+                eventDetailDto.location.Id = eventInfo.LocationId;
+                eventDetailDto.location.Coord = eventInfo.LocationCoord;
+                eventDetailDto.location.Address = eventInfo.LocationAddress;
+                eventDetailDto.location.Url = eventInfo.LocationUrl;
                 eventDetailDto.Fare = eventInfo.Fare;
                 eventDetailDto.UpdatedAt = eventInfo.UpdatedAt.HasValue ? DateTimeHelper.ToJsDateType(eventInfo.UpdatedAt.Value) : null;
                 eventDetailDto.eventTags = _mapper.Map<List<EventTag>>(eventInfo.Tags);
@@ -87,6 +89,11 @@ namespace Event_Management.Application.Service
         public bool IsValidEmail(string email)
         {
             return email.EndsWith("@fpt.edu.vn") || email.EndsWith("@fe.edu.vn") ? true : false;
+        }
+        private bool IsValidCoordinateString(string coordinateString)
+        {
+            string pattern = @"^-?\d+(?:\.\d+)?, *-?\d+(?:\.\d+)?$";
+            return Regex.IsMatch(coordinateString, pattern);
         }
         public async Task<APIResponse> AddEvent(EventRequestDto eventDto, string userId)// HttpContext context)
         {
@@ -134,11 +141,19 @@ namespace Event_Management.Application.Service
             }
 
             eventEntity.CreatedAt = DateTime.Now;
-            eventEntity.Location = eventDto.Location.Location;
-            eventEntity.LocationId = eventDto.Location.LocationId;
-            eventEntity.LocationAddress = eventDto.Location.LocationAddress;
-            eventEntity.LocationUrl = eventDto.Location.LocationUrl;
-            eventEntity.LocationCoord = eventDto.Location.LocationCoord;
+            eventEntity.Location = eventDto.Location.Name;
+            eventEntity.LocationId = eventDto.Location.Id;
+            eventEntity.LocationAddress = eventDto.Location.Address;
+            eventEntity.LocationUrl = eventDto.Location.Url;
+            if (!IsValidCoordinateString(eventDto.Location.Coord!))
+            {
+                return new APIResponse 
+                {
+                    Message = MessageEvent.LocationCoordInvalid,
+                    StatusResponse = HttpStatusCode.BadRequest
+                };
+            }
+            eventEntity.LocationCoord = eventDto.Location.Coord;
             eventEntity.Status = EventStatus.NotYet.ToString();
             foreach(int item in eventDto.TagId)
             {
@@ -174,15 +189,16 @@ namespace Event_Management.Application.Service
             response.Status = eventEntity.Status;
             response.Approval = eventEntity.Approval;
             response.Description = eventEntity.Description;
-            response.Location = eventEntity.Location;
-            response.LocationId = eventEntity.LocationId;
-            response.LocationCoord = eventEntity.LocationCoord;
-            response.LocationAddress = eventEntity.LocationAddress;
-            response.LocationUrl = eventEntity.LocationUrl;
+            response.Location.Name = eventEntity.Location;
+            response.Location.Id = eventEntity.LocationId;
+            response.Location.Coord = eventEntity.LocationCoord;
+            response.Location.Address = eventEntity.LocationAddress;
+            response.Location.Url = eventEntity.LocationUrl;
             response.EventId = eventEntity.EventId;
             response.EventName = eventEntity.EventName;
             var user = _userService.GetUserById((Guid)eventEntity.CreatedBy!);
-            response.CreatedBy = user.FullName;
+            response.Host.Name = user.FullName;
+            response.Host.Id = eventEntity.CreatedBy.HasValue ? eventEntity.CreatedBy.Value : null;
             response.Image = eventEntity.Image;
             response.Theme = eventEntity.Theme;
             response.eventTags = _mapper.Map<List<EventTag>>(eventEntity.Tags);

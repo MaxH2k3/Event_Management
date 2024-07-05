@@ -27,17 +27,17 @@ namespace Event_Management.Application.Validators
             RuleFor(x => x.EndDate)
                 .NotEmpty().WithMessage("EndDate is required.");
                 
-            RuleFor(x => x.Location.Location)
+            RuleFor(x => x.Location.Name)
                 .NotEmpty().WithMessage("Location is required!")
                 .Length(5, 500).WithMessage("Location name must be between 5 and 500 characters");
 
             /*RuleFor(x => x.Location.LocationId)
                 .NotEmpty().WithMessage("LocationId is required!");*/
 
-            RuleFor(x => x.Location.LocationAddress)
+            RuleFor(x => x.Location.Address)
                 .NotEmpty().WithMessage("LocationAddress is required!");
 
-            RuleFor(x => x.Location.LocationCoord)
+            RuleFor(x => x.Location.Coord)
                 .NotEmpty().WithMessage("LocationCoord is required!");
 
             RuleFor(x => x.Capacity)

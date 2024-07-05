@@ -37,19 +37,6 @@ namespace Event_Management.API.Controllers
         //     return Ok(response);
         // }
 
-        // [HttpPost("SignInWithGoogle")]
-        // [ProducesResponseType(StatusCodes.Status200OK)]
-        // [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        // public async Task<IActionResult> SignInWithGoogle([FromBody] LoginUserDto loginUser)
-        // {
-        //     var response = await _authenService.Login(loginUser);
-        //     if (response.StatusResponse != HttpStatusCode.OK)
-        //     {
-        //         return BadRequest(response);
-        //     }
-        //     return Ok(response);
-        // }
-
         [HttpPost("sign-in/google")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

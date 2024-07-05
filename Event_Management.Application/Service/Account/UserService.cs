@@ -33,12 +33,12 @@ namespace Event_Management.Application.Service
 
         public async Task<APIResponse> GetAllUser(int page, int eachPage)
         {
-            PagedList<User> users = await _unitOfWork.UserRepository.GetAllUser(page, eachPage, "Email");
+            IEnumerable<User> users = await _unitOfWork.UserRepository.GetAllUser(page, eachPage, "Email");
             return new APIResponse
             {
                 StatusResponse = HttpStatusCode.OK,
                 Message = "Ok",
-                Data = _mapper.Map<PagedList<UserResponseDto>>(users),
+                Data = _mapper.Map<IEnumerable<UserResponseDto>>(users),
             };
         }
 

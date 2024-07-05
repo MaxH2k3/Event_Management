@@ -28,6 +28,7 @@ namespace Event_Management.Domain.Configuration
             CreateMap<PagedList<User>, PagedList<UserResponseDto>>()
                 .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items)).ReverseMap();
 
+
             //Mapper Event
             CreateMap<Event, EventResponseDto>()
                 .ReverseMap();

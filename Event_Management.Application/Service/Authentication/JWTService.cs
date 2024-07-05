@@ -62,7 +62,7 @@ namespace Event_Management.Application.Service
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddDays(Convert.ToDouble(_jwtSettings.TokenExpiry)),
+                Expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_jwtSettings.TokenExpiry)),
                 Issuer = _jwtSettings.Issuer,
                 Audience = _jwtSettings.Audience,
                 SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
@@ -81,13 +81,13 @@ namespace Event_Management.Application.Service
         {
             var tokenValidationParameters = new TokenValidationParameters
             {
-                ValidateAudience = false,
-                ValidateIssuer = false,
-                //ValidateAudience = true,
-                //ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateIssuer = true,
+                ValidAudience = _jwtSettings.Audience,
+                ValidIssuer = _jwtSettings.Issuer,
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecurityKey)),
-                ValidateLifetime = true //false
+                ValidateLifetime = false //false
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -107,15 +107,6 @@ namespace Event_Management.Application.Service
             //extract userId and email from payload
             var userIdClaim = principal!.Claims.FirstOrDefault(c => c.Type == UserClaimType.UserId);
             var emailClaim = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
-            if (userIdClaim == null || emailClaim == null)
-            {
-                return new APIResponse
-                {
-                    StatusResponse = System.Net.HttpStatusCode.Unauthorized,
-                    Message = MessageUser.TokenInvalid,
-                    Data = null
-                };
-            }
 
             //check user existed in the refresh token
             var existUser = await _unitOfWork.RefreshTokenRepository.GetUserByIdAsync(Guid.Parse(userIdClaim!.Value));

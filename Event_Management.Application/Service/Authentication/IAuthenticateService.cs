@@ -8,10 +8,10 @@ namespace Event_Management.Application.Service.Authentication
         Task<APIResponse> SignInWithOTP(string email);
         Task<APIResponse> SignUpWithOTP(RegisterUserDto registerUser);
         Task<APIResponse> SignInWithGoogle(LoginInWithGoogleDto loginInWithGoogleDto);
-        Task<APIResponse> Register(RegisterUserDto registerUserDto);
         Task<APIResponse> Login(LoginInWithGoogleDto loginUser);
         Task<APIResponse> Logout(string userId);
         Task<APIResponse> ValidateAccountWithToken(string token, Guid id);
         Task<APIResponse> ValidateOTP(ValidateOtpDTO validateOtp);
+        //Task<APIResponse> Register(RegisterUserDto registerUserDto);
     }
 }
