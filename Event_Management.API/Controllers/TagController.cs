@@ -57,16 +57,16 @@ namespace Event_Management.API.Controllers
             APIResponse response = new APIResponse();
             var result = await _tagService.AddTag(tagDTO);
 
-            if (result)
+            if (result != null)
             {
                 response.StatusResponse = HttpStatusCode.Created;
-                response.Message = MessageCommon.SavingSuccesfully;
+                response.Message = MessageCommon.CreateSuccesfully;
                 response.Data = result;
                 
             } else
             {
                 response.StatusResponse = HttpStatusCode.BadRequest;
-                response.Message = MessageCommon.SavingFailed;
+                response.Message = MessageCommon.CreateFailed;
             }
             return response;
            

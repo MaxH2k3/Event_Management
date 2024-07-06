@@ -26,22 +26,26 @@ namespace Event_Management.API.Controllers
             _eventService = eventService;
         }
 
-		[HttpGet("participants")]
-		[Authorize]
+		[HttpGet("")]
+		//[Authorize]
 		public async Task<IActionResult> GetParticipantOnEvent([FromQuery] FilterParticipant filter)
 		{
 			var response = await _registerEventService.GetParticipantOnEvent(filter);
 
 			if (response.Any())
 			{
-				return Ok(response);
+                Response.Headers.Add("X-Total-Element", response.TotalItems.ToString());
+                Response.Headers.Add("X-Total-Page", response.TotalPages.ToString());
+                Response.Headers.Add("X-Current-Page", response.CurrentPage.ToString());
+
+                return Ok(response);
 			}
 
 			return BadRequest(response);
 		}
 
 		[HttpPost("register")]
-		public async Task<IActionResult> RegisterEvent(Guid eventId)
+		public async Task<IActionResult> RegisterEvent([FromBody] Guid eventId)
 		{
 			var registerEventModel = new RegisterEventModel
             {
@@ -62,7 +66,7 @@ namespace Event_Management.API.Controllers
 
         [HttpPost("add")]
 		[Authorize]
-        public async Task<IActionResult> AddParticipantToEvent(RegisterEventModel registerEventModel)
+        public async Task<IActionResult> AddParticipantToEvent([FromBody] RegisterEventModel registerEventModel)
         {
 			var isOwner = await _eventService.IsOwner(registerEventModel.EventId, Guid.Parse(User.GetUserIdFromToken()));
 
@@ -88,7 +92,7 @@ namespace Event_Management.API.Controllers
 
         [HttpPut("role")]
 		[Authorize]
-		public async Task<IActionResult> UpdateRoleEvent(RegisterEventModel registerEventModel)
+		public async Task<IActionResult> UpdateRoleEvent([FromBody] RegisterEventModel registerEventModel)
 		{
 			var response = await _registerEventService.UpdateRoleEvent(registerEventModel);
 

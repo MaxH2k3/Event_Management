@@ -21,17 +21,21 @@ namespace Event_Management.Domain.Service.TagEvent
             _mapper = mapper;
         }
 
-        public async Task<bool> AddTag(TagDto tagDTO)
+        public async Task<Tag> AddTag(TagDto tagDTO)
         {
             var existTag = await _unitOfWork.TagRepository.GetTagByName(tagDTO.TagName);
-            if(!existTag)
+            if(existTag == null)
             {
 				var tagEntity = _mapper.Map<Tag>(tagDTO);
 
 				await _unitOfWork.TagRepository.Add(tagEntity);
-				return await _unitOfWork.SaveChangesAsync();
+				await _unitOfWork.SaveChangesAsync();
+                var addedTag = await _unitOfWork.TagRepository.GetTagByName(tagDTO.TagName);
+                return addedTag;
+
+  
 			}
-            return false;
+            return null;
  
         }
 

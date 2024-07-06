@@ -10,8 +10,10 @@ namespace Event_Management.Domain.Models.ParticipantDTO
 {
 	public class FilterParticipant
 	{
+		[Range(1, int.MaxValue)]
 		public int Page { get; set; } = 1;
-		public int EachPage { get; set; } = 10;
+        [Range(1, int.MaxValue)]
+        public int EachPage { get; set; } = 10;
 		[Required]
 		public Guid? EventId { get; set; }
 		[Range(1, 4)]

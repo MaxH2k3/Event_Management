@@ -13,6 +13,6 @@ namespace Event_Management.Domain.Repository
     public interface ITagRepository : IExtendRepository<Tag>
     {
         //Task<PagedList<Tag>> GetAllTagByEventId(Guid eventId);
-        Task<bool> GetTagByName(string name);
+        Task<Tag> GetTagByName(string name);
     }
 }

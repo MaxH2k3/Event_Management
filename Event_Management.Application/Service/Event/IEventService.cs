@@ -12,6 +12,8 @@ namespace Event_Management.Application.Service
 	public interface IEventService
     {
         public Task<APIResponse> GetEventInfo(Guid eventId);
+        //public Task<PagedList<EventResponseDto>> GetEventsByTag(int tagId, int pageNo, int elementEachPage);
+        public Task<PagedList<EventResponseDto>> GetEventsByListTag(List<int> tagIds, int pageNo, int elementEachPage);
         public Task<PagedList<EventResponseDto>> GetAllEvents(EventFilterObject filter, int pageNo, int elementEachPage);
         public Task<PagedList<EventResponseDto>> GetUserParticipatedEvents(EventFilterObject filter, string userId, int pageNo, int elementEachPage);
         public Task<Dictionary<string, List<EventResponseDto>>> GetUserPastAndFutureEvents(Guid userId);

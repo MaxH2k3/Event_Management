@@ -55,14 +55,14 @@ namespace Event_Management.Application.Service
                 eventDetailDto.StartDate = DateTimeHelper.ToJsDateType(eventInfo.StartDate);
                 eventDetailDto.EndDate = DateTimeHelper.ToJsDateType((DateTime)eventInfo.EndDate);
                 var user = _userService.GetUserById((Guid)eventInfo.CreatedBy!);
-                eventDetailDto.Host.Name = user.FullName;
+                eventDetailDto.Host!.Name = user!.FullName;
                 eventDetailDto.Host.Id = eventInfo.CreatedBy.HasValue ? eventInfo.CreatedBy.Value : null;
                 eventDetailDto.Image = eventInfo.Image;
                 eventDetailDto.Theme = eventInfo.Theme;
                 eventDetailDto.Approval = eventInfo.Approval.HasValue? eventInfo.Approval.Value: false;
                 eventDetailDto.Capacity = eventInfo.Capacity.HasValue ? eventInfo.Capacity.Value : 0;
                 eventDetailDto.CreatedAt = DateTimeHelper.ToJsDateType((DateTime)eventInfo.CreatedAt!);
-                eventDetailDto.location.Name = eventInfo.Location;
+                eventDetailDto.location!.Name = eventInfo.Location!;
                 eventDetailDto.location.Id = eventInfo.LocationId;
                 eventDetailDto.location.Coord = eventInfo.LocationCoord;
                 eventDetailDto.location.Address = eventInfo.LocationAddress;
@@ -189,7 +189,7 @@ namespace Event_Management.Application.Service
             response.Status = eventEntity.Status;
             response.Approval = eventEntity.Approval;
             response.Description = eventEntity.Description;
-            response.Location.Name = eventEntity.Location;
+            response.Location!.Name = eventEntity.Location!;
             response.Location.Id = eventEntity.LocationId;
             response.Location.Coord = eventEntity.LocationCoord;
             response.Location.Address = eventEntity.LocationAddress;
@@ -197,7 +197,7 @@ namespace Event_Management.Application.Service
             response.EventId = eventEntity.EventId;
             response.EventName = eventEntity.EventName;
             var user = _userService.GetUserById((Guid)eventEntity.CreatedBy!);
-            response.Host.Name = user.FullName;
+            response.Host!.Name = user!.FullName;
             response.Host.Id = eventEntity.CreatedBy.HasValue ? eventEntity.CreatedBy.Value : null;
             response.Image = eventEntity.Image;
             response.Theme = eventEntity.Theme;
@@ -249,6 +249,24 @@ namespace Event_Management.Application.Service
                 (response, response.Count, pageNo, elementEachPage);
             return pages;
 
+        }
+        /*public async Task<PagedList<EventResponseDto>> GetEventsByTag(int tagId, int pageNo, int elementEachPage)
+        {
+            var result = await _unitOfWork.EventRepository.GetEventsByTag(tagId, pageNo, elementEachPage);
+            List<EventResponseDto> response = new List<EventResponseDto>();
+            response = result.Select(ToResponseDto).ToList();
+            PagedList<EventResponseDto> pages = new PagedList<EventResponseDto>
+                (response, response.Count, pageNo, elementEachPage);
+            return pages;
+        }*/
+        public async Task<PagedList<EventResponseDto>> GetEventsByListTag(List<int> tagIds, int pageNo, int elementEachPage)
+        {
+            var result = await _unitOfWork.EventRepository.GetEventsByListTags(tagIds, pageNo, elementEachPage);
+            List<EventResponseDto> response = new List<EventResponseDto>();
+            response = result.Select(ToResponseDto).ToList();
+            PagedList<EventResponseDto> pages = new PagedList<EventResponseDto>
+                (response, response.Count, pageNo, elementEachPage);
+            return pages;
         }
 
         public async Task<bool> UpdateEvent(EventRequestDto eventDto, string userId)

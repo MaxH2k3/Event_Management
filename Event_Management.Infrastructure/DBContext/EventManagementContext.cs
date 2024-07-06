@@ -58,7 +58,7 @@ namespace Event_Management.Infrastructure.DBContext
 
             //if (environment?.IsProduction() ?? true)
             //{
-                return config["ConnectionStrings:SQL"]!;
+                return config["LocalDB:SQL"]!;
             //}
             //else
             //{

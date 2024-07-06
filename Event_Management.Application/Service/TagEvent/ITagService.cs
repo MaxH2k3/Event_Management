@@ -18,7 +18,7 @@ namespace Event_Management.Domain.Service.TagEvent
         //Get all Tag for Event
         Task<PagedList<Tag>> GetAllTag(int page, int eachPage);
         
-        Task<bool> AddTag(TagDto tagDTO);
+        Task<Tag> AddTag(TagDto tagDTO);
         Task<bool> DeleteTag(int TagId);
         Task<Tag> GetById(int TagId);
         //Task<bool> UpdateTag(TagDto tagDTO);

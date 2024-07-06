@@ -34,6 +34,32 @@ namespace Event_Management.API.Controllers
             }
             return BadRequest(response);
         }
+        [HttpGet("tag")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetEventsByTag([FromQuery] List<int> TagId,
+                                                        [FromQuery, Range(1, int.MaxValue)] int pageNo = 1,
+                                                        [FromQuery, Range(1, int.MaxValue)] int elementEachPage = 10)
+        {
+            var response = await _eventService.GetEventsByListTag(TagId, pageNo, elementEachPage);
+            if(response.TotalItems > 0)
+            {
+                Response.Headers.Add("X-Total-Element", response.TotalItems.ToString());
+                Response.Headers.Add("X-Total-Page", response.TotalPages.ToString());
+                Response.Headers.Add("X-Current-Page", response.CurrentPage.ToString());
+                return Ok(new APIResponse
+                {
+                    StatusResponse = HttpStatusCode.OK,
+                    Message = MessageEvent.GetAllEvent,
+                    Data = response
+                });
+            }
+            return BadRequest(new APIResponse
+            {
+                StatusResponse = HttpStatusCode.NotFound,
+                Message = MessageCommon.NotFound,
+            });
+        }
 
         [HttpGet("")]
         [ProducesResponseType(StatusCodes.Status200OK)]

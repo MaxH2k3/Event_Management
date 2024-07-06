@@ -42,6 +42,36 @@ namespace Event_Management.Infrastructure.Repository.SQL
             }
             return new PagedList<Event>(result, totalEle, pageNo, elementEachPage);
         }
+        public async Task<PagedList<Event>> GetEventsByTag(int tagId, int pageNo, int elementEachPage)
+        {
+            var tag = await _context.Tags.FirstOrDefaultAsync(t => t.TagId == tagId);
+            
+            if (tag != null)
+            {
+                var events = await _context.Events.Include(e => e.Tags).Where(e => e.Tags.Contains(tag))
+                    .PaginateAndSort(pageNo, elementEachPage, "CreatedAt", false).ToListAsync();
+                var totalEle = events.Count;
+                return new PagedList<Event>(events, totalEle, pageNo, elementEachPage);
+            }
+            return new PagedList<Event>(new List<Event>(), 0, 0, 0);
+        }
+        public async Task<PagedList<Event>> GetEventsByListTags(List<int> tagIds, int pageNo, int elementEachPage)
+        {
+            var tags = await _context.Tags.Where(t => tagIds.Contains(t.TagId)).ToListAsync();
+
+            if (tags.Count > 0)
+            {
+                var events = await _context.Events.Include(e => e.Tags)
+                    .Where(e => e.Tags.Any(t => tags.Contains(t)))
+                    .PaginateAndSort(pageNo, elementEachPage, "CreatedAt", false)
+                    .ToListAsync();
+
+                var totalEle = events.Count;
+                return new PagedList<Event>(events, totalEle, pageNo, elementEachPage);
+            }
+
+            return new PagedList<Event>(new List<Event>(), 0, 0, 0);
+        }
         private async Task<List<Event>?> ApplySearch(string keyword)
         {
             if (string.IsNullOrWhiteSpace(keyword))

@@ -58,7 +58,7 @@ app.UseCors(app => app
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
 	app.UseSwagger();
-    app.UseSwaggerThemes(SwaggerHelper.GetTheme());
+    app.UseSwaggerThemes(Theme.Dracula);
 	app.UseSwaggerUI();
 }
 

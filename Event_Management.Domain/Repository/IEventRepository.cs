@@ -39,5 +39,8 @@ namespace Event_Management.Domain.Repository
 
         // get Event
         public Task<Event> getAllEventInfo(Guid eventId);
+
+        public Task<PagedList<Event>> GetEventsByTag(int tagId, int pageNo, int elementEachPage);
+        public Task<PagedList<Event>> GetEventsByListTags(List<int> tagIds, int pageNo, int elementEachPage);
     }
 }
