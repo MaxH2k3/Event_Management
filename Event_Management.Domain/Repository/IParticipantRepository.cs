@@ -10,5 +10,7 @@ namespace Event_Management.Domain.Repository
 		Task<bool> IsExistedOnEvent(Guid userId, Guid eventId);
 		Task<Participant?> GetParticipant(Guid userId, Guid eventId);
 		Task<PagedList<Participant>> FilterDataParticipant(FilterParticipant filter);
-	}
+		Task UpSert(Participant participant);
+
+    }
 }

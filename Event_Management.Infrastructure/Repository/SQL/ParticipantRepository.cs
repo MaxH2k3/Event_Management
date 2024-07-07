@@ -1,18 +1,17 @@
-﻿using Event_Management.Domain.Models.ParticipantDTO;
-using Event_Management.Domain;
+﻿using Event_Management.Domain.Entity;
 using Event_Management.Domain.Enum;
 using Event_Management.Domain.Models.Common;
+using Event_Management.Domain.Models.ParticipantDTO;
 using Event_Management.Domain.Repository;
 using Event_Management.Domain.Repository.Common;
 using Event_Management.Infrastructure.DBContext;
 using Event_Management.Infrastructure.Extensions;
 using Event_Management.Infrastructure.Repository.Common;
 using Microsoft.EntityFrameworkCore;
-using Event_Management.Domain.Entity;
 
 namespace Event_Management.Infrastructure.Repository.SQL
 {
-	public class ParticipantRepository : SQLExtendRepository<Participant>, IParticipantRepository
+    public class ParticipantRepository : SQLExtendRepository<Participant>, IParticipantRepository
     {
         private readonly EventManagementContext _context;
 		private readonly ICacheRepository _cacheRepository;
@@ -67,9 +66,6 @@ namespace Event_Management.Infrastructure.Repository.SQL
 		{
 			switch (sortBy)
 			{
-				//case ParticipantSortBy.Name:
-				//	participants = participants.OrderBy(p => p.User.FirstName + p.User.LastName);
-				//	break;
 				case ParticipantSortBy.CheckedIn:
 					participants = participants.OrderByDescending(p => p.CheckedIn);
 					break;
@@ -77,12 +73,28 @@ namespace Event_Management.Infrastructure.Repository.SQL
 					participants = participants.OrderBy(p => p.CreatedAt);
 					break;
 				default:
-					// Xử lý trường hợp không hợp lệ (nếu cần)
 					break;
 			}
 
 			return participants;
 		}
+
+		public async Task UpSert(Participant participant)
+		{
+			var participantExist = _context.Participants.FirstOrDefault(p => p.UserId.Equals(participant.UserId) && p.EventId.Equals(participant.EventId));
+
+			if(participantExist == null)
+			{
+				await _context.Participants.AddAsync(participant);
+            } else
+			{
+				participantExist.RoleEventId = participant.RoleEventId;
+				participantExist.Status = participant.Status;
+                _context.Participants.Update(participantExist);
+            }
+
+        }
+
 	}
 
 }

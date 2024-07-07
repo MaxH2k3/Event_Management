@@ -2,9 +2,9 @@
 
 namespace Event_Management.Domain.Helper
 {
-    public class DateTimeHelper
+    public static class DateTimeHelper
     {
-        public static DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        public static DateTime dateTime = new DateTime(1970, 1, 1, 7, 0, 0, DateTimeKind.Utc);
         public static long epochTime = dateTime.Ticks;
         public static long ToJsDateType(DateTime dateTime)
         {
@@ -39,9 +39,9 @@ namespace Event_Management.Domain.Helper
         }
         public static bool ValidateStartTimeAndEndTime(long startTime, long endTime)
         {
-            long startTimeTick = startTime + 60000 * 30;
-            long now = ToJsDateType(DateTime.Now);
-            return startTimeTick > now && endTime > startTimeTick;
+            DateTime check = DateTime.Now.AddHours(12);
+            long now = ToJsDateType(check);
+            return startTime > now && endTime > startTime;
         }
         public static DateTime ToDateTime(long tick)
         {
@@ -54,5 +54,16 @@ namespace Event_Management.Domain.Helper
             // Example: "0 0 12 * * ? *" (every day at 12:00 PM)
             return $"{dateTime.Second} {dateTime.Minute} {dateTime.Hour} {dateTime.Day} {dateTime.Month} ? {dateTime.Year}";
         }
+
+        public static string ToOnlyDate(this DateTime dateTime)
+        {
+            return dateTime.ToString("dd/MM/yyyy");
+        }
+
+        public static string GetTimeRange(DateTime startDate, DateTime endDate)
+        {
+            return startDate.ToString("HH:mm:tt") + " - " + endDate.ToString("HH:mm:tt");
+        }
+
     }
 }

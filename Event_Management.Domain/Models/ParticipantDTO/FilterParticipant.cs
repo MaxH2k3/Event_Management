@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Event_Management.Domain.Models.ParticipantDTO
@@ -15,7 +16,7 @@ namespace Event_Management.Domain.Models.ParticipantDTO
         [Range(1, int.MaxValue)]
         public int EachPage { get; set; } = 10;
 		[Required]
-		public Guid? EventId { get; set; }
+		public Guid EventId { get; set; }
 		[Range(1, 4)]
 		public int? RoleEventId { get; set; }
 		public DateTime? CheckedIn { get; set; }

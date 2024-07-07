@@ -26,7 +26,7 @@ namespace Event_Management.Domain.Entity
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public int? Capacity { get; set; }
-        public bool? Approval { get; set; }
+        public bool Approval { get; set; }
         public decimal? Fare { get; set; }
         public string? LocationUrl { get; set; }
         public string? LocationCoord { get; set; }

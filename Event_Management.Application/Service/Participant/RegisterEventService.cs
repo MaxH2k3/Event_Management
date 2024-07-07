@@ -1,8 +1,12 @@
 ﻿using AutoMapper;
-using Event_Management.Application.Helper;
+using Event_Management.Application.BackgroundTask;
 using Event_Management.Application.Message;
 using Event_Management.Application.Service;
+using Event_Management.Application.ServiceTask;
+using Event_Management.Domain.Constants;
 using Event_Management.Domain.Entity;
+using Event_Management.Domain.Enum;
+using Event_Management.Domain.Helper;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Models.ParticipantDTO;
 using Event_Management.Domain.Models.System;
@@ -16,14 +20,15 @@ namespace Event_Management.Domain.Service
 	{
 		private readonly IUnitOfWork _unitOfWork;
 		private readonly IMapper _mapper;
-		private readonly IEmailService _emailService;
+		private readonly SendMailTask _sendMailTask;
+        private object currentEvent;
 
         public RegisterEventService(IUnitOfWork unitOfWork, IMapper mapper,
-			IEmailService emailService)
+			SendMailTask sendMailTask)
 		{
 			_unitOfWork = unitOfWork;
 			_mapper = mapper;
-            _emailService = emailService;
+            _sendMailTask = sendMailTask;
         }
 
 		public async Task<APIResponse> DeleteParticipant(Guid userId, Guid eventId)
@@ -60,20 +65,40 @@ namespace Event_Management.Domain.Service
 
 		public async Task<APIResponse> RegisterEvent(RegisterEventModel registerEventModel)
 		{
-			Participant participant = new()
+			var isExistedOnEvent = await _unitOfWork.ParticipantRepository.IsExistedOnEvent(registerEventModel.UserId, registerEventModel.EventId);
+
+			if(isExistedOnEvent)
+			{
+				return new APIResponse()
+				{
+					StatusResponse = HttpStatusCode.Conflict,
+					Message = MessageParticipant.ExistedOnEvent,
+                    Data = new { registerEventModel.UserId, registerEventModel.EventId }
+                };
+			}
+
+            var currentEvent = await _unitOfWork.EventRepository.GetById(registerEventModel.EventId);
+
+            Participant participant = new()
 			{
 				UserId = registerEventModel.UserId,
 				EventId = registerEventModel.EventId,
 				RoleEventId = registerEventModel.RoleEventId,
-				CreatedAt = DateTime.Now
-			};
-
+				CreatedAt = DateTime.Now,
+				IsCheckedMail = false,
+                Status = currentEvent!.Approval ? ParticipantStatus.Pending.ToString() : ParticipantStatus.Confirmed.ToString()
+            };
 
 			await _unitOfWork.ParticipantRepository.Add(participant);
 
 			if(await _unitOfWork.SaveChangesAsync())
 			{
-				return new APIResponse()
+				if(!currentEvent!.Approval)
+				{
+                    _sendMailTask.SendMail(registerEventModel);
+                }
+				
+                return new APIResponse()
 				{
 					StatusResponse = HttpStatusCode.Created,
 					Message = MessageCommon.SavingSuccesfully,
@@ -88,6 +113,40 @@ namespace Event_Management.Domain.Service
 				Data = registerEventModel
 			};
 		}
+
+		public async Task<APIResponse> AddToEvent(RegisterEventModel registerEventModel)
+		{
+            Participant participant = new()
+            {
+                UserId = registerEventModel.UserId,
+                EventId = registerEventModel.EventId,
+                RoleEventId = registerEventModel.RoleEventId,
+                CreatedAt = DateTime.Now,
+                IsCheckedMail = false,
+                Status = ParticipantStatus.Pending.ToString()
+            };
+
+            await _unitOfWork.ParticipantRepository.UpSert(participant);
+
+            if (await _unitOfWork.SaveChangesAsync())
+            {
+                _sendMailTask.SendMail(registerEventModel);
+
+                return new APIResponse()
+                {
+                    StatusResponse = HttpStatusCode.Created,
+                    Message = MessageCommon.SavingSuccesfully,
+                    Data = registerEventModel
+                };
+            }
+
+            return new APIResponse()
+            {
+                StatusResponse = HttpStatusCode.NotModified,
+                Message = MessageCommon.SavingFailed,
+                Data = registerEventModel
+            };
+        }
 
 		public async Task<APIResponse> UpdateRoleEvent(RegisterEventModel registerEventModel)
 		{
@@ -167,14 +226,37 @@ namespace Event_Management.Domain.Service
 			return _mapper.Map<PagedList<ParticipantEventModel>>(participants);
 		}
 
-		public async Task SendTest()
+		public async Task<APIResponse> AcceptRegisterEvent(Guid eventId, Guid userId)
 		{
+            var participant = await _unitOfWork.ParticipantRepository.GetParticipant(userId, eventId);
 
-            var bytes = QRCodeHelper.GenerateQRCode("okokok");
-			await _emailService.SendEmailTicket("Views/Template/TicketUser.cshtml", "Your Ticket", new TicketModel()
+            if (participant == null)
 			{
-				Email = "huy110903@gmail.com"
-			});
+                return new APIResponse()
+				{
+                    StatusResponse = HttpStatusCode.NotFound,
+                    Message = MessageCommon.NotFound
+                };
+            }
+
+            participant.Status = ParticipantStatus.Confirmed.ToString();
+
+            await _unitOfWork.ParticipantRepository.Update(participant);
+
+            if (await _unitOfWork.SaveChangesAsync())
+			{
+                return new APIResponse()
+				{
+                    StatusResponse = HttpStatusCode.OK,
+                    Message = MessageParticipant.AcceptParticipant
+                };
+            }
+
+            return new APIResponse()
+			{
+                StatusResponse = HttpStatusCode.NotModified,
+                Message = MessageParticipant.AcceptParticipantFailed
+            };
         }
 
 	}

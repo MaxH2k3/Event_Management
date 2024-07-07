@@ -1,16 +1,12 @@
 ﻿using Event_Management.Application.Dto.EventDTO.ResponseDTO;
-using Event_Management.Domain;
-using Event_Management.Domain.Enum;
 using Event_Management.Domain.Entity;
+using Event_Management.Domain.Enum;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Repository;
-using Event_Management.Domain.Repository.Common;
 using Event_Management.Infrastructure.DBContext;
 using Event_Management.Infrastructure.Extensions;
 using Event_Management.Infrastructure.Repository.Common;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
-using System.Globalization;
 
 namespace Event_Management.Infrastructure.Repository.SQL
 {
@@ -95,7 +91,7 @@ namespace Event_Management.Infrastructure.Repository.SQL
             if (!string.IsNullOrWhiteSpace(filter.Location))
             {
                 eventList = from e in eventList
-                            where e.Location!.Contains(filter.Location)
+                            where (e.Location!.Contains(filter.Location)) || (e.LocationAddress!.Contains(filter.Location))
                             select e;
             }
             if (filter.StartDateFrom != null)
@@ -356,14 +352,14 @@ namespace Event_Management.Infrastructure.Repository.SQL
             List<EventLocationLeaderBoardDto> result = new List<EventLocationLeaderBoardDto>();
             var temp = _context.Events
                 .AsEnumerable()
-                .GroupBy(e => e.Location!)
+                .GroupBy(e => e.LocationAddress!)
                 .OrderByDescending(g => g.Count())
                 .Take(10)
                 .ToDictionary(g => g.Key, g => g.Count());
             foreach (var item in temp)
             {
                 EventLocationLeaderBoardDto locationInfo = new EventLocationLeaderBoardDto();
-                var eventTemp = _context.Events.FirstOrDefault(e => e.Location.Equals(item.Key));
+                var eventTemp = _context.Events.FirstOrDefault(e => e.LocationAddress.Equals(item.Key));
                 locationInfo.totalevent = item.Value;
                 locationInfo.Location = item.Key;
                 locationInfo.LocationId = eventTemp.LocationId;
@@ -404,10 +400,16 @@ namespace Event_Management.Infrastructure.Repository.SQL
             return result != null ? result : null;
         }
 
-        public async Task<bool> IsOwner(Guid user, Guid eventId)
+        public async Task<bool> IsOwner(Guid userId, Guid eventId)
         {
-            return await _context.Events.AnyAsync(e => e.EventId.Equals(eventId) && e.CreatedBy.Equals(user));
+            return await _context.Events.AnyAsync(e => e.EventId.Equals(eventId) && e.CreatedBy.Equals(userId));
         }
 
+        public async Task<Event?> GetEventById(Guid eventId)
+        {
+            return await _context.Events
+                .Include(e => e.CreatedByNavigation)
+                .FirstOrDefaultAsync(e => e.EventId.Equals(eventId));
+        }
     }
 }

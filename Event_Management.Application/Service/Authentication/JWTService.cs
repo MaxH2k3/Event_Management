@@ -42,8 +42,8 @@ namespace Event_Management.Application.Service
             List<Claim> claims = new List<Claim>
             {
                 new Claim(UserClaimType.UserId, existUser.UserId.ToString()),
-                new Claim(ClaimTypes.Email, existUser.Email!),
-                new Claim(ClaimTypes.Role, existUser.Role.RoleName)
+                new Claim(UserClaimType.Email, existUser.Email!),
+                new Claim(UserClaimType.Role, existUser.Role.RoleName)
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(

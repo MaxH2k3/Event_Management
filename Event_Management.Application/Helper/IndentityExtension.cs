@@ -1,4 +1,5 @@
 ﻿using Azure;
+using Event_Management.Domain.Constants;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -42,6 +43,17 @@ namespace Event_Management.Domain.Helper
                 return string.Empty;
             }
         }
+
+        public static string GetEmailFromToken(this IPrincipal user)
+        {
+            if (user == null)
+                return string.Empty;
+
+            var identity = user.Identity as ClaimsIdentity;
+            IEnumerable<Claim> claims = identity!.Claims;
+            return claims.FirstOrDefault(s => s.Type.Equals(UserClaimType.Email))?.Value ?? string.Empty;
+        }
+
         private static string? GetJwtTokenFromHeader(HttpContext httpContext)
         {
             if (httpContext.Request.Headers.TryGetValue("Authorization", out var authHeader))

@@ -20,7 +20,11 @@ namespace Event_Management.Domain.Service
 
 		// Get all participant on event
 		Task<PagedList<ParticipantEventModel>> GetParticipantOnEvent(FilterParticipant filter);
-		Task SendTest();
 
+        // Accept register event
+        Task<APIResponse> AcceptRegisterEvent(Guid eventId, Guid userId);
+
+        // Add user to event
+        Task<APIResponse> AddToEvent(RegisterEventModel registerEventModel);
     }
 }

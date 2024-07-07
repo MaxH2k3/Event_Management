@@ -31,7 +31,7 @@ namespace Event_Management.Application.Service
         private readonly IImageService _fileService;
         private readonly ITagService _tagService;
         private readonly IUserService _userService;
-
+        private readonly long dateTimeConvertValue = 25200000; //-7h to match JS dateTime type
         public EventService(IUnitOfWork unitOfWork, IMapper mapper, ITagService tagService,
             IQuartzService quartzService, IImageService fileService, IUserService userService)
         {
@@ -56,10 +56,11 @@ namespace Event_Management.Application.Service
                 eventDetailDto.EndDate = DateTimeHelper.ToJsDateType((DateTime)eventInfo.EndDate);
                 var user = _userService.GetUserById((Guid)eventInfo.CreatedBy!);
                 eventDetailDto.Host!.Name = user!.FullName;
+                eventDetailDto.Host.avatar = user!.Avatar;
                 eventDetailDto.Host.Id = eventInfo.CreatedBy.HasValue ? eventInfo.CreatedBy.Value : null;
                 eventDetailDto.Image = eventInfo.Image;
                 eventDetailDto.Theme = eventInfo.Theme;
-                eventDetailDto.Approval = eventInfo.Approval.HasValue? eventInfo.Approval.Value: false;
+                eventDetailDto.Approval = eventInfo.Approval ? eventInfo.Approval : false;
                 eventDetailDto.Capacity = eventInfo.Capacity.HasValue ? eventInfo.Capacity.Value : 0;
                 eventDetailDto.CreatedAt = DateTimeHelper.ToJsDateType((DateTime)eventInfo.CreatedAt!);
                 eventDetailDto.location!.Name = eventInfo.Location!;
@@ -109,8 +110,8 @@ namespace Event_Management.Application.Service
             }
             var eventEntity = _mapper.Map<Event>(eventDto);
             eventEntity.EventId = Guid.NewGuid();
-            eventEntity.StartDate = DateTimeOffset.FromUnixTimeMilliseconds(eventDto.StartDate).DateTime;
-            eventEntity.EndDate = DateTimeOffset.FromUnixTimeMilliseconds(eventDto.EndDate).DateTime;
+            eventEntity.StartDate = DateTimeOffset.FromUnixTimeMilliseconds(eventDto.StartDate + dateTimeConvertValue).DateTime;
+            eventEntity.EndDate = DateTimeOffset.FromUnixTimeMilliseconds(eventDto.EndDate + dateTimeConvertValue).DateTime;
             if (eventDto.Image != null)
             {
                 eventEntity.Image = await _fileService.UploadImage(eventDto.Image, eventEntity.EventId);
@@ -139,7 +140,7 @@ namespace Event_Management.Application.Service
                 };
                 }
             }
-
+            eventEntity.Fare = eventDto.Ticket;
             eventEntity.CreatedAt = DateTime.Now;
             eventEntity.Location = eventDto.Location.Name;
             eventEntity.LocationId = eventDto.Location.Id;
@@ -181,7 +182,6 @@ namespace Event_Management.Application.Service
         }
         private EventResponseDto ToResponseDto(Event eventEntity)
         { 
-            long epochTime = DateTimeHelper.epochTime;
             EventResponseDto response = new EventResponseDto();
             response.StartDate = DateTimeHelper.ToJsDateType(eventEntity.StartDate);
             response.EndDate = DateTimeHelper.ToJsDateType(eventEntity.EndDate);
@@ -199,10 +199,11 @@ namespace Event_Management.Application.Service
             var user = _userService.GetUserById((Guid)eventEntity.CreatedBy!);
             response.Host!.Name = user!.FullName;
             response.Host.Id = eventEntity.CreatedBy.HasValue ? eventEntity.CreatedBy.Value : null;
+            response.Host.avatar = user!.Avatar;
             response.Image = eventEntity.Image;
             response.Theme = eventEntity.Theme;
             response.eventTags = _mapper.Map<List<EventTag>>(eventEntity.Tags);
-            response.UpdatedAt = eventEntity.UpdatedAt.HasValue ? DateTimeHelper.ToJsDateType(eventEntity.UpdatedAt.Value) : null;  
+            response.UpdatedAt = eventEntity.UpdatedAt.HasValue ? DateTimeHelper.ToJsDateType(eventEntity.UpdatedAt.Value): null;  
             response.Fare = eventEntity.Fare;
             response.Capacity = eventEntity.Capacity;
             return response;

@@ -1,4 +1,5 @@
-﻿using Event_Management.Application.Dto.PaymentDTO;
+﻿using Event_Management.Application.BackgroundTask;
+using Event_Management.Application.Dto.PaymentDTO;
 using Event_Management.Application.ExternalServices;
 using Event_Management.Application.Service;
 using Event_Management.Application.Service.Account;
@@ -7,6 +8,7 @@ using Event_Management.Application.Service.FileService;
 using Event_Management.Application.Service.Job;
 using Event_Management.Application.Service.Payments;
 using Event_Management.Application.Service.Payments.PayPalService;
+using Event_Management.Application.ServiceTask;
 using Event_Management.Application.Validators;
 using Event_Management.Domain.Repository.Common;
 using Event_Management.Domain.Service;
@@ -21,12 +23,12 @@ using Event_Management.Infrastructure.UnitOfWork;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
 using Quartz.Impl;
 using Serilog;
 using Stripe;
-using System.Reflection;
 using System.Text.Json;
 //using Event_Management.Application.Service.SQL;
 
@@ -79,9 +81,6 @@ namespace Event_Management.Infastructure.Configuration
             //Setup FluentValidation
             builder.Services.AddValidatorsFromAssemblyContaining<EventRequestDtoValidator>();
 
-            //Setup VNP
-            //services.Configure<VNPAYPaymentRequest>(configuration.GetSection("VNPAY"));
-
 			// Set up SignalR
 			builder.Services
 				.AddSignalR(option =>
@@ -96,11 +95,10 @@ namespace Event_Management.Infastructure.Configuration
 				});
 			
             
-
-            // Set up services to the container.
+            // Set up schedule job.
             builder.Services.AddSingleton<StdSchedulerFactory>();
-            // Set up services to the container.
 
+            // Set up services to the container.
             builder.Services.AddScoped<IAvatarApiClient, AvatarApiClient>();
             builder.Services.AddScoped<IGoogleTokenValidation, GoogleTokenValidation>();
             builder.Services.AddScoped<IRegisterEventService, RegisterEventService>();
@@ -108,10 +106,7 @@ namespace Event_Management.Infastructure.Configuration
 			builder.Services.AddScoped<IUserService, UserService>();
 			builder.Services.AddScoped<IAuthenticateService, AuthenticateService>();
             builder.Services.AddScoped<Event_Management.Application.Service.IEventService, Event_Management.Application.Service.EventService>();
-            //builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IJWTService, JWTService>();
-            
-			
             builder.Services.AddScoped<IPayPalService, PayPalService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
 			builder.Services.AddScoped<ISponsorEventService, SponsorEventService>();
@@ -119,22 +114,18 @@ namespace Event_Management.Infastructure.Configuration
 			builder.Services.AddScoped<IEmailService, EmailService>();
 			builder.Services.AddScoped<ICacheRepository, CacheRepository>();
 			builder.Services.AddScoped<IImageService, ImageService>();
-			//builder.Services.AddScoped<ISqlService, SqlService>();
-			//builder.Services.AddScoped<ICurrentUser, CurrentUserService>();
 			builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IQuartzService, QuartzService>();
+            builder.Services.AddScoped<SendMailTask>();
 
             builder.Services.AddTransient<PaymentHandler>();
 
+            // Set up background task
+            builder.Services.AddHostedService<QueuedHostedService>();
+            builder.Services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
+
             //Add MediatR
             builder.Services.AddMediatR(typeof(PaymentDto).Assembly);
-            
-            /*builder.Services.AddMediatR(r =>
-            {
-                r.RegisterServicesFromAssembly(typeof(PaymentDto).Assembly);
-            });*/
-
-            //
 
             //Set up Quartz
             builder.Services.AddQuartz(q =>
@@ -161,7 +152,6 @@ namespace Event_Management.Infastructure.Configuration
                 q.WaitForJobsToComplete = true;
                 q.AwaitApplicationStarted = true;
             });
-            //builder.Services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
 
             builder.Services.AddHttpClient(); // Add this line to register the IHttpClientFactory service
 

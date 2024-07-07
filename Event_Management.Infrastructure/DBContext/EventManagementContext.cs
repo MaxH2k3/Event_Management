@@ -42,7 +42,8 @@ namespace Event_Management.Infrastructure.DBContext
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
-            { optionsBuilder.UseSqlServer(GetConnectionString());
+            { 
+                optionsBuilder.UseSqlServer(GetConnectionString());
             }
         }
 
@@ -56,13 +57,13 @@ namespace Event_Management.Infrastructure.DBContext
 
             .Build();
 
-            //if (environment?.IsProduction() ?? true)
-            //{
+            /*if (environment?.IsProduction() ?? true)
+            {
                 return config["ConnectionStrings:SQL"]!;
-            //}
-            //else
-            //{
-                //return config["LocalDB:SQL"]!;
+            }
+            else
+            {*/
+                return config["LocalDB:SQL"]!;
             //}
 
         }

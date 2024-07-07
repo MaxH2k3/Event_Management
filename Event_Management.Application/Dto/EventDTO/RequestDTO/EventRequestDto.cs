@@ -39,6 +39,6 @@ namespace Event_Management.Application
         public bool? Approval { get; set; } = false;
 
         [Range(0, 5000000, ErrorMessage = "Maximum ticket price is 5 000 000")]
-        public double Ticket { get; set; } = 0;
+        public decimal? Ticket { get; set; } = 0;
     }
 }

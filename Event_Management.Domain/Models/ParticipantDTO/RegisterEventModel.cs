@@ -11,5 +11,16 @@ namespace Event_Management.Domain.Models.ParticipantDTO
 		[Required]
 		[Range(1, 4)]
 		public int RoleEventId { get; set; }
-	}
+
+        public RegisterEventModel()
+        {
+        }
+        public RegisterEventModel(Guid userId, Guid eventId, int roleId)
+        {
+			EventId = eventId;
+            UserId = userId;
+            RoleEventId = roleId;
+        }
+
+    }
 }
