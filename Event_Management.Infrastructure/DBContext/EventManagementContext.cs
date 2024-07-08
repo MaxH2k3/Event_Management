@@ -57,14 +57,14 @@ namespace Event_Management.Infrastructure.DBContext
 
             .Build();
 
-//            return config["ConnectionStrings:SQL"]!;
+            return config["ConnectionStrings:SQL"]!;
             /*if (environment?.IsProduction() ?? true)
             {
                 return config["ConnectionStrings:SQL"]!;
             }
             else
             {*/
-            return config["LocalDB:SQL"]!;
+            //return config["LocalDB:SQL"]!;
             //return config["ConnectionStrings:SQL"]!;
             //}
 
