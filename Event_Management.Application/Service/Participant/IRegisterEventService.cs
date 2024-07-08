@@ -1,4 +1,5 @@
-﻿using Event_Management.Domain.Models.Common;
+﻿using Event_Management.Application.Dto.UserDTO.Response;
+using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Models.ParticipantDTO;
 using Event_Management.Domain.Models.System;
 
@@ -26,5 +27,12 @@ namespace Event_Management.Domain.Service
 
         // Add user to event
         Task<APIResponse> AddToEvent(RegisterEventModel registerEventModel);
+
+        // Get current user on current event
+        Task<ParticipantEventModel> GetCurrentUser(Guid userId, Guid eventId);
+
+		Task<APIResponse> GetEventParticipants(Guid eventId);
+
+        Task<APIResponse> UserRegisterStatus(Guid eventId, string? userId);
     }
 }

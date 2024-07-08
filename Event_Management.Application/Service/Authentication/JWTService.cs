@@ -106,7 +106,7 @@ namespace Event_Management.Application.Service
 
             //extract userId and email from payload
             var userIdClaim = principal!.Claims.FirstOrDefault(c => c.Type == UserClaimType.UserId);
-            var emailClaim = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
+            var emailClaim = principal.Claims.FirstOrDefault(c => c.Type == UserClaimType.Email);
 
             //check user existed in the refresh token
             var existUser = await _unitOfWork.RefreshTokenRepository.GetUserByIdAsync(Guid.Parse(userIdClaim!.Value));
@@ -124,6 +124,10 @@ namespace Event_Management.Application.Service
             var existingRefreshToken = await _unitOfWork.RefreshTokenRepository.GetTokenAsync(token.RefreshToken!);
             if (existingRefreshToken == null || existingRefreshToken.ExpireAt <= DateTime.UtcNow)
             {
+                if (existingRefreshToken != null && existingRefreshToken.ExpireAt <= DateTime.UtcNow)
+                {
+                    await _unitOfWork.RefreshTokenRepository.RemoveRefreshTokenAsync(existingRefreshToken.Token);
+                }
                 return new APIResponse
                 {
                     StatusResponse = System.Net.HttpStatusCode.Unauthorized,
@@ -139,7 +143,7 @@ namespace Event_Management.Application.Service
             await _unitOfWork.RefreshTokenRepository.RemoveRefreshTokenAsync(existingRefreshToken.Token);
 
             // generate new tokens
-            var newAccessToken = await GenerateAccessToken(emailClaim.Value);
+            var newAccessToken = await GenerateAccessToken(emailClaim!.Value);
             var newRefreshToken = GenerateRefreshToken();
 
             var refreshTokenEntity = new RefreshToken

@@ -11,6 +11,7 @@ namespace Event_Management.Domain.Repository
 		Task<Participant?> GetParticipant(Guid userId, Guid eventId);
 		Task<PagedList<Participant>> FilterDataParticipant(FilterParticipant filter);
 		Task UpSert(Participant participant);
+		Task<Participant?> GetDetailParticipant(Guid userId, Guid eventId);
 
     }
 }

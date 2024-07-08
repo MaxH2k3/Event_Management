@@ -4,6 +4,7 @@ using Event_Management.Application.ExternalServices;
 using Event_Management.Application.Service;
 using Event_Management.Application.Service.Account;
 using Event_Management.Application.Service.Authentication;
+using Event_Management.Application.Service.FeedbackEvent;
 using Event_Management.Application.Service.FileService;
 using Event_Management.Application.Service.Job;
 using Event_Management.Application.Service.Payments;
@@ -105,7 +106,7 @@ namespace Event_Management.Infastructure.Configuration
 			builder.Services.AddScoped<ITagService, TagService>();
 			builder.Services.AddScoped<IUserService, UserService>();
 			builder.Services.AddScoped<IAuthenticateService, AuthenticateService>();
-            builder.Services.AddScoped<Event_Management.Application.Service.IEventService, Event_Management.Application.Service.EventService>();
+            builder.Services.AddScoped<IEventService, Event_Management.Application.Service.EventService>();
             builder.Services.AddScoped<IJWTService, JWTService>();
             builder.Services.AddScoped<IPayPalService, PayPalService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
@@ -116,6 +117,7 @@ namespace Event_Management.Infastructure.Configuration
 			builder.Services.AddScoped<IImageService, ImageService>();
 			builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IQuartzService, QuartzService>();
+            builder.Services.AddScoped<IFeedbackService, FeedbackSevice>();
             builder.Services.AddScoped<SendMailTask>();
 
             builder.Services.AddTransient<PaymentHandler>();

@@ -32,9 +32,16 @@ namespace Event_Management.Infrastructure.Repository.SQL
 			return await _context.Participants.FirstOrDefaultAsync(p => p.UserId.Equals(userId) && p.EventId.Equals(eventId));
 		}
 
-		public async Task<PagedList<Participant>> FilterDataParticipant(FilterParticipant filter)
+        public async Task<Participant?> GetDetailParticipant(Guid userId, Guid eventId)
+        {
+            return await _context.Participants
+				.Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.UserId.Equals(userId) && p.EventId.Equals(eventId));
+        }
+
+        public async Task<PagedList<Participant>> FilterDataParticipant(FilterParticipant filter)
 		{
-			var query = _context.Participants.Where(p => p.EventId.Equals(filter.EventId)).AsNoTracking().AsQueryable();
+			var query = _context.Participants.Where(p => p.EventId.Equals(filter.EventId) && p.Status!.Equals(filter.Status.ToString())).AsNoTracking().AsQueryable();
 
 			if (filter.RoleEventId.HasValue)
 			{
@@ -58,7 +65,7 @@ namespace Event_Management.Infrastructure.Repository.SQL
 
 			query = query.Include(p => p.User);
 			query = SortParticipants(query, filter.SortBy);
-
+			
 			return await query.ToPagedListAsync(filter.Page, filter.EachPage);
 		}
 

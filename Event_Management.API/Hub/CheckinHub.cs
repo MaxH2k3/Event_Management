@@ -20,10 +20,20 @@ namespace Event_Management.API.Hub
 
 			if(response.StatusResponse != HttpStatusCode.OK)
 			{
-				await Clients.Groups(eventId.ToString()).SendNotification(MessageParticipant.CheckInUserSuccess);
+				await Clients.Groups(eventId.ToString()).SendNotification(new Domain.Models.SocketResponse()
+				{
+					StatusResponse = false,
+                    Message = response.Message,
+					Data = response.Data
+                });
 			}
 
-			await Clients.Groups(eventId.ToString()).SendNotification(MessageParticipant.CheckInUserFailed);
+			await Clients.Groups(eventId.ToString()).SendNotification(new Domain.Models.SocketResponse()
+            {
+                StatusResponse = false,
+                Message = response.Message,
+                Data = response.Data
+            });
 		}
 
 	}

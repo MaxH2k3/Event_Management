@@ -10,5 +10,6 @@
 		public const string ExistedOnEvent = "You already registered on event!";
         public const string AcceptInvite = "Accept invite success!";
 		public const string AcceptInviteFailed = "Accept invite failed!";
+		public const string HostCannotRegister = "Host cannot register on event!";
     }
 }

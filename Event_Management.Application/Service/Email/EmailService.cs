@@ -8,18 +8,31 @@ namespace Event_Management.Application.Service
     {
 
         private readonly IFluentEmail _fluentEmail;
+        private static readonly string CachedTemplate = File.ReadAllText("./Views/Template/VerifyWithOTP.cshtml");
 
         public EmailService (IFluentEmail fluentEmail)
         {
             _fluentEmail = fluentEmail;
         }
-
-        public async Task<bool> SendEmailWithTemplate(string template, string title, UserMailDto userMail)
+        
+        public async Task<bool> SendEmailWithTemplateFromFile(string template, string title, UserMailDto userMail)
         {
+            
             var response = await _fluentEmail.To(userMail.Email)
                 .Subject(title)
                 .UsingTemplateFromFile(template, userMail, true)
                 .SendAsync();
+            return response.Successful;
+        }
+        
+        public async Task<bool> SendEmailWithTemplate(string title, UserMailDto userMail)
+        {
+            var renderedTemplate = CachedTemplate.Replace("@Model.UserName", userMail.UserName)
+            .Replace("@Model.OTP", userMail.OTP);
+            var response = await _fluentEmail.To(userMail.Email)
+                                         .Subject(title)
+                                         .Body(renderedTemplate, isHtml: true)
+                                         .SendAsync();
             return response.Successful;
         }
 

@@ -1,12 +1,11 @@
 ﻿using AutoMapper;
 using Event_Management.Application.BackgroundTask;
+using Event_Management.Application.Dto.EventDTO.ResponseDTO;
+using Event_Management.Application.Dto.UserDTO.Response;
 using Event_Management.Application.Message;
-using Event_Management.Application.Service;
 using Event_Management.Application.ServiceTask;
-using Event_Management.Domain.Constants;
 using Event_Management.Domain.Entity;
 using Event_Management.Domain.Enum;
-using Event_Management.Domain.Helper;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Models.ParticipantDTO;
 using Event_Management.Domain.Models.System;
@@ -21,7 +20,6 @@ namespace Event_Management.Domain.Service
 		private readonly IUnitOfWork _unitOfWork;
 		private readonly IMapper _mapper;
 		private readonly SendMailTask _sendMailTask;
-        private object currentEvent;
 
         public RegisterEventService(IUnitOfWork unitOfWork, IMapper mapper,
 			SendMailTask sendMailTask)
@@ -208,7 +206,8 @@ namespace Event_Management.Domain.Service
 				{
 					StatusResponse = HttpStatusCode.OK,
 					Message = MessageParticipant.CheckInUserSuccess,
-				};
+                    Data = JsonSerializer.Serialize(new { userId, eventId })
+                };
 			}
 
 			return new APIResponse()
@@ -259,5 +258,37 @@ namespace Event_Management.Domain.Service
             };
         }
 
-	}
+        public async Task<APIResponse> GetEventParticipants(Guid eventId)
+        {
+            var eventInfo = await _unitOfWork.EventRepository.getAllEventInfo(eventId);
+            List<ParticipantInfo> participantInfos = _mapper.Map<List<ParticipantInfo>>(eventInfo.Participants);
+            return new APIResponse
+            {
+                Message = MessageCommon.Complete,
+                StatusResponse = HttpStatusCode.OK,
+                Data = participantInfos
+            };
+        }
+
+        public async Task<APIResponse> UserRegisterStatus(Guid eventId, string? userId)
+        {
+            var eventInfo = await _unitOfWork.EventRepository.getAllEventInfo(eventId);
+            ParticipantEventModel currentUser = _mapper.Map<ParticipantEventModel>
+                (eventInfo.Participants.FirstOrDefault(ep => ep.UserId == Guid.Parse(userId!)));
+            return new APIResponse
+            {
+                Message = MessageCommon.Complete,
+                StatusResponse = HttpStatusCode.OK,
+                Data = currentUser
+            };
+        }
+
+        public async Task<ParticipantEventModel> GetCurrentUser(Guid userId, Guid eventId)
+        {
+            var user = await _unitOfWork.ParticipantRepository.GetDetailParticipant(userId, eventId);
+
+            return _mapper.Map<ParticipantEventModel>(user);
+        }
+
+    }
 }

@@ -9,6 +9,7 @@ using Event_Management.Domain.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 
 namespace Event_Management.API.Controllers
@@ -26,7 +27,7 @@ namespace Event_Management.API.Controllers
             _registerEventService = registerEventService;
             _eventService = eventService;
         }
-
+        
         [HttpGet("")]
         [Authorize]
         public async Task<IActionResult> GetParticipantOnEvent([FromQuery] FilterParticipant filter)
@@ -61,6 +62,18 @@ namespace Event_Management.API.Controllers
         [Authorize]
         public async Task<IActionResult> RegisterEvent(Guid eventId)
         {
+            var isOwner = await _eventService.IsOwner(eventId, Guid.Parse(User.GetUserIdFromToken()));
+
+            if (isOwner)
+            {
+                return BadRequest(new APIResponse()
+                {
+                    StatusResponse = HttpStatusCode.BadRequest,
+                    Message = MessageParticipant.HostCannotRegister,
+                    Data = null
+                });
+            }
+
             var registerEventModel = new RegisterEventModel
             {
                 UserId = Guid.Parse(User.GetUserIdFromToken()),
@@ -90,6 +103,18 @@ namespace Event_Management.API.Controllers
                 {
                     StatusResponse = HttpStatusCode.BadRequest,
                     Message = MessageParticipant.NotOwner,
+                    Data = null
+                });
+            }
+
+            isOwner = await _eventService.IsOwner(registerEventModel.EventId, registerEventModel.UserId);
+
+            if (isOwner)
+            {
+                return BadRequest(new APIResponse()
+                {
+                    StatusResponse = HttpStatusCode.BadRequest,
+                    Message = MessageParticipant.HostCannotRegister,
                     Data = null
                 });
             }
@@ -158,9 +183,9 @@ namespace Event_Management.API.Controllers
         }
 
         [HttpGet("qrcode")]
-        public IActionResult QRCode(string data)
+        public IActionResult QRCode(Guid eventId, Guid userId)
         {
-            var bytes = QRCodeHelper.GenerateQRCode(data);
+            var bytes = QRCodeHelper.GenerateQRCode(userId.ToString());
 
             return File(bytes, "image/png");
 
@@ -207,5 +232,13 @@ namespace Event_Management.API.Controllers
             return BadRequest(response);
         }
 
+        [Authorize]
+        [HttpGet("current-user")]
+        public async Task<IActionResult> GetUserRegisterStatus([Required] Guid eventId)
+        {
+            Guid userId = Guid.Parse(User.GetUserIdFromToken());
+            var response = await _registerEventService.GetCurrentUser(userId, eventId);
+            return Ok(response);
+        }
     }
 }

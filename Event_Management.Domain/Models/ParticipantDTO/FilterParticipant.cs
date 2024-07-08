@@ -19,7 +19,8 @@ namespace Event_Management.Domain.Models.ParticipantDTO
 		public Guid EventId { get; set; }
 		[Range(1, 4)]
 		public int? RoleEventId { get; set; }
-		public DateTime? CheckedIn { get; set; }
+        public ParticipantStatus Status { get; set; } = ParticipantStatus.Confirmed;
+        public DateTime? CheckedIn { get; set; }
 		public bool? IsCheckedMail { get; set; }
 		public DateTime? CreatedAt { get; set; }
 		public ParticipantSortBy SortBy { get; set; } = ParticipantSortBy.CreatedAt;

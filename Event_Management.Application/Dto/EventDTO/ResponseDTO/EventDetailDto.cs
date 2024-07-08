@@ -30,8 +30,6 @@ namespace Event_Management.Application.Dto.EventDTO.ResponseDTO
         public int? Capacity { get; set; }
         public bool? Approval { get; set; }
         public decimal? Fare { get; set; }
-        public List<FeedbackDto> feedbacks { get; set; } = new List<FeedbackDto>();
         public List<SponsorLogoDto> sponsorLogos { get; set; } = new List<SponsorLogoDto>();
-        public List<ParticipantEventModel> participants { get; set; } = new List<ParticipantEventModel>();
     }
 }

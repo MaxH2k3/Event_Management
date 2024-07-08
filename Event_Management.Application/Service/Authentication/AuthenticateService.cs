@@ -316,7 +316,7 @@ namespace Event_Management.Application.Service.Authentication
 
             await _unitOfWork.SaveChangesAsync();
 
-            var emailSent = await _emailService.SendEmailWithTemplate("Views/Template/VerifyWithOTP.cshtml", "Your OTP Code", new UserMailDto()
+            var emailSent = await _emailService.SendEmailWithTemplate("Your OTP Code", new UserMailDto()
             {
                 UserName = userName,
                 Email = email,

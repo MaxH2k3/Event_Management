@@ -16,6 +16,7 @@ using Event_Management.Domain.Models.System;
 using Event_Management.Domain.Service.TagEvent;
 using Event_Management.Domain.UnitOfWork;
 using Microsoft.Extensions.Configuration;
+using PayPal.Api;
 using System.Net;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -71,9 +72,9 @@ namespace Event_Management.Application.Service
                 eventDetailDto.Fare = eventInfo.Fare;
                 eventDetailDto.UpdatedAt = eventInfo.UpdatedAt.HasValue ? DateTimeHelper.ToJsDateType(eventInfo.UpdatedAt.Value) : null;
                 eventDetailDto.eventTags = _mapper.Map<List<EventTag>>(eventInfo.Tags);
-                eventDetailDto.feedbacks = _mapper.Map<List<FeedbackDto>>(eventInfo.Feedbacks);
+                //eventDetailDto.feedbacks = _mapper.Map<List<FeedbackDto>>(eventInfo.Feedbacks);
                 eventDetailDto.sponsorLogos = _mapper.Map<List<SponsorLogoDto>>(eventInfo.Logos);
-                eventDetailDto.participants = _mapper.Map<List< ParticipantEventModel>>(eventInfo.Participants);
+                //eventDetailDto.participants = _mapper.Map<List<ParticipantInfo>>(eventInfo.Participants);
                 return new APIResponse
                 {
                     Message = MessageCommon.Complete,
@@ -156,9 +157,17 @@ namespace Event_Management.Application.Service
             }
             eventEntity.LocationCoord = eventDto.Location.Coord;
             eventEntity.Status = EventStatus.NotYet.ToString();
-            foreach(int item in eventDto.TagId)
+            if(eventDto.TagId.Count > 5)
             {
-               var tag = await _tagService.GetById(item);
+                return new APIResponse
+                {
+                    Message = MessageEvent.TagLimitValidation,
+                    StatusResponse = HttpStatusCode.BadRequest
+                };
+            }
+            foreach (int item in eventDto.TagId)
+            {
+                var tag = await _tagService.GetById(item);
                 eventEntity.Tags.Add(tag);
             }
             await _unitOfWork.EventRepository.Add(eventEntity);

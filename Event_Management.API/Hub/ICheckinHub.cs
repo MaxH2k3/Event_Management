@@ -1,7 +1,10 @@
-﻿namespace Event_Management.API.Hub
+﻿using Event_Management.Domain.Models;
+
+namespace Event_Management.API.Hub
 {
 	public interface ICheckinHub
 	{
-		Task SendNotification(string message);
+		Task SendNotification(SocketResponse socketResponse);
+
 	}
 }

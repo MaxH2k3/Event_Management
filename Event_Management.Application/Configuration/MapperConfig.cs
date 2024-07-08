@@ -58,12 +58,13 @@ namespace Event_Management.Domain.Configuration
 
             //Participant
             CreateMap<Participant, ParticipantEventModel>()
-
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email))
                 .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.User.Phone))
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.User.FullName))
                 .ReverseMap();
-
+            CreateMap<Participant, ParticipantInfo>().ReverseMap();
             CreateMap<PagedList<Participant>, PagedList<ParticipantEventModel>>().ReverseMap();
+
 
             //Logo
             CreateMap<Logo, SponsorLogoDto>().ReverseMap();

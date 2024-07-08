@@ -6,8 +6,10 @@ using Event_Management.Domain;
 using Event_Management.Domain.Helper;
 using Event_Management.Domain.Models.System;
 using Event_Management.Domain.Service.TagEvent;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 
 namespace Event_Management.API.Controllers
@@ -71,6 +73,13 @@ namespace Event_Management.API.Controllers
                 response.Message = MessageCommon.UpdateFailed;
             }
             return response;
+        }
+        //[Authorize]
+        [HttpGet("event")]
+        public async Task<IActionResult> GetEventFeedbacks([FromQuery, Required] Guid eventId)
+        {
+            var result = await _feedbackService.GetEventFeedbacks(eventId);
+            return Ok(result);
         }
     }
 }
