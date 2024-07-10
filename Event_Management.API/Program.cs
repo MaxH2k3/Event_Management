@@ -6,6 +6,8 @@ using Event_Management.Infastructure.Configuration;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Serilog;
 using SwaggerThemes;
+using WatchDog;
+using WatchDog.src.Enums;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,7 +15,14 @@ var builder = WebApplication.CreateBuilder(args);
 // Set up config
 builder.Services.AddScoped<GlobalException>();
 
-
+// Set up logs
+builder.Services.AddWatchDogServices(opt =>
+{
+    opt.IsAutoClear = true;
+    opt.ClearTimeSchedule = WatchDogAutoClearScheduleEnum.Hourly;
+    opt.SetExternalDbConnString = builder.Configuration.GetConnectionString("WatchDog");
+    opt.DbDriverOption = WatchDogDbDriverEnum.Mongo;
+});
 
 
 // Add services to the container.
@@ -62,6 +71,16 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 	app.UseSwaggerUI();
 }
 
+//inject middleware watch dog logs
+app.UseWatchDogExceptionLogger();
+app.UseWatchDog(opt =>
+{
+    opt.WatchPageUsername = "admin";
+    opt.WatchPagePassword = "123";
+    opt.UseRegexForBlacklisting = true;
+    opt.Blacklist = "api/v1/events, logo/*, api/v1/feedback, api/v1/enums, api/v1/constants, api/v1/response-message, api/v1/participants, api/v1/payment, api/v1/sponsor, api/v1/tags";
+});
+
 app.UseSerilogRequestLogging();
 
 app.UseAuthentication();
@@ -79,6 +98,5 @@ app.UseSession();
 app.ConfigureExceptionHandler();
 
 app.MapHub<CheckinHub>(DefaultSystem.CheckinHubConnection);
-//app.MapRazorPages();
 
 app.Run();
