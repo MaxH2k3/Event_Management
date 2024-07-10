@@ -8,6 +8,7 @@ using Event_Management.Infrastructure.DBContext;
 using Event_Management.Infrastructure.Extensions;
 using Event_Management.Infrastructure.Repository.Common;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Event_Management.Infrastructure.Repository.SQL
 {

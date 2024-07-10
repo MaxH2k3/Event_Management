@@ -7,6 +7,7 @@ using Event_Management.Application.Helper;
 using Event_Management.Application.Message;
 using Event_Management.Domain.Entity;
 using Event_Management.Domain.Enum;
+using Event_Management.Domain.Helper;
 using Event_Management.Domain.Models.System;
 using Event_Management.Domain.Models.User;
 using Event_Management.Domain.UnitOfWork;
@@ -377,8 +378,8 @@ namespace Event_Management.Application.Service.Authentication
             {
                 UserId = userId,
                 Token = refreshToken,
-                CreatedAt = DateTime.UtcNow,
-                ExpireAt = DateTime.UtcNow.AddMonths(Convert.ToInt32(_configuration["JWTSetting:RefreshTokenValidityInMonths"]))
+                CreatedAt = DateTimeHelper.GetDateTimeNow(),
+                ExpireAt = DateTimeHelper.GetDateTimeNow().AddMonths(Convert.ToInt32(_configuration["JWTSetting:RefreshTokenValidityInMonths"]))
             };
 
             await _unitOfWork.RefreshTokenRepository.AddRefreshToken(refreshTokenEntity);

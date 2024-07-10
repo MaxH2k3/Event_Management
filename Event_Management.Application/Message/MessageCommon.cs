@@ -31,6 +31,8 @@ namespace Event_Management.Application.Message
         public const string ReturnListHasValue = "List has value";
         public const string ReturnNullList = "List is null";
 
+        public const string Unauthorized = "Unauthorized";
+
         
         
     }

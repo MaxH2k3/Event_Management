@@ -4,6 +4,7 @@ using Event_Management.Application.Message;
 using Event_Management.Domain;
 using Event_Management.Domain.Constants;
 using Event_Management.Domain.Entity;
+using Event_Management.Domain.Helper;
 using Event_Management.Domain.Models.JWT;
 using Event_Management.Domain.Models.System;
 using Event_Management.Domain.UnitOfWork;
@@ -62,7 +63,8 @@ namespace Event_Management.Application.Service
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_jwtSettings.TokenExpiry)),
+                //Expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_jwtSettings.TokenExpiry)),
+                Expires = DateTime.UtcNow.AddMinutes(1),
                 Issuer = _jwtSettings.Issuer,
                 Audience = _jwtSettings.Audience,
                 SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
@@ -122,9 +124,9 @@ namespace Event_Management.Application.Service
 
             //check refresh token whether it's expired or null
             var existingRefreshToken = await _unitOfWork.RefreshTokenRepository.GetTokenAsync(token.RefreshToken!);
-            if (existingRefreshToken == null || existingRefreshToken.ExpireAt <= DateTime.UtcNow)
+            if (existingRefreshToken == null || existingRefreshToken.ExpireAt <= DateTimeHelper.GetDateTimeNow())
             {
-                if (existingRefreshToken != null && existingRefreshToken.ExpireAt <= DateTime.UtcNow)
+                if (existingRefreshToken != null)
                 {
                     await _unitOfWork.RefreshTokenRepository.RemoveRefreshTokenAsync(existingRefreshToken.Token);
                 }
@@ -150,7 +152,7 @@ namespace Event_Management.Application.Service
             {
                 UserId = existUser.UserId,
                 Token = newRefreshToken,
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = DateTimeHelper.GetDateTimeNow(),
                 ExpireAt = originalExpirationDate
             };
 

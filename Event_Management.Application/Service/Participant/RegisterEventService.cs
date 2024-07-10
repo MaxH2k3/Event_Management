@@ -1,7 +1,5 @@
 ﻿using AutoMapper;
-using Event_Management.Application.BackgroundTask;
 using Event_Management.Application.Dto.EventDTO.ResponseDTO;
-using Event_Management.Application.Dto.UserDTO.Response;
 using Event_Management.Application.Message;
 using Event_Management.Application.ServiceTask;
 using Event_Management.Domain.Entity;
@@ -288,6 +286,13 @@ namespace Event_Management.Domain.Service
             var user = await _unitOfWork.ParticipantRepository.GetDetailParticipant(userId, eventId);
 
             return _mapper.Map<ParticipantEventModel>(user);
+        }
+
+		public async Task<PagedList<ParticipantModel>> GetParticipantOnEvent(int page, int eachPage, Guid eventId)
+		{
+			var participants = await _unitOfWork.ParticipantRepository.GetAll(p => p.EventId.Equals(eventId), page, eachPage, ParticipantSortBy.CheckedIn.ToString());
+
+            return _mapper.Map<PagedList<ParticipantModel>>(participants);
         }
 
     }

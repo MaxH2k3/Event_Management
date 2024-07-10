@@ -37,9 +37,16 @@ namespace Event_Management.API.Controllers
         {
             APIResponse response = new APIResponse();
             string userId = User.GetUserIdFromToken();
+            if (userId.Equals(""))
+            {
+                response.StatusResponse = HttpStatusCode.Unauthorized;
+                response.Message = MessageCommon.Unauthorized;
+                return response;
+            }
+            //string userId = feedbackDto.UserId.ToString();
             var result = await _feedbackService.AddFeedback(feedbackDto, userId);
 
-            if (result)
+            if (result != null)
             {
                 response.StatusResponse = HttpStatusCode.Created;
                 response.Message = MessageCommon.SavingSuccesfully;
@@ -56,12 +63,19 @@ namespace Event_Management.API.Controllers
         [HttpPut("")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<APIResponse> UpdateFeedback([FromBody] FeedbackDto feedback)
+        public async Task<APIResponse> UpdateFeedback([FromBody] FeedbackDto feedbackDto)
         {
             APIResponse response = new APIResponse();
             string userId = User.GetUserIdFromToken();
-            var result = await _feedbackService.UpdateFeedback(feedback, userId);
-            if (result)
+            if (userId.Equals(""))
+            {
+                response.StatusResponse = HttpStatusCode.Unauthorized;
+                response.Message = MessageCommon.Unauthorized;
+                return response;
+            }
+            //string userId = feedbackDto.UserId.ToString();
+            var result = await _feedbackService.UpdateFeedback(feedbackDto, userId);
+            if (result != null)
             {
                 response.StatusResponse = HttpStatusCode.OK;
                 response.Message = MessageCommon.UpdateSuccesfully;

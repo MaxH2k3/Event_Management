@@ -25,7 +25,7 @@ namespace Event_Management.Infrastructure.Repository.SQL
 
 		public async Task<Tag> GetTagByName(string name)
 		{
-			var tag = await _context.Tags.FirstOrDefaultAsync(t => t.TagName.Equals(name));
+			var tag = await _context.Tags.FirstOrDefaultAsync(t => t.TagName.ToUpper().Trim().Equals(name.ToUpper().Trim()));
             if(tag != null)
             {
                 return tag;

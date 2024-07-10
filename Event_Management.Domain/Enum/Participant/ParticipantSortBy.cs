@@ -9,6 +9,7 @@ namespace Event_Management.Domain.Enum
 	public enum ParticipantSortBy
 	{
 		CheckedIn,
-		CreatedAt
+		CreatedAt,
+		FullName
 	}
 }

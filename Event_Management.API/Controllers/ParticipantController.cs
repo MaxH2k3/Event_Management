@@ -46,16 +46,36 @@ namespace Event_Management.API.Controllers
 
             var response = await _registerEventService.GetParticipantOnEvent(filter);
 
-            if (response.Any())
-            {
-                Response.Headers.Add("X-Total-Element", response.TotalItems.ToString());
-                Response.Headers.Add("X-Total-Page", response.TotalPages.ToString());
-                Response.Headers.Add("X-Current-Page", response.CurrentPage.ToString());
+            Response.Headers.Add("X-Total-Element", response.TotalItems.ToString());
+            Response.Headers.Add("X-Total-Page", response.TotalPages.ToString());
+            Response.Headers.Add("X-Current-Page", response.CurrentPage.ToString());
 
-                return Ok(response);
+            return Ok(response);
+        }
+
+        [HttpGet("checkin")]
+        [Authorize]
+        public async Task<IActionResult> GetParticipantRelatedToCheckInOnEvent([Required] Guid eventId, int page = 1, int eachPage = 10)
+        {
+            var isOwner = await _eventService.IsOwner(eventId, Guid.Parse(User.GetUserIdFromToken()));
+
+            if (!isOwner)
+            {
+                return BadRequest(new APIResponse()
+                {
+                    StatusResponse = HttpStatusCode.BadRequest,
+                    Message = MessageParticipant.NotOwner,
+                    Data = null
+                });
             }
 
-            return BadRequest(response);
+            var response = await _registerEventService.GetParticipantOnEvent(page, eachPage, eventId);
+
+            Response.Headers.Add("X-Total-Element", response.TotalItems.ToString());
+            Response.Headers.Add("X-Total-Page", response.TotalPages.ToString());
+            Response.Headers.Add("X-Current-Page", response.CurrentPage.ToString());
+
+            return Ok(response);
         }
 
         [HttpPost("register")]

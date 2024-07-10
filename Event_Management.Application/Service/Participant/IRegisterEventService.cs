@@ -1,4 +1,5 @@
 ﻿using Event_Management.Application.Dto.UserDTO.Response;
+using Event_Management.Domain.Enum;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Models.ParticipantDTO;
 using Event_Management.Domain.Models.System;
@@ -31,7 +32,11 @@ namespace Event_Management.Domain.Service
         // Get current user on current event
         Task<ParticipantEventModel> GetCurrentUser(Guid userId, Guid eventId);
 
-		Task<APIResponse> GetEventParticipants(Guid eventId);
+        // Get all participant related to check-in on event
+        Task<PagedList<ParticipantModel>> GetParticipantOnEvent(int page, int eachPage, Guid eventId);
+
+
+        Task<APIResponse> GetEventParticipants(Guid eventId);
 
         Task<APIResponse> UserRegisterStatus(Guid eventId, string? userId);
     }
