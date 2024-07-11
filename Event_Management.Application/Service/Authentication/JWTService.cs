@@ -63,8 +63,8 @@ namespace Event_Management.Application.Service
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                //Expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_jwtSettings.TokenExpiry)),
-                Expires = DateTime.UtcNow.AddMinutes(1),
+                Expires = DateTime.UtcNow.AddHours(1000),
+                //Expires = DateTime.UtcNow.AddMinutes(2),
                 Issuer = _jwtSettings.Issuer,
                 Audience = _jwtSettings.Audience,
                 SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
@@ -152,7 +152,8 @@ namespace Event_Management.Application.Service
             {
                 UserId = existUser.UserId,
                 Token = newRefreshToken,
-                CreatedAt = DateTimeHelper.GetDateTimeNow(),
+                //CreatedAt = DateTimeHelper.GetDateTimeNow(),
+                CreatedAt = DateTime.UtcNow,
                 ExpireAt = originalExpirationDate
             };
 

@@ -148,5 +148,19 @@ namespace Event_Management.Application.Service.FileService
             }
             return null;
         }
+
+        public async Task<bool> DeleteBlob(string blobName)
+        {
+            try
+            {
+                BlobContainerClient blobContainerClient = GetBlobContainerClient();
+                BlobClient blobClient = blobContainerClient.GetBlobClient(blobName);
+                blobClient.DeleteAsync();
+                return true;
+            }catch (Exception ex)
+            {
+                return false;
+            }
+        }
     }
 }

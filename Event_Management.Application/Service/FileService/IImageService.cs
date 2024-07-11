@@ -16,5 +16,6 @@ namespace Event_Management.Application.Service.FileService
         public Task<Dictionary<string, List<string>>> GetAllEventBlobUris(Guid eventId);
         public Task<SponsorLogoDto> GetBlobUri(string blobName);
         public Task<string?> UploadEventSponsorLogo(string base64, Guid EventId, string sponsorName);
+        public Task<bool> DeleteBlob(string blobName);
     }
 }

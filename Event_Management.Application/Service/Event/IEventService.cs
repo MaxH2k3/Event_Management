@@ -18,7 +18,7 @@ namespace Event_Management.Application.Service
         public Task<PagedList<EventResponseDto>> GetUserParticipatedEvents(EventFilterObject filter, string userId, int pageNo, int elementEachPage);
         public Task<Dictionary<string, List<EventResponseDto>>> GetUserPastAndFutureEvents(Guid userId);
         public Task<APIResponse> AddEvent(EventRequestDto eventDto, string userId);// HttpContext http);
-        public Task<bool> UpdateEvent(EventRequestDto eventDto, string userId);
+        public Task<APIResponse> UpdateEvent(EventRequestDto eventDto, string userId, Guid eventId);
         public Task<bool> DeleteEvent(Guid eventId);
         public void UpdateEventStatusEnded(Guid eventId);
         public void UpdateEventStatusOngoing(Guid eventId);

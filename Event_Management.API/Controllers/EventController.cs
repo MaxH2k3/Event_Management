@@ -54,10 +54,11 @@ namespace Event_Management.API.Controllers
                     Data = response
                 });
             }
-            return BadRequest(new APIResponse
+            return Ok(new APIResponse
             {
                 StatusResponse = HttpStatusCode.NotFound,
                 Message = MessageCommon.NotFound,
+                Data = null
             });
         }
 
@@ -82,10 +83,11 @@ namespace Event_Management.API.Controllers
                     Data = response
                 });
             }
-            return BadRequest(new APIResponse
+            return Ok(new APIResponse
             {
                 StatusResponse = HttpStatusCode.NotFound,
                 Message = MessageCommon.NotFound,
+                Data= null
             });
         }
 
@@ -112,10 +114,11 @@ namespace Event_Management.API.Controllers
                     Data = response
                 });
             }
-            return BadRequest(new APIResponse
+            return Ok(new APIResponse
             {
                 StatusResponse = HttpStatusCode.NotFound,
                 Message = MessageCommon.NotFound,
+                Data = null
             });
         }
         [Authorize]
@@ -153,24 +156,19 @@ namespace Event_Management.API.Controllers
         [HttpPut("")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<APIResponse> UpdateEvent([FromBody] EventRequestDto eventDto)
+        public async Task<IActionResult> UpdateEvent([FromBody] EventRequestDto eventDto, [FromQuery, Required] Guid eventId)
         {
-            APIResponse response = new APIResponse();
             string userId = User.GetUserIdFromToken();
-            var result = await _eventService.UpdateEvent(eventDto, userId);
-            if (result)
+            var result = await _eventService.UpdateEvent(eventDto, userId, eventId);
+            if (result.StatusResponse == HttpStatusCode.OK)
             {
-                response.StatusResponse = HttpStatusCode.OK;
-                response.Message = MessageCommon.UpdateSuccesfully;
-                response.Data = result;
-
+                return Ok(result);
             }
-            else
+            if(result.StatusResponse == HttpStatusCode.Unauthorized)
             {
-                response.StatusResponse = HttpStatusCode.BadRequest;
-                response.Message = MessageCommon.UpdateFailed;
+                return Unauthorized(result);
             }
-            return response;
+            return BadRequest(result);
         }
 
         [Authorize]

@@ -121,7 +121,7 @@ namespace Event_Management.Application.Service
             {
                 return new APIResponse
                 {
-                    Message = MessageCommon.CreateFailed,
+                    Message = MessageCommon.SessionTimeout,
                     StatusResponse = HttpStatusCode.BadRequest
                 };
             }
@@ -142,7 +142,7 @@ namespace Event_Management.Application.Service
                 }
             }
             eventEntity.Fare = eventDto.Ticket;
-            eventEntity.CreatedAt = DateTime.Now;
+            eventEntity.CreatedAt = DateTimeHelper.GetDateTimeNow();
             eventEntity.Location = eventDto.Location.Name;
             eventEntity.LocationId = eventDto.Location.Id;
             eventEntity.LocationAddress = eventDto.Location.Address;
@@ -279,20 +279,88 @@ namespace Event_Management.Application.Service
             return pages;
         }
 
-        public async Task<bool> UpdateEvent(EventRequestDto eventDto, string userId)
+        public async Task<APIResponse> UpdateEvent(EventRequestDto eventDto, string userId, Guid eventId)
         {
-            var eventEntity = _mapper.Map<Event>(eventDto);
-            if (!string.IsNullOrEmpty(userId))
+            //var eventEntity = _mapper.Map<Event>(eventDto);
+            var eventEntity = await _unitOfWork.EventRepository.getAllEventInfo(eventId);
+            if (eventEntity.Status != EventStatus.NotYet.ToString())
             {
-                eventEntity.CreatedBy = Guid.Parse(userId);
+                return new APIResponse
+                {
+                    Message = MessageEvent.UpdateEventWithStatus,
+                    StatusResponse = HttpStatusCode.BadRequest,
+                };
             }
-            eventEntity.UpdatedAt = DateTime.Now;
-            eventEntity.StartDate = DateTimeOffset.FromUnixTimeMilliseconds(eventDto.StartDate).DateTime;
-            eventEntity.EndDate = DateTimeOffset.FromUnixTimeMilliseconds(eventDto.EndDate).DateTime;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return new APIResponse
+                {
+                    Message = MessageCommon.Unauthorized,
+                    StatusResponse = HttpStatusCode.Unauthorized,
+                };
+            }
+            var userinfo = await _unitOfWork.UserRepository.GetById(Guid.Parse(userId));
+            if(!userId.Equals(eventEntity.CreatedBy.Value.ToString()))
+            {
+                return new APIResponse
+                {
+                    Message = MessageEvent.OnlyHostCanUpdateEvent,
+                    StatusResponse = HttpStatusCode.Unauthorized,
+                };
+            }
+            eventEntity.UpdatedAt = DateTimeHelper.GetDateTimeNow();
+            //name
+            eventEntity.EventName = eventDto.EventName;
+            //description
+            eventEntity.Description = eventDto.Description;
+            //tags;
+            eventEntity.Tags.Clear();
+            foreach (int tagId in eventDto.TagId)
+            {
+                Tag tag = await _unitOfWork.TagRepository.GetById(tagId);
+                eventEntity.Tags.Add(tag!);
+            }
+            //startDate
+            if (eventDto.StartDate > 0 && eventDto.StartDate - DateTimeHelper.ToJsDateType((DateTime)eventEntity.CreatedAt!) > 0)
+            eventEntity.StartDate = DateTimeOffset.FromUnixTimeMilliseconds(eventDto.StartDate + +dateTimeConvertValue).DateTime;
+            //endDate
+            if(eventDto.EndDate > 0 && eventDto.EndDate - eventDto.StartDate >= 30*60*1000)
+            eventEntity.EndDate = DateTimeOffset.FromUnixTimeMilliseconds(eventDto.EndDate + +dateTimeConvertValue).DateTime;
+            //theme
+            eventEntity.Theme = eventDto.Theme;
+            //image
+            if (!string.IsNullOrWhiteSpace(eventDto.Image))
+            {
+                if(await _fileService.DeleteBlob(eventEntity.EventId.ToString()))
+                eventEntity.Image = await _fileService.UploadImage(eventDto.Image, eventEntity.EventId);
+            }
+            //location
+            eventEntity.Location = eventDto.Location!.Name;
+            eventEntity.LocationId = eventDto.Location.Id;
+            eventEntity.LocationCoord = eventDto.Location.Coord;
+            eventEntity.LocationAddress = eventDto.Location.Address;
+            eventEntity.LocationUrl = eventDto.Location.Url;
+            //capacity
+            eventEntity.Capacity = eventDto.Capacity;
+            //approval
+            eventEntity.Approval = eventDto.Approval.HasValue ? eventDto.Approval.Value : false;
+            //fare / ticket
+            eventEntity.Fare = eventDto.Ticket;
             await _unitOfWork.EventRepository.Update(eventEntity);
-            return await _unitOfWork.SaveChangesAsync();
-
-
+            if (await _unitOfWork.SaveChangesAsync())
+            {
+                return new APIResponse
+                {
+                    Message = MessageCommon.UpdateSuccesfully,
+                    StatusResponse = HttpStatusCode.OK,
+                    Data = ToResponseDto(eventEntity)
+                };
+            }
+            return new APIResponse
+            {
+                Message = MessageCommon.UpdateFailed,
+                StatusResponse = HttpStatusCode.BadRequest,
+            };
         }
         public void UpdateEventStatusEnded(Guid eventId)
         {

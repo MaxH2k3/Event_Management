@@ -18,5 +18,7 @@ namespace Event_Management.Application.Message
         public const string UserNotAllow = "User not allowed to create event";
         public const string LocationCoordInvalid = "Location coordinate must follow pattern: @\"^-?\\d+(?:\\.\\d+)?, *-?\\d+(?:\\.\\d+)?$\"";
         public const string TagLimitValidation = "Event's maximum tags is 5!";
+        public const string UpdateEventWithStatus = "Can only update Event with status NotYet";
+        public const string OnlyHostCanUpdateEvent = "Only host can update this event";
     }
 }
