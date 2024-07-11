@@ -54,4 +54,4 @@ jobs:
           app-name: 'fpt-event-management'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_A057C46D5BB14FF5B9D73C23C3465BA8 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_B2EB3C6C506C401B865C1189994E6D72 }}
