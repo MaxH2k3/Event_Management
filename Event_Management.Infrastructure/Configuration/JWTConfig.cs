@@ -34,7 +34,7 @@ namespace Event_Management.Infrastructure.Configuration
 					ValidateLifetime = true,
 					ValidateIssuerSigningKey = true,
 					RequireExpirationTime = true,
-                    ClockSkew = TimeSpan.Zero
+                    //ClockSkew = TimeSpan.Zero
                 };
 			});
 
