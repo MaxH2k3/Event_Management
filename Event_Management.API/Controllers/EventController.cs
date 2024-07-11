@@ -253,7 +253,7 @@ namespace Event_Management.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> PopularOrganizers()
         {
-            var result = _eventService.GetEventLeaderBoards();
+            var result = _eventService.GetTop10CreatorsByEventCount();
             return Ok(new APIResponse
             {
                 StatusResponse = HttpStatusCode.OK,

@@ -398,9 +398,9 @@ namespace Event_Management.Application.Service
         {
             Dictionary<string, List<EventCreatorLeaderBoardDto>> result = new Dictionary<string, List<EventCreatorLeaderBoardDto>>();
             var top10EventCreator = GetTop10CreatorsByEventCount();
-            var top20Speaker = GetTop20SpeakerEventCount();
-            result.Add("top 10 event creator", top10EventCreator);
-            result.Add("top 20 event speaker", top20Speaker);
+            //var top20Speaker = GetTop20SpeakerEventCount();
+            result.Add("eventCreator", top10EventCreator);
+            //result.Add("top 20 event speaker", top20Speaker);
             return result;
         }
 

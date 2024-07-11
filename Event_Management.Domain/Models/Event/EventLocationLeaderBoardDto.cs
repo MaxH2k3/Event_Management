@@ -9,6 +9,7 @@ namespace Event_Management.Application.Dto.EventDTO.ResponseDTO
     public class EventLocationLeaderBoardDto
     {
         public int totalevent { get; set; }
+        //public string city { get; set; }
         public string Location {  get; set; }
         public string? LocationUrl { get; set; } = "";
         public string? LocationCoord {  get; set; } = "";

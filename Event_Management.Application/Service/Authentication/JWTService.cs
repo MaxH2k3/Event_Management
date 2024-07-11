@@ -4,7 +4,6 @@ using Event_Management.Application.Message;
 using Event_Management.Domain;
 using Event_Management.Domain.Constants;
 using Event_Management.Domain.Entity;
-using Event_Management.Domain.Helper;
 using Event_Management.Domain.Models.JWT;
 using Event_Management.Domain.Models.System;
 using Event_Management.Domain.UnitOfWork;
@@ -63,8 +62,7 @@ namespace Event_Management.Application.Service
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddHours(1000),
-                //Expires = DateTime.UtcNow.AddMinutes(2),
+                Expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_jwtSettings.TokenExpiry)),
                 Issuer = _jwtSettings.Issuer,
                 Audience = _jwtSettings.Audience,
                 SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
@@ -152,7 +150,6 @@ namespace Event_Management.Application.Service
             {
                 UserId = existUser.UserId,
                 Token = newRefreshToken,
-                //CreatedAt = DateTimeHelper.GetDateTimeNow(),
                 CreatedAt = DateTime.UtcNow,
                 ExpireAt = originalExpirationDate
             };

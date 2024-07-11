@@ -14,7 +14,7 @@ namespace Event_Management.Application.Message
         public const string GetAllEvent = "Get all events!";
         public const string UserParticipatedEvent = "User participated events!";
         public const string PopularLocation = "Popular locations leaderboard";
-        public const string PopularOrganizers = "Popular organizers(event creators) and speakers leaderboard";
+        public const string PopularOrganizers = "Popular organizers(event creators)";
         public const string UserNotAllow = "User not allowed to create event";
         public const string LocationCoordInvalid = "Location coordinate must follow pattern: @\"^-?\\d+(?:\\.\\d+)?, *-?\\d+(?:\\.\\d+)?$\"";
         public const string TagLimitValidation = "Event's maximum tags is 5!";

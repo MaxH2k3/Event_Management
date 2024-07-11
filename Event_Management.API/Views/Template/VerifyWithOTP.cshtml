@@ -23,17 +23,16 @@
             display: flex;
             justify-content: center;
             height: 100vh;
-            background-color: white;
+            background-color: tan;
             /* background: url('~/Images/Orange Gradient Sunset Desktop Wallpaper.png') no-repeat center center fixed;
-                            background-size: cover */
+                    background-size: cover */
         }
 
         .email-content {
             /* background: url('~/Images/Orange Gradient Sunset Desktop Wallpaper.png') no-repeat center center fixed;
-                            background-size: cover; */
-            border-radius: 20px;
-            border: 1.5px solid #e6658a;
-            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
+                    background-size: cover; */
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             width: 400px;
             max-width: 90%;
@@ -46,7 +45,7 @@
         }
 
         .email-header {
-            background-color: #e6658a;
+            background-color: tan;
             padding: 20px;
             border-radius: 8px;
             width: 400px;
@@ -63,7 +62,8 @@
         }
 
         h1 {
-            font-size: 25px;
+            font-size: 30px;
+            font-family: "Playfair Display";
             margin-bottom: 10px;
         }
 
@@ -105,23 +105,24 @@
     <div class="email-container">
         <div class="email-content">
             <div class="email-header">
-                <h3 style="margin: 0 auto; color: white;">FEM</h3>
+                <h3 style="margin: 0 auto; color: black;">MaLu</h3>
             </div>
             <div class="email-body" style="color: black;">
                 <h1>Verify your email address</h1>
                 <p>Welcome @Model.UserName.</p>
                 <p>
-                    Please copy this code and paste in the signin website to
+                    Please click the button below to confirm your email address and
                     activate your account.
                 </p>
                 <h2>@Model.OTP</h2>
                 <p>
-                    this is an automated email. Please do not reply this email
+                    If you received this in error, simply ignore this email and do not
+                    click the button.
                 </p>
             </div>
             <div class="email-footer">
-                <p>Copyright © 2024, FEM INC</p>
-                <p>If you do not wish to receive these emails, simply ignore it.</p>
+                <p>Copyright © 2019, LUMA INC</p>
+                <p>If you do not wish to receive these emails, Please biến.</p>
             </div>
         </div>
     </div>

@@ -15,6 +15,77 @@ namespace Event_Management.Infrastructure.Repository.SQL
 {
     public class EventRepository : SQLExtendRepository<Event>, IEventRepository
     {
+        private readonly string[] vietnamAdministrativeDivisions = {
+    // Centrally-Administered City
+    "Thành phố Hồ Chí Minh",
+    "Hồ Chí Minh",
+
+    // Provincially-Administered Cities
+    "Hà Nội",
+    "Hải Phòng",
+    "Đà Nẵng",
+    "Cần Thơ",
+    "Biên Hòa",
+
+    // Provinces
+    "An Giang",
+    "Bà Rịa - Vũng Tàu",
+    "Bắc Giang",
+    "Bắc Kạn",
+    "Bạc Liêu",
+    "Bắc Ninh",
+    "Bến Tre",
+    "Bình Định",
+    "Bình Dương",
+    "Bình Phước",
+    "Bình Thuận",
+    "Cà Mau",
+    "Cao Bằng",
+    "Đắk Lắk",
+    "Đắk Nông",
+    "Điện Biên",
+    "Đồng Nai",
+    "Đồng Tháp",
+    "Gia Lai",
+    "Hà Giang",
+    "Hà Nam",
+    "Hà Tĩnh",
+    "Hải Dương",
+    "Hậu Giang",
+    "Hòa Bình",
+    "Hưng Yên",
+    "Khánh Hòa",
+    "Kiên Giang",
+    "Kon Tum",
+    "Lai Châu",
+    "Lâm Đồng",
+    "Lạng Sơn",
+    "Lào Cai",
+    "Long An",
+    "Nam Định",
+    "Nghệ An",
+    "Ninh Bình",
+    "Ninh Thuận",
+    "Phú Thọ",
+    "Quảng Bình",
+    "Quảng Nam",
+    "Quảng Ngãi",
+    "Quảng Ninh",
+    "Quảng Trị",
+    "Sóc Trăng",
+    "Sơn La",
+    "Tây Ninh",
+    "Thái Bình",
+    "Thái Nguyên",
+    "Thanh Hóa",
+    "Thừa Thiên Huế",
+    "Tiền Giang",
+    "Trà Vinh",
+    "Tuyên Quang",
+    "Vĩnh Long",
+    "Vĩnh Phúc",
+    "Yên Bái"
+};
         private readonly EventManagementContext _context;
 
         public EventRepository(EventManagementContext context) : base(context)
@@ -355,20 +426,34 @@ namespace Event_Management.Infrastructure.Repository.SQL
             List<EventLocationLeaderBoardDto> result = new List<EventLocationLeaderBoardDto>();
             var temp = _context.Events
                 .AsEnumerable()
-                .GroupBy(e => e.LocationAddress!)
+                .GroupBy(e => e.Location!)
                 .OrderByDescending(g => g.Count())
                 .Take(10)
                 .ToDictionary(g => g.Key, g => g.Count());
             foreach (var item in temp)
             {
                 EventLocationLeaderBoardDto locationInfo = new EventLocationLeaderBoardDto();
-                var eventTemp = _context.Events.FirstOrDefault(e => e.LocationAddress.Equals(item.Key));
+                var eventTemp = _context.Events.FirstOrDefault(e => e.Location.Equals(item.Key));
                 locationInfo.totalevent = item.Value;
-                locationInfo.Location = item.Key;
+                if(eventTemp!.Location!.Equals("Google meet", StringComparison.OrdinalIgnoreCase))
+                {
+                    locationInfo.Location = "Online";
+                }
+                else
+                {
+                    locationInfo.Location = eventTemp!.Location;
+                }
                 locationInfo.LocationId = eventTemp.LocationId;
                 locationInfo.LocationUrl = eventTemp.LocationUrl;
                 locationInfo.LocationCoord = eventTemp.LocationCoord;
                 locationInfo.LocationAddress = eventTemp.LocationAddress;
+                /*foreach(string item2 in vietnamAdministrativeDivisions)
+                {
+                    if (eventTemp!.LocationAddress.Contains(item2))
+                    {
+                        locationInfo.city = item2;
+                    }
+                }*/
                 result.Add(locationInfo);
             }
             return result!;
