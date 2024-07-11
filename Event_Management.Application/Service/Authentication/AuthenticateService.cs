@@ -379,7 +379,7 @@ namespace Event_Management.Application.Service.Authentication
                 UserId = userId,
                 Token = refreshToken,
                 CreatedAt = DateTimeHelper.GetDateTimeNow(),
-                ExpireAt = DateTimeHelper.GetDateTimeNow().AddMonths(Convert.ToInt32(_configuration["JWTSetting:RefreshTokenValidityInMonths"]))
+                ExpireAt = DateTime.UtcNow.AddMonths(Convert.ToInt32(_configuration["JWTSetting:RefreshTokenValidityInMonths"]))
             };
 
             await _unitOfWork.RefreshTokenRepository.AddRefreshToken(refreshTokenEntity);

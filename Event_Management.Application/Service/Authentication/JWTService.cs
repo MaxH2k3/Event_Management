@@ -63,7 +63,7 @@ namespace Event_Management.Application.Service
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTimeHelper.GetDateTimeNow().AddMinutes(Convert.ToDouble(_jwtSettings.TokenExpiry)),
+                Expires = DateTime.UtcNow.AddHours(1000),
                 //Expires = DateTime.UtcNow.AddMinutes(2),
                 Issuer = _jwtSettings.Issuer,
                 Audience = _jwtSettings.Audience,
