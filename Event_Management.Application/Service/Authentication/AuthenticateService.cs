@@ -32,7 +32,7 @@ namespace Event_Management.Application.Service.Authentication
         private readonly IConfiguration _configuration;
         private readonly IAvatarApiClient _avatarApiClient;
         private readonly IGoogleTokenValidation _googleTokenValidation;
-        public AuthenticateService(IUnitOfWork unitOfWork, IMapper mapper, IJWTService jWTService, IEmailService emailService, IConfiguration configuration, IAvatarApiClient avatarApiClient, IGoogleTokenValidation googleTokenValidation)
+        public AuthenticateService(IUnitOfWork unitOfWork , IMapper mapper, IJWTService jWTService, IEmailService emailService, IConfiguration configuration, IAvatarApiClient avatarApiClient, IGoogleTokenValidation googleTokenValidation)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -100,7 +100,7 @@ namespace Event_Management.Application.Service.Authentication
             }
 
             //var email = tokenValidationResponse.Data!.ToString();
-
+            
             var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(googleUser.Email);
             if (user == null)
             {
@@ -143,7 +143,7 @@ namespace Event_Management.Application.Service.Authentication
             };
         }
 
-
+        
         public async Task<APIResponse> Login(LoginInWithGoogleDto loginUser)
         {
             var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(loginUser.Email!);
@@ -215,7 +215,7 @@ namespace Event_Management.Application.Service.Authentication
                 Data = null
             };
         }
-
+       
         public async Task<APIResponse> ValidateAccountWithToken(string token, Guid id)
         {
             var existUser = await _unitOfWork.UserValidationRepository.GetUser(id);
@@ -324,14 +324,14 @@ namespace Event_Management.Application.Service.Authentication
                 OTP = otp,
             });
 
-
-            return new APIResponse
-            {
-                StatusResponse = HttpStatusCode.OK,
-                Message = "OTP sent successfully",
-                Data = null
-            };
-
+           
+                return new APIResponse
+                {
+                    StatusResponse = HttpStatusCode.OK,
+                    Message = "OTP sent successfully",
+                    Data = null
+                };
+            
         }
         private async Task<APIResponse> ProcessValidOTP(User user, UserValidation userValidation)
         {
@@ -378,10 +378,9 @@ namespace Event_Management.Application.Service.Authentication
             {
                 UserId = userId,
                 Token = refreshToken,
+                //CreatedAt = DateTimeHelper.GetDateTimeNow(),
                 CreatedAt = DateTime.UtcNow,
                 ExpireAt = DateTime.UtcNow.AddMonths(Convert.ToInt32(_configuration["JWTSetting:RefreshTokenValidityInMonths"]))
-                //ExpireAt = DateTimeHelper.GetDateTimeNow().AddMinutes(5)
-                //ExpireAt = DateTime.UtcNow.AddMinutes(10)
             };
 
             await _unitOfWork.RefreshTokenRepository.AddRefreshToken(refreshTokenEntity);

@@ -124,9 +124,9 @@ namespace Event_Management.Application.Service
 
             //check refresh token whether it's expired or null
             var existingRefreshToken = await _unitOfWork.RefreshTokenRepository.GetTokenAsync(token.RefreshToken!);
-            if (existingRefreshToken == null || existingRefreshToken.ExpireAt <= DateTimeHelper.GetDateTimeNow())
+            if (existingRefreshToken == null || existingRefreshToken.ExpireAt <= DateTime.UtcNow)
             {
-                if (existingRefreshToken != null)
+                if (existingRefreshToken != null && existingRefreshToken.ExpireAt <= DateTime.UtcNow)
                 {
                     await _unitOfWork.RefreshTokenRepository.RemoveRefreshTokenAsync(existingRefreshToken.Token);
                 }
