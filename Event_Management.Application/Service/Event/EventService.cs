@@ -403,7 +403,15 @@ namespace Event_Management.Application.Service
             //result.Add("top 20 event speaker", top20Speaker);
             return result;
         }
-
+        public async Task<PagedList<EventResponseDto>> GetEventByUserRole(EventRole eventRole, string userId, int pageNo, int elementEachPage)
+        {
+            var result = await _unitOfWork.EventRepository.getEventByUserRole(eventRole, Guid.Parse(userId), pageNo, elementEachPage);
+            List<EventResponseDto> response = new List<EventResponseDto>();
+            response = result.Select(ToResponseDto).ToList();
+            PagedList<EventResponseDto> pages = new PagedList<EventResponseDto>
+                (response, response.Count, pageNo, elementEachPage);
+            return pages;
+        }
         public async Task<bool> IsOwner(Guid eventId, Guid userId)
         {
             return await _unitOfWork.EventRepository.IsOwner(userId, eventId);

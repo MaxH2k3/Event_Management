@@ -3,6 +3,7 @@ using Event_Management.Application.Dto.EventDTO.RequestDTO;
 using Event_Management.Application.Message;
 using Event_Management.Application.Service;
 using Event_Management.Application.Service.FileService;
+using Event_Management.Domain.Enum;
 using Event_Management.Domain.Helper;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Models.System;
@@ -33,6 +34,24 @@ namespace Event_Management.API.Controllers
                 return Ok(response);
             }
             return BadRequest(response);
+        }
+        [Authorize]
+        [HttpGet("user-event-role")]
+        public async Task<IActionResult> GetEventByUserRole([FromQuery, Required] EventRole eventRole,
+                                                        [FromQuery, Range(1, int.MaxValue)] int pageNo = 1,
+                                                        [FromQuery, Range(1, int.MaxValue)] int elementEachPage = 10)
+        {
+            string userId = User.GetUserIdFromToken();
+            var response = await _eventService.GetEventByUserRole(eventRole, userId, pageNo, elementEachPage);
+            Response.Headers.Add("X-Total-Element", response.TotalItems.ToString());
+            Response.Headers.Add("X-Total-Page", response.TotalPages.ToString());
+            Response.Headers.Add("X-Current-Page", response.CurrentPage.ToString());
+            return Ok(new APIResponse
+            {
+                StatusResponse = HttpStatusCode.OK,
+                Message = MessageEvent.GetAllEvent,
+                Data = response
+            });
         }
         [HttpGet("tag")]
         [ProducesResponseType(StatusCodes.Status200OK)]

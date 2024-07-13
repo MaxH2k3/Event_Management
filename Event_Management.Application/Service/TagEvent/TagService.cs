@@ -110,7 +110,7 @@ namespace Event_Management.Domain.Service.TagEvent
         public async Task<Tag> GetById(int TagId)
         {
             var result = await _unitOfWork.TagRepository.GetById(TagId);
-            return result;
+            return result!;
         }
 
 

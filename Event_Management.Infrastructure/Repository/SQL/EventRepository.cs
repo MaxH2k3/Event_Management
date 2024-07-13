@@ -8,8 +8,11 @@ using Event_Management.Infrastructure.DBContext;
 using Event_Management.Infrastructure.Extensions;
 using Event_Management.Infrastructure.Repository.Common;
 using Microsoft.EntityFrameworkCore;
+using Stripe;
 using System.Drawing.Printing;
 using System.Globalization;
+using System.Linq;
+using Event = Event_Management.Domain.Entity.Event;
 
 namespace Event_Management.Infrastructure.Repository.SQL
 {
@@ -115,7 +118,7 @@ namespace Event_Management.Infrastructure.Repository.SQL
         public async Task<PagedList<Event>> GetEventsByTag(int tagId, int pageNo, int elementEachPage)
         {
             var tag = await _context.Tags.FirstOrDefaultAsync(t => t.TagId == tagId);
-            
+
             if (tag != null)
             {
                 var events = await _context.Events.Include(e => e.Tags).Where(e => e.Tags.Contains(tag))
@@ -155,12 +158,17 @@ namespace Event_Management.Infrastructure.Repository.SQL
         }
         private IQueryable<Event> ApplyFilter(IQueryable<Event> eventList, EventFilterObject filter)
         {
-            if (!string.IsNullOrWhiteSpace(filter.EventName))
-            
+            if (filter.TagId != null)
             {
-                    eventList = from e in eventList
-                                where e.EventName!.Contains(filter.EventName)
-                                select e;
+                var tags = _context.Tags.Where(t => filter.TagId.Contains(t.TagId)).ToList();
+                eventList = eventList.Where(e => e.Tags.Any(t => tags.Contains(t)));
+            }
+            if (!string.IsNullOrWhiteSpace(filter.EventName))
+
+            {
+                eventList = from e in eventList
+                            where e.EventName!.Contains(filter.EventName)
+                            select e;
             }
             if (!string.IsNullOrWhiteSpace(filter.Location))
             {
@@ -208,11 +216,9 @@ namespace Event_Management.Infrastructure.Repository.SQL
             {
 
             }
-            if (!string.IsNullOrWhiteSpace(filter.Status))
+            if (filter.Status != null)
             {
-                eventList = from e in eventList
-                            where e.Status == filter.Status
-                            select e;
+                eventList = eventList.Where(e => filter.Status.Contains(e.Status));
             }
             if (filter.TicketFrom != null)
             {
@@ -296,7 +302,7 @@ namespace Event_Management.Infrastructure.Repository.SQL
         {
             var events = await GetUserRegisterdEventsQuery(userId);
             return events.Where(e => e.EndDate.Date < DateTime.Now)
-                
+
                 .OrderByDescending(e => e.EndDate)
                 .ToList();
         }
@@ -316,7 +322,7 @@ namespace Event_Management.Infrastructure.Repository.SQL
             /*var ongoingEvents = _context.Events.Where(e => e.StartDate <= DateTime.Now).ToList();
             ongoingEvents.ForEach(e => e.Status = EventStatus.OnGoing.ToString());
                 _context.UpdateRange(ongoingEvents);*/
-               return _context.SaveChanges() > 0;
+            return _context.SaveChanges() > 0;
         }
 
         public bool UpdateEventStatusToEnded(Guid eventId)
@@ -327,14 +333,14 @@ namespace Event_Management.Infrastructure.Repository.SQL
             /*var endedEvents = _context.Events.Where(e => e.EndDate <= DateTime.Now).ToList();
             endedEvents.ForEach(e => e.Status = EventStatus.Ended.ToString());
             _context.UpdateRange(endedEvents);*/
-                return _context.SaveChanges() > 0;
+            return _context.SaveChanges() > 0;
         }
         public bool UpdateEventStatusToOnGoing()
         {
             var ongoingEvents = _context.Events.Where(e => e.StartDate <= DateTime.Now &&
             e.Status!.Equals(EventStatus.NotYet.ToString())).ToList();
             ongoingEvents.ForEach(e => e.Status = EventStatus.OnGoing.ToString());
-                _context.UpdateRange(ongoingEvents);
+            _context.UpdateRange(ongoingEvents);
             return _context.SaveChanges() > 0;
         }
 
@@ -402,7 +408,7 @@ namespace Event_Management.Infrastructure.Repository.SQL
         }
         public List<EventCreatorLeaderBoardDto> GetTop10CreatorsByEventCount()
         {
-            List<EventCreatorLeaderBoardDto> userInfos = new List<EventCreatorLeaderBoardDto>(); 
+            List<EventCreatorLeaderBoardDto> userInfos = new List<EventCreatorLeaderBoardDto>();
             var result = _context.Events
                 .AsEnumerable()
                 .GroupBy(e => e.CreatedBy!)
@@ -435,7 +441,7 @@ namespace Event_Management.Infrastructure.Repository.SQL
                 EventLocationLeaderBoardDto locationInfo = new EventLocationLeaderBoardDto();
                 var eventTemp = _context.Events.FirstOrDefault(e => e.Location.Equals(item.Key));
                 locationInfo.totalevent = item.Value;
-                if(eventTemp!.Location!.Equals("Google meet", StringComparison.OrdinalIgnoreCase))
+                if (eventTemp!.Location!.Equals("Google meet", StringComparison.OrdinalIgnoreCase))
                 {
                     locationInfo.Location = "Online";
                 }
@@ -478,7 +484,7 @@ namespace Event_Management.Infrastructure.Repository.SQL
                 userInfo.userId = temp.UserId;
                 userInfos.Add(userInfo);
             }
-            return userInfos;               
+            return userInfos;
         }
         public async Task<Event> getAllEventInfo(Guid eventId)
         {
@@ -487,7 +493,20 @@ namespace Event_Management.Infrastructure.Repository.SQL
                 .FirstOrDefaultAsync(e => e.EventId == eventId);
             return result != null ? result : null;
         }
-
+        public async Task<PagedList<Event>> getEventByUserRole(EventRole eventRole, Guid userId, int pageNo, int elementEachPage)
+        {
+            var userInfo = await _context.Participants.Where(p => p.UserId == userId && p.RoleEvent!.RoleEventId == ((int)eventRole))
+                .ToListAsync();
+            var eventIds = userInfo.Select(p => p.EventId).ToList();
+            var events = await _context.Events
+                .Where(e => eventIds.Contains(e.EventId))
+                .Where(e => e.Status!.Equals(EventStatus.OnGoing.ToString()) || e.Status!.Equals(EventStatus.NotYet.ToString()))
+                .AsSplitQuery().AsNoTracking()
+                .PaginateAndSort(pageNo, elementEachPage, "CreatedAt", false)
+                    .ToListAsync();
+            var totalEle = events.Count;
+                return new PagedList<Event>(events, totalEle, pageNo, elementEachPage);
+        }
         public async Task<bool> IsOwner(Guid userId, Guid eventId)
         {
             return await _context.Events.AnyAsync(e => e.EventId.Equals(eventId) && e.CreatedBy.Equals(userId));
