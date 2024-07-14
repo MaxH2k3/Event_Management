@@ -8,6 +8,7 @@ namespace Event_Management.Domain.Models.ParticipantDTO
 {
     public class ParticipantModel
     {
+        public Guid UserId { get; set; }
         public string FullName { get; set; } = null!;
         public string Email { get; set; } = null!;
         public string Phone { get; set; } = null!;
