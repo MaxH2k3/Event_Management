@@ -211,11 +211,11 @@ namespace Event_Management.API.Controllers
 
         }
 
-        [HttpPost("accept-ticket")]
+        [HttpPost("process-ticket")]
         [Authorize]
-        public async Task<IActionResult> AcceptParticipant(RegisterEventModel registerEventModel)
+        public async Task<IActionResult> ProcessTicketParticipant(ParticipantTicket participantTicket)
         {
-            var isOwner = await _eventService.IsOwner(registerEventModel.EventId, Guid.Parse(User.GetUserIdFromToken()));
+            var isOwner = await _eventService.IsOwner(participantTicket.EventId, Guid.Parse(User.GetUserIdFromToken()));
 
             if (!isOwner)
             {
@@ -227,7 +227,7 @@ namespace Event_Management.API.Controllers
                 });
             }
 
-            var response = await _registerEventService.AcceptRegisterEvent(registerEventModel.EventId, registerEventModel.UserId);
+            var response = await _registerEventService.ProcessingTicket(participantTicket.EventId, participantTicket.UserId, participantTicket.Status);
 
             if (response.StatusResponse == HttpStatusCode.OK)
             {
@@ -242,7 +242,7 @@ namespace Event_Management.API.Controllers
         public async Task<IActionResult> ApprovalInvite(Guid eventId)
         {
             var userId = Guid.Parse(User.GetUserIdFromToken());
-            var response = await _registerEventService.AcceptRegisterEvent(eventId, userId);
+            var response = await _registerEventService.ProcessingTicket(eventId, userId, ParticipantStatus.Confirmed);
 
             if (response.StatusResponse == HttpStatusCode.OK)
             {

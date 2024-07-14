@@ -223,7 +223,7 @@ namespace Event_Management.Domain.Service
 			return _mapper.Map<PagedList<ParticipantEventModel>>(participants);
 		}
 
-		public async Task<APIResponse> AcceptRegisterEvent(Guid eventId, Guid userId)
+		public async Task<APIResponse> ProcessingTicket(Guid eventId, Guid userId, ParticipantStatus status)
 		{
             var participant = await _unitOfWork.ParticipantRepository.GetParticipant(userId, eventId);
 
@@ -236,7 +236,7 @@ namespace Event_Management.Domain.Service
                 };
             }
 
-            participant.Status = ParticipantStatus.Confirmed.ToString();
+            participant.Status = status.ToString();
 
             await _unitOfWork.ParticipantRepository.Update(participant);
 
@@ -245,14 +245,14 @@ namespace Event_Management.Domain.Service
                 return new APIResponse()
 				{
                     StatusResponse = HttpStatusCode.OK,
-                    Message = MessageParticipant.AcceptParticipant
+                    Message = MessageParticipant.ProcessParticipant
                 };
             }
 
             return new APIResponse()
 			{
                 StatusResponse = HttpStatusCode.NotModified,
-                Message = MessageParticipant.AcceptParticipantFailed
+                Message = MessageParticipant.ProcessParticipantFailed
             };
         }
 
