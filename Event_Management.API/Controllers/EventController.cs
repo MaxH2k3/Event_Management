@@ -4,6 +4,7 @@ using Event_Management.Application.Message;
 using Event_Management.Application.Service;
 using Event_Management.Application.Service.FileService;
 using Event_Management.Domain.Enum;
+using Event_Management.Domain.Entity;
 using Event_Management.Domain.Helper;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Models.System;
@@ -20,10 +21,12 @@ namespace Event_Management.API.Controllers
     {
         private readonly IEventService _eventService;
         private readonly IImageService _fileService;
-        public EventController(IEventService eventService, IImageService fileService)
+        private readonly IUserService _userService;
+        public EventController(IEventService eventService, IImageService fileService, IUserService userService)
         {
             _eventService = eventService;
             _fileService = fileService;
+            _userService = userService;
         }
         [HttpGet("info")]
         public async Task<IActionResult> GetEventInfo([FromQuery, Required] Guid eventId)
@@ -292,6 +295,43 @@ namespace Event_Management.API.Controllers
                 Message = MessageEvent.PopularLocation,
                 Data = result
             });
+        }
+
+
+
+        [Authorize]
+        [HttpGet("event-statistics")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<APIResponse> GetEventStatictis(Guid eventId)
+        {
+            string userId = User.GetUserIdFromToken();
+            var response = new APIResponse();
+            var isOwner = await _eventService.IsOwner(eventId, Guid.Parse(userId));
+
+            if (!isOwner)
+            {
+                response.StatusResponse = HttpStatusCode.Unauthorized;
+                response.Message = MessageParticipant.NotOwner;
+                response.Data = null;
+                return response;
+            }
+
+            var result = await _eventService.GetEventStatis(eventId);
+            if (result != null)
+            {
+                response.StatusResponse = HttpStatusCode.OK;
+                response.Message = MessageCommon.Complete;
+                response.Data = result;
+            }
+            else
+            {
+                response.StatusResponse = HttpStatusCode.NotFound;
+                response.Message = MessageCommon.NotFound;
+            }
+            return response;
+
+
         }
 
     }

@@ -1,9 +1,7 @@
 ﻿using AutoMapper;
-using Azure;
-using Event_Management.Application.Dto;
 using Event_Management.Application.Dto.EventDTO.ResponseDTO;
-using Event_Management.Application.Dto.FeedbackDTO;
 using Event_Management.Application.Dto.SponsorLogoDTO;
+using Event_Management.Application.Dto.UserDTO.Response;
 using Event_Management.Application.Message;
 using Event_Management.Application.Service.FileService;
 using Event_Management.Application.Service.Job;
@@ -11,14 +9,12 @@ using Event_Management.Domain.Entity;
 using Event_Management.Domain.Enum;
 using Event_Management.Domain.Helper;
 using Event_Management.Domain.Models.Common;
-using Event_Management.Domain.Models.ParticipantDTO;
+using Event_Management.Domain.Models.EventDTO.ResponseDTO;
 using Event_Management.Domain.Models.System;
 using Event_Management.Domain.Service.TagEvent;
 using Event_Management.Domain.UnitOfWork;
-using Microsoft.Extensions.Configuration;
-using PayPal.Api;
+using Microsoft.Extensions.Logging;
 using System.Net;
-using System.Reflection;
 using System.Text.RegularExpressions;
 
 
@@ -33,6 +29,7 @@ namespace Event_Management.Application.Service
         private readonly ITagService _tagService;
         private readonly IUserService _userService;
         private readonly long dateTimeConvertValue = 25200000; //-7h to match JS dateTime type
+        private readonly long minimumUpdateTimeSpan = 21600000;//time span between event created and new event startDate
         public EventService(IUnitOfWork unitOfWork, IMapper mapper, ITagService tagService,
             IQuartzService quartzService, IImageService fileService, IUserService userService)
         {
@@ -46,7 +43,11 @@ namespace Event_Management.Application.Service
         public async Task<APIResponse> GetEventInfo(Guid eventId)
         {
             var eventInfo = await _unitOfWork.EventRepository.getAllEventInfo(eventId);
-            if(eventInfo != null)
+            /*await _quartzService.StartEventStartingEmailNoticeJob(eventId, DateTime.Now.AddMinutes(1));
+            await _quartzService.StartEventEndingEmailNoticeJob(eventId, DateTime.Now.AddMinutes(1));
+            await _quartzService.DeleteJobsByEventId("start-" +eventId);
+            await _quartzService.DeleteJobsByEventId("ended-" + eventId);*/
+            if (eventInfo != null)
             {
                 EventDetailDto eventDetailDto = new EventDetailDto();
                 eventDetailDto.EventId = eventId;
@@ -175,6 +176,8 @@ namespace Event_Management.Application.Service
             {
                 await _quartzService.StartEventStatusToOngoingJob(eventEntity.EventId, eventEntity.StartDate);
                 await _quartzService.StartEventStatusToEndedJob(eventEntity.EventId, eventEntity.EndDate);
+                await _quartzService.StartEventStartingEmailNoticeJob(eventEntity.EventId, eventEntity.StartDate.AddHours(-1));
+                await _quartzService.StartEventEndingEmailNoticeJob(eventEntity.EventId, eventEntity.EndDate.AddHours(1));
                 EventResponseDto response = ToResponseDto(eventEntity);
                 return new APIResponse
                 {
@@ -188,6 +191,15 @@ namespace Event_Management.Application.Service
                 Message = MessageCommon.CreateFailed,
                 StatusResponse = HttpStatusCode.BadRequest
             };
+        }
+        private CreatedByUserDto getHostInfo(Guid userId)
+        {
+            var user = _userService.GetUserById(userId);
+            CreatedByUserDto response = new CreatedByUserDto();
+            response.avatar = user!.Avatar;
+            response.Id = user.UserId;
+            response.Name = user.FullName;
+            return response;
         }
         private EventResponseDto ToResponseDto(Event eventEntity)
         { 
@@ -205,10 +217,7 @@ namespace Event_Management.Application.Service
             response.Location.Url = eventEntity.LocationUrl;
             response.EventId = eventEntity.EventId;
             response.EventName = eventEntity.EventName;
-            var user = _userService.GetUserById((Guid)eventEntity.CreatedBy!);
-            response.Host!.Name = user!.FullName;
-            response.Host.Id = eventEntity.CreatedBy.HasValue ? eventEntity.CreatedBy.Value : null;
-            response.Host.avatar = user!.Avatar;
+            response.Host = getHostInfo((Guid)eventEntity.CreatedBy!);
             response.Image = eventEntity.Image;
             response.Theme = eventEntity.Theme;
             response.eventTags = _mapper.Map<List<EventTag>>(eventEntity.Tags);
@@ -217,10 +226,22 @@ namespace Event_Management.Application.Service
             response.Capacity = eventEntity.Capacity;
             return response;
         }
+        private EventPreview ToEventPreview(Event entity)
+        {
+            EventPreview response = new EventPreview();
+            response.EventId = entity.EventId;
+            response.EventName = entity.EventName;
+            response.Location = entity.Location;
+            response.Status = entity.Status;
+            response.Image = entity.Image;
+            response.StartDate = DateTimeHelper.ToJsDateType(entity.StartDate);
+            response.Host = getHostInfo((Guid)entity.CreatedBy!);
+            return response;
+        }
         public async Task<bool> DeleteEvent(Guid eventId)
         {
             Event? existEvent = await _unitOfWork.EventRepository.GetById(eventId);
-            if (existEvent == null || existEvent.Status.Equals(EventStatus.OnGoing))
+            if (existEvent == null || existEvent.Status!.Equals(EventStatus.OnGoing))
             {
                 return false;
             }
@@ -229,13 +250,15 @@ namespace Event_Management.Application.Service
 
         //	_distributedCache = distributedCache;
         //}
-        public async Task<Dictionary<string, List<EventResponseDto>>> GetUserPastAndFutureEvents(Guid userId)
+        public async Task<Dictionary<string, List<EventPreview>>> GetUserPastAndFutureEvents(Guid userId)
         {
             List<Event> pastEvent = await _unitOfWork.EventRepository.UserPastEvents(userId);
             List<Event> incoming = await _unitOfWork.EventRepository.UserIncomingEvents(userId);
-            Dictionary<string, List<EventResponseDto>> response = new Dictionary<string, List<EventResponseDto>>();
-            response.Add("IncomingEvent", incoming.Select(ToResponseDto).ToList());
-            response.Add("PastEvent", pastEvent.Select(ToResponseDto).ToList());
+            Dictionary<string, List<EventPreview>> response = new Dictionary<string, List<EventPreview>>
+            {
+                { "IncomingEvent", incoming.Select(ToEventPreview).ToList() },
+                { "PastEvent", pastEvent.Select(ToEventPreview).ToList() }
+            };
             return response;
         }
         public async Task<PagedList<EventResponseDto>> GetAllEvents(EventFilterObject filter, int pageNo, int elementEachPage)
@@ -281,7 +304,6 @@ namespace Event_Management.Application.Service
 
         public async Task<APIResponse> UpdateEvent(EventRequestDto eventDto, string userId, Guid eventId)
         {
-            //var eventEntity = _mapper.Map<Event>(eventDto);
             var eventEntity = await _unitOfWork.EventRepository.getAllEventInfo(eventId);
             if (eventEntity.Status != EventStatus.NotYet.ToString())
             {
@@ -299,8 +321,7 @@ namespace Event_Management.Application.Service
                     StatusResponse = HttpStatusCode.Unauthorized,
                 };
             }
-            var userinfo = await _unitOfWork.UserRepository.GetById(Guid.Parse(userId));
-            if(!userId.Equals(eventEntity.CreatedBy.Value.ToString()))
+            if(!userId.Equals(eventEntity.CreatedBy!.Value.ToString()))
             {
                 return new APIResponse
                 {
@@ -321,11 +342,37 @@ namespace Event_Management.Application.Service
                 eventEntity.Tags.Add(tag!);
             }
             //startDate
-            if (eventDto.StartDate > 0 && eventDto.StartDate - DateTimeHelper.ToJsDateType((DateTime)eventEntity.CreatedAt!) > 0)
-            eventEntity.StartDate = DateTimeOffset.FromUnixTimeMilliseconds(eventDto.StartDate + +dateTimeConvertValue).DateTime;
+            if (eventDto.StartDate > 0 && eventDto.StartDate - (DateTimeHelper.ToJsDateType((DateTime)eventEntity.CreatedAt!)) < minimumUpdateTimeSpan)
+            {
+                return new APIResponse
+                {
+                    Message= MessageEvent.UpdateStartEndTimeValidation,
+                    StatusResponse = HttpStatusCode.BadRequest,
+                };
+            }
+            if (eventDto.StartDate > 0 && eventDto.StartDate - (DateTimeHelper.ToJsDateType((DateTime)eventEntity.CreatedAt!)) >= minimumUpdateTimeSpan)
+            {
+                eventEntity.StartDate = DateTimeOffset.FromUnixTimeMilliseconds(eventDto.StartDate + dateTimeConvertValue).DateTime;
+                await _quartzService.DeleteJobsByEventId("start-" + eventEntity.EventId);
+                await _quartzService.StartEventStatusToOngoingJob(eventEntity.EventId, eventEntity.StartDate);
+                await _quartzService.StartEventStartingEmailNoticeJob(eventEntity.EventId, eventEntity.StartDate.AddHours(-1));
+            }
             //endDate
-            if(eventDto.EndDate > 0 && eventDto.EndDate - eventDto.StartDate >= 30*60*1000)
-            eventEntity.EndDate = DateTimeOffset.FromUnixTimeMilliseconds(eventDto.EndDate + +dateTimeConvertValue).DateTime;
+            if (eventDto.EndDate > 0 && eventDto.EndDate - DateTimeHelper.ToJsDateType(eventEntity.StartDate) < 30 * 60 * 1000)
+            {
+                return new APIResponse
+                {
+                    Message = MessageEvent.UpdateStartEndTimeValidation,
+                    StatusResponse = HttpStatusCode.BadRequest,
+                };
+            }
+            if (eventDto.EndDate > 0 && eventDto.EndDate - DateTimeHelper.ToJsDateType(eventEntity.StartDate) >= 30 * 60 * 1000)
+            {
+                eventEntity.EndDate = DateTimeOffset.FromUnixTimeMilliseconds(eventDto.EndDate + dateTimeConvertValue).DateTime;
+                await _quartzService.DeleteJobsByEventId("ended-" + eventEntity.EventId);
+                await _quartzService.StartEventStatusToEndedJob(eventEntity.EventId, eventEntity.EndDate);
+                await _quartzService.StartEventEndingEmailNoticeJob(eventEntity.EventId, eventEntity.EndDate.AddHours(1));
+            }            
             //theme
             eventEntity.Theme = eventDto.Theme;
             //image
@@ -341,11 +388,11 @@ namespace Event_Management.Application.Service
             eventEntity.LocationAddress = eventDto.Location.Address;
             eventEntity.LocationUrl = eventDto.Location.Url;
             //capacity
-            eventEntity.Capacity = eventDto.Capacity;
+            eventEntity.Capacity = eventDto.Capacity.HasValue ? eventDto.Capacity.Value : eventEntity.Capacity;
             //approval
-            eventEntity.Approval = eventDto.Approval.HasValue ? eventDto.Approval.Value : false;
+            eventEntity.Approval = eventDto.Approval.HasValue ? eventDto.Approval.Value : eventEntity.Approval;
             //fare / ticket
-            eventEntity.Fare = eventDto.Ticket;
+            eventEntity.Fare = eventDto.Ticket.HasValue ? eventDto.Ticket.Value : eventEntity.Fare;
             await _unitOfWork.EventRepository.Update(eventEntity);
             if (await _unitOfWork.SaveChangesAsync())
             {
@@ -415,6 +462,11 @@ namespace Event_Management.Application.Service
         public async Task<bool> IsOwner(Guid eventId, Guid userId)
         {
             return await _unitOfWork.EventRepository.IsOwner(userId, eventId);
+        }
+
+        public async Task<EventStatistics?> GetEventStatis(Guid eventId)
+        {
+            return await _unitOfWork.EventStatisticsRepository.GetById(eventId);
         }
     }
 }

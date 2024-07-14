@@ -115,6 +115,11 @@ namespace Event_Management.Infrastructure.Repository.SQL
 
         }
 
+		public async Task<bool> IsRole(Guid userId, Guid eventId, EventRole role)
+		{
+            return await _context.Participants.AnyAsync(p => p.EventId.Equals(eventId) && p.UserId.Equals(userId) && p.RoleEventId.Equals((int)role));
+        }
+
 	}
 
 }

@@ -31,6 +31,7 @@ namespace Event_Management.Infrastructure.UnitOfWork
         private readonly IUserRepository _userRepository = null!;
         private readonly IUserValidationRepository _userValidationRepository = null!;
         private readonly IRefreshTokenRepository _refreshTokenRepository = null!;
+        private readonly IEventStatisticsRepository _eventStatisticsRepository = null!;
         public UnitOfWork()
         {
         }
@@ -81,6 +82,7 @@ namespace Event_Management.Infrastructure.UnitOfWork
         public IUserRepository UserRepository => _userRepository ?? new UserRepository(_context, _cacheRepository);
         public IUserValidationRepository UserValidationRepository => _userValidationRepository ?? new UserValidationRepository(_context);
         public IRefreshTokenRepository RefreshTokenRepository => _refreshTokenRepository ?? new RefreshTokenRepository(_context);
+        public IEventStatisticsRepository EventStatisticsRepository => _eventStatisticsRepository ?? new EventStatisticsRepository(_context);
 
         public void Dispose()
         {

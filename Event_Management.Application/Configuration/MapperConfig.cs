@@ -13,6 +13,7 @@ using Event_Management.Domain.Entity;
 using Event_Management.Application.Dto.UserDTO.Request;
 using Event_Management.Application.Dto.SponsorLogoDTO;
 using Event_Management.Application.Dto.EventDTO.SponsorDTO;
+using Event_Management.Domain.Models.Sponsor;
 
 namespace Event_Management.Domain.Configuration
 {
@@ -75,6 +76,16 @@ namespace Event_Management.Domain.Configuration
 
             //Logo
             CreateMap<Logo, SponsorLogoDto>().ReverseMap();
+
+
+            CreateMap<SponsorEvent, SponsorEventDto>()
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.User.FullName)).ReverseMap();
+
+
+            CreateMap<PagedList<SponsorEvent>, PagedList<SponsorEventDto>>()
+                .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.ToList()))
+                .ReverseMap();
+               
 
         }
     }

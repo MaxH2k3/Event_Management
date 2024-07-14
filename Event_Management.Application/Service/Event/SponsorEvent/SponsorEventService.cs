@@ -4,6 +4,7 @@ using Event_Management.Application.Dto.EventDTO.SponsorDTO;
 using Event_Management.Domain.Entity;
 using Event_Management.Domain.Enum.Sponsor;
 using Event_Management.Domain.Models.Common;
+using Event_Management.Domain.Models.Sponsor;
 using Event_Management.Domain.UnitOfWork;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -15,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace Event_Management.Application.Service
 {
-	public class SponsorEventService : ISponsorEventService
+    public class SponsorEventService : ISponsorEventService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -45,14 +46,22 @@ namespace Event_Management.Application.Service
 
 		}
 
-		//public async Task<PagedList<SponsorEvent>> GetSponsorByEventId(Expression<Func<Guid, bool>> eventId, int page, int eachPage)
-  //      {
-  //          return await _unitOfWork.SponsorEventRepository.GetAll(page, eachPage);
-  //      }
+        public async Task<PagedList<SponsorEventDto>> GetSponsorEventsById(SponsorEventFilter sponsorFilter)
+        {
+            var list = await _unitOfWork.SponsorEventRepository.GetSponsorEvents(sponsorFilter);
+            return _mapper.Map<PagedList<SponsorEventDto>>(list);
+           
+        }
 
-		public async Task<bool> UpdateSponsorEventRequest(SponsorDto sponsorEvent)
+        //public async Task<PagedList<SponsorEvent>> GetSponsorByEventId(Expression<Func<Guid, bool>> eventId, int page, int eachPage)
+        //      {
+        //          return await _unitOfWork.SponsorEventRepository.GetAll(page, eachPage);
+        //      }
+
+        public async Task<bool> UpdateSponsorEventRequest(SponsorDto sponsorEvent)
 		{
             sponsorEvent.UpdatedAt = DateTime.Now;
+           
 			var sponsorEntity = _mapper.Map<SponsorEvent>(sponsorEvent);
 			await _unitOfWork.SponsorEventRepository.Update(sponsorEntity);
             return await _unitOfWork.SaveChangesAsync();

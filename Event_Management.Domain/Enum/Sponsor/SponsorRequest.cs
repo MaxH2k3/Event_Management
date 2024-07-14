@@ -9,8 +9,8 @@ namespace Event_Management.Domain.Enum.Sponsor
 	public enum SponsorRequest
 	{
 		PENDING,
-		PROCESSING,
-		CONFIRMED,
-		REJECTED
+        CONFIRMED,
+        PROCESSING,
+		CANCEL
 	}
 }

@@ -295,5 +295,10 @@ namespace Event_Management.Domain.Service
             return _mapper.Map<PagedList<ParticipantModel>>(participants);
         }
 
+        public async Task<bool> IsRole(Guid userId, Guid eventId, EventRole role)
+        {
+            return await _unitOfWork.ParticipantRepository.IsRole(userId, eventId, role);
+        }
+
     }
 }

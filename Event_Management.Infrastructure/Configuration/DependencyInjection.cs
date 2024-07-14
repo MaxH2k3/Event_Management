@@ -121,6 +121,7 @@ namespace Event_Management.Infastructure.Configuration
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IQuartzService, QuartzService>();
             builder.Services.AddScoped<IFeedbackService, FeedbackService>();
+            
             builder.Services.AddScoped<SendMailTask>();
 
             builder.Services.AddTransient<PaymentHandler>();

@@ -9,7 +9,7 @@ namespace Event_Management.Application.Dto.EventDTO.SponsorDTO
 {
 	public class SponsorDto
 	{
-		public Guid? EventId { get; set; }
+		public Guid EventId { get; set; }
 		//public int? SponsorMethodId { get; set; }
 		public Guid? UserId { get; set; }
 		public SponsorRequest? Status { get; set; }

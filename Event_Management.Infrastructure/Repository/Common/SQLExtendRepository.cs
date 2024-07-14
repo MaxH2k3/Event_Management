@@ -40,5 +40,7 @@ namespace Event_Management.Infrastructure.Repository.Common
             return new PagedList<T>(entities, entities.Count, page, eachPage);
 
         }
+
+       
     }
 }

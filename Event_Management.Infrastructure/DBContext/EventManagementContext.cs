@@ -38,6 +38,7 @@ namespace Event_Management.Infrastructure.DBContext
         public virtual DbSet<Tag> Tags { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;
         public virtual DbSet<UserValidation> UserValidations { get; set; } = null!;
+        public virtual DbSet<EventStatistics> EventStatistics { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -125,6 +126,10 @@ namespace Event_Management.Infrastructure.DBContext
                     .WithMany(p => p.Events)
                     .HasForeignKey(d => d.CreatedBy)
                     .HasConstraintName("FK__Event__CreatedBy__3E52440B");
+
+                entity.HasOne(e => e.Statistics)
+                    .WithOne(s => s.Event)
+                    .HasForeignKey<EventStatistics>(s => s.EventId);
             });
 
             modelBuilder.Entity<EventMailSystem>(entity =>
@@ -475,6 +480,18 @@ namespace Event_Management.Infrastructure.DBContext
                     .HasColumnName("OTP");
 
                 entity.Property(e => e.VerifyToken).IsUnicode(false);
+            });
+
+            modelBuilder.Entity<EventStatistics>(entity =>
+            {
+                entity.HasKey(e => e.EventId);
+
+                entity.ToView("EventStatistics");
+
+                entity.HasOne(s => s.Event)
+                    .WithOne(p => p.Statistics)
+                    .HasForeignKey<EventStatistics>(s => s.EventId);
+                entity.Metadata.SetIsTableExcludedFromMigrations(true);
             });
 
             OnModelCreatingPartial(modelBuilder);

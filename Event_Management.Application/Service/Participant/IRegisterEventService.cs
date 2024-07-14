@@ -35,6 +35,8 @@ namespace Event_Management.Domain.Service
         // Get all participant related to check-in on event
         Task<PagedList<ParticipantModel>> GetParticipantOnEvent(int page, int eachPage, Guid eventId);
 
+		// Check if user is role of event
+		Task<bool> IsRole(Guid userId, Guid eventId, EventRole role);
 
         Task<APIResponse> GetEventParticipants(Guid eventId);
 

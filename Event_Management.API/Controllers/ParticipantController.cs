@@ -271,5 +271,24 @@ namespace Event_Management.API.Controllers
             var response = await _registerEventService.GetCurrentUser(userId, eventId);
             return Ok(response);
         }
+
+        [Authorize]
+        [HttpGet("checkin-user")]
+        public async Task<IActionResult> CheckinParticipant(Guid eventId, Guid userId)
+        {
+            if(await _registerEventService.IsRole(userId, eventId, EventRole.CheckingStaff))
+            {
+                return BadRequest(new APIResponse()
+                {
+                    StatusResponse = HttpStatusCode.BadRequest,
+                    Message = MessageParticipant.YouAreNotStaff,
+                    Data = null
+                });
+            }
+
+            var response = await _registerEventService.CheckInParticipant(userId, eventId);
+            return Ok(response);
+        }
+
     }
 }

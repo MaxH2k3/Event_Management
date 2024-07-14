@@ -77,6 +77,8 @@ namespace Event_Management.Infrastructure.Repository.Common
             return new PagedList<T>(items, totalItems, page, eachPage);
         }
 
+        
+
         public async Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>> predicate)
         {
             return await _context.Set<T>().Where(predicate).ToListAsync();

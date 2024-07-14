@@ -5,6 +5,7 @@ using Event_Management.Domain;
 using Event_Management.Domain.Entity;
 using Event_Management.Domain.Enum;
 using Event_Management.Domain.Models.Common;
+using Event_Management.Domain.Models.EventDTO.ResponseDTO;
 using Event_Management.Domain.Models.System;
 using Microsoft.AspNetCore.Http;
 
@@ -18,7 +19,7 @@ namespace Event_Management.Application.Service
         public Task<PagedList<EventResponseDto>> GetEventsByListTag(List<int> tagIds, int pageNo, int elementEachPage);
         public Task<PagedList<EventResponseDto>> GetAllEvents(EventFilterObject filter, int pageNo, int elementEachPage);
         public Task<PagedList<EventResponseDto>> GetUserParticipatedEvents(EventFilterObject filter, string userId, int pageNo, int elementEachPage);
-        public Task<Dictionary<string, List<EventResponseDto>>> GetUserPastAndFutureEvents(Guid userId);
+        public Task<Dictionary<string, List<EventPreview>>> GetUserPastAndFutureEvents(Guid userId);
         public Task<APIResponse> AddEvent(EventRequestDto eventDto, string userId);// HttpContext http);
         public Task<APIResponse> UpdateEvent(EventRequestDto eventDto, string userId, Guid eventId);
         public Task<bool> DeleteEvent(Guid eventId);
@@ -32,6 +33,8 @@ namespace Event_Management.Application.Service
         public List<EventCreatorLeaderBoardDto> GetTop20SpeakerEventCount();
         public Dictionary<string, List<EventCreatorLeaderBoardDto>> GetEventLeaderBoards();
         Task<bool> IsOwner(Guid eventId, Guid userId);
+
+        Task<EventStatistics?> GetEventStatis(Guid eventId);
     }
         
         

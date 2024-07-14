@@ -35,6 +35,7 @@ namespace Event_Management.Domain.Entity
         public string? Theme { get; set; }
 
         public virtual User? CreatedByNavigation { get; set; }
+        public virtual EventStatistics Statistics { get; set; }
         public virtual ICollection<Feedback> Feedbacks { get; set; }
         public virtual ICollection<Participant> Participants { get; set; }
         public virtual ICollection<PaymentTransaction> PaymentTransactions { get; set; }

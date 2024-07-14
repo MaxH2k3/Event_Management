@@ -3,10 +3,12 @@ using Event_Management.Application.Message;
 using Event_Management.Application.Service;
 using Event_Management.Domain.Entity;
 using Event_Management.Domain.Helper;
+using Event_Management.Domain.Models.Sponsor;
 using Event_Management.Domain.Models.System;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 
 namespace Event_Management.API.Controllers
@@ -16,13 +18,17 @@ namespace Event_Management.API.Controllers
 	public class SponsorController : ControllerBase
 	{
 		private readonly ISponsorEventService _sponsorEventService;
+		private readonly IUserService _userService;
+		private readonly IEventService _eventService;
 
-		public SponsorController(ISponsorEventService sponsorEventService)
+		public SponsorController(ISponsorEventService sponsorEventService, IUserService userService, IEventService eventService)
 		{
 			_sponsorEventService = sponsorEventService;
+			_userService = userService;
+			_eventService = eventService;
 		}
 
-		//[Authorize]
+		[Authorize]
 		[HttpPost("request")]
 		[ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
 		[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -30,8 +36,16 @@ namespace Event_Management.API.Controllers
 		public async Task<APIResponse> CreateRequest([FromQuery] SponsorDto sponsorEvent)
 		{
 			APIResponse response = new APIResponse();
-			//string userId = User.GetUserIdFromToken();
-			//sponsorEvent.UserId = Guid.Parse(userId);
+			string userId = User.GetUserIdFromToken();
+			var userEntity = await _userService.GetUserByIdAsync(Guid.Parse(userId));
+			if(userEntity == null)
+			{
+                response.StatusResponse = HttpStatusCode.BadRequest;
+				response.Message =  MessageUser.UserNotFound;
+				response.Data = null;
+				return response;
+            }
+			sponsorEvent.UserId = Guid.Parse(userId);
 			var result = await _sponsorEventService.AddSponsorEventRequest(sponsorEvent);
 			if(result)
 			{
@@ -47,16 +61,26 @@ namespace Event_Management.API.Controllers
 			return response;
 		}
 
-
-		[HttpPut("request")]
+        [Authorize]
+        [HttpPut("request")]
 		[ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
 		[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
 		[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 		public async Task<APIResponse> UpdateRequest([FromQuery] SponsorDto sponsorEvent)
 		{
 			APIResponse response = new APIResponse();
-			//string userId = User.GetUserIdFromToken();
-			//sponsorEvent.UserId = Guid.Parse(userId);
+			string userId = User.GetUserIdFromToken();
+            var isOwner = await _eventService.IsOwner(sponsorEvent.EventId, Guid.Parse(userId));
+
+            if (!isOwner)
+            {
+                response.StatusResponse = HttpStatusCode.BadRequest;
+                response.Message = MessageParticipant.NotOwner;
+                response.Data = null;
+                return response;
+            }
+
+            sponsorEvent.UserId = Guid.Parse(userId);
 			var result = await _sponsorEventService.UpdateSponsorEventRequest(sponsorEvent);
 			if (result != null)
 			{
@@ -72,8 +96,39 @@ namespace Event_Management.API.Controllers
 
 			return response;
 
+        }
 
 
-		}
-	}
+        [Authorize]
+        [HttpGet("event")]
+        public async Task<APIResponse> GetSponsorEvent([FromQuery] SponsorEventFilter sponsorFilter)
+        {
+            var response = new APIResponse();
+			var isOwner = await _eventService.IsOwner(sponsorFilter.EventId, Guid.Parse(User.GetUserIdFromToken()));
+			if (!isOwner)
+			{
+				response.StatusResponse = HttpStatusCode.BadRequest;
+				response.Message = MessageParticipant.NotOwner;
+				response.Data = null;
+			}
+
+			var result = await _sponsorEventService.GetSponsorEventsById(sponsorFilter);
+            if (result.Count() > 0)
+            {
+                response.StatusResponse = HttpStatusCode.OK;
+                response.Message = MessageCommon.Complete;
+                response.Data = result;
+            }
+            else
+            {
+                response.StatusResponse = HttpStatusCode.NotFound;
+                response.Message = MessageCommon.NotFound;
+                response.Data = result;
+            }
+
+            return response;
+
+        }
+
+    }
 }

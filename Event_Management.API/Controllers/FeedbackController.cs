@@ -1,6 +1,7 @@
 ﻿using Event_Management.Application.Dto;
 using Event_Management.Application.Dto.FeedbackDTO;
 using Event_Management.Application.Message;
+using Event_Management.Application.Service;
 using Event_Management.Application.Service.FeedbackEvent;
 using Event_Management.Domain;
 using Event_Management.Domain.Helper;
@@ -21,14 +22,16 @@ namespace Event_Management.API.Controllers
         private readonly IFeedbackService _feedbackService;
 
         private readonly IWebHostEnvironment _environment;
+        private readonly IEventService _eventService;
 
-        public FeedbackController(IFeedbackService feedbackService, IWebHostEnvironment environment)
+        public FeedbackController(IFeedbackService feedbackService, IWebHostEnvironment environment, IEventService eventService)
         {
             _feedbackService = feedbackService;
             _environment = environment;
+            _eventService = eventService;
         }
 
-
+        [Authorize]
         [HttpPost("")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -60,6 +63,7 @@ namespace Event_Management.API.Controllers
             return response;
         }
 
+        [Authorize]
         [HttpPut("")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -88,12 +92,37 @@ namespace Event_Management.API.Controllers
             }
             return response;
         }
-        //[Authorize]
+
+
+        [Authorize]
         [HttpGet("event")]
-        public async Task<IActionResult> GetEventFeedbacks([FromQuery, Required] Guid eventId)
+        public async Task<APIResponse> GetEventFeedbacks([FromQuery, Required] Guid eventId, [FromQuery, Range(1, 5)]  int? numOfStar, [FromQuery, Range(1, int.MaxValue)] int page = 1,
+                                                                   [FromQuery, Range(1, int.MaxValue)] int eachPage = 10)
         {
-            var result = await _feedbackService.GetEventFeedbacks(eventId);
-            return Ok(result);
+            var response = new APIResponse();
+            var isOwner = await _eventService.IsOwner(eventId, Guid.Parse(User.GetUserIdFromToken()));
+            if (!isOwner)
+            {
+                response.StatusResponse = HttpStatusCode.BadRequest;
+                response.Message = MessageParticipant.NotOwner;
+                response.Data = null;
+            }
+
+            var result = await _feedbackService.GetEventFeedbacks(eventId, numOfStar, page, eachPage);
+            if(result != null)
+            {
+                response.StatusResponse = HttpStatusCode.OK;
+                response.Message = MessageCommon.Complete;
+                response.Data = result;
+            } else
+            {
+                response.StatusResponse = HttpStatusCode.NotFound;
+                response.Message = MessageCommon.NotFound;
+                response.Data = result;
+            }
+           
+            return response;
+            
         }
     }
 }
