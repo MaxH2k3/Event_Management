@@ -15,7 +15,6 @@ namespace Event_Management.Domain.Models.ParticipantDTO
         [Required]
         public Guid EventId { get; set; }
         [Required]
-        [Range(0, 3)]
-        public ParticipantStatus Status { get; set; }
+        public string Status { get; set; } = string.Empty;
     }
 }

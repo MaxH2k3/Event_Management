@@ -1,4 +1,5 @@
-﻿using Event_Management.Application.Helper;
+﻿using Event_Management.API.Utilities;
+using Event_Management.Application.Helper;
 using Event_Management.Application.Message;
 using Event_Management.Application.Service;
 using Event_Management.Domain.Enum;
@@ -227,6 +228,16 @@ namespace Event_Management.API.Controllers
                 });
             }
 
+            if (!Helper.IsValidParticipantStatus(participantTicket.Status))
+            {
+                return BadRequest(new APIResponse()
+                {
+                    StatusResponse = HttpStatusCode.BadRequest,
+                    Message = MessageParticipant.ParticipantStatusNotValid,
+                    Data = null
+                });
+            }
+
             var response = await _registerEventService.ProcessingTicket(participantTicket.EventId, participantTicket.UserId, participantTicket.Status);
 
             if (response.StatusResponse == HttpStatusCode.OK)
@@ -242,7 +253,7 @@ namespace Event_Management.API.Controllers
         public async Task<IActionResult> ApprovalInvite(Guid eventId)
         {
             var userId = Guid.Parse(User.GetUserIdFromToken());
-            var response = await _registerEventService.ProcessingTicket(eventId, userId, ParticipantStatus.Confirmed);
+            var response = await _registerEventService.ProcessingTicket(eventId, userId, ParticipantStatus.Confirmed.ToString());
 
             if (response.StatusResponse == HttpStatusCode.OK)
             {

@@ -24,7 +24,7 @@ namespace Event_Management.Domain.Service
 		Task<PagedList<ParticipantEventModel>> GetParticipantOnEvent(FilterParticipant filter);
 
 		// Accept register event
-		Task<APIResponse> ProcessingTicket(Guid eventId, Guid userId, ParticipantStatus status);
+		Task<APIResponse> ProcessingTicket(Guid eventId, Guid userId, string status);
 
         // Add user to event
         Task<APIResponse> AddToEvent(RegisterEventModel registerEventModel);

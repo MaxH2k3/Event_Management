@@ -223,7 +223,7 @@ namespace Event_Management.Domain.Service
 			return _mapper.Map<PagedList<ParticipantEventModel>>(participants);
 		}
 
-		public async Task<APIResponse> ProcessingTicket(Guid eventId, Guid userId, ParticipantStatus status)
+		public async Task<APIResponse> ProcessingTicket(Guid eventId, Guid userId, string status)
 		{
             var participant = await _unitOfWork.ParticipantRepository.GetParticipant(userId, eventId);
 
@@ -236,7 +236,7 @@ namespace Event_Management.Domain.Service
                 };
             }
 
-            participant.Status = status.ToString();
+            participant.Status = status;
 
             await _unitOfWork.ParticipantRepository.Update(participant);
 

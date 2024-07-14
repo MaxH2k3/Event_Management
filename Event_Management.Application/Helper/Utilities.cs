@@ -23,5 +23,26 @@ namespace Event_Management.Application.Helper
 
             return string.Empty;
         }
+
+        public static ParticipantStatus GetParticipantStatus(string status)
+        {
+            if(ParticipantStatus.Pending.ToString().Equals(status))
+            {
+                return ParticipantStatus.Pending;
+            } else if(ParticipantStatus.Confirmed.ToString().Equals(status))
+            {
+                return ParticipantStatus.Confirmed;
+            } else if(ParticipantStatus.Blocked.ToString().Equals(status))
+            {
+                return ParticipantStatus.Blocked;
+            } else if(ParticipantStatus.Cancel.ToString().Equals(status))
+            {
+                return ParticipantStatus.Cancel;
+            }
+
+
+            throw new Exception("Status not found");
+        }
+
     }
 }
