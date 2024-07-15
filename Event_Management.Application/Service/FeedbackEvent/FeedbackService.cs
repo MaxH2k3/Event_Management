@@ -1,22 +1,12 @@
 ﻿using AutoMapper;
-using Event_Management.Application.Dto.EventDTO.ResponseDTO;
 using Event_Management.Application.Dto.FeedbackDTO;
-using Event_Management.Application.Message;
-using Event_Management.Domain;
+using Event_Management.Application.Dto.UserDTO.Response;
 using Event_Management.Domain.Entity;
 using Event_Management.Domain.Helper;
 using Event_Management.Domain.Models.Common;
-using Event_Management.Domain.Models.System;
 using Event_Management.Domain.UnitOfWork;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Event_Management.Application.Service.FeedbackEvent
+namespace Event_Management.Application.Service
 {
     public class FeedbackService : IFeedbackService
     {
@@ -55,10 +45,58 @@ namespace Event_Management.Application.Service.FeedbackEvent
             await _unitOfWork.SaveChangesAsync();
             return feedbackEntity;
         }
-        public async Task<PagedList<Feedback>?> GetEventFeedbacks(Guid eventId, int? numOfStar, int pageNo, int elementEachPage)
+        public async Task<PagedList<FeedbackEvent>?> GetEventFeedbacks(Guid eventId, int? numOfStar, int pageNo, int elementEachPage)
         {
-            return await _unitOfWork.FeedbackRepository.GetFeedbackByEventIdAndStar(eventId, numOfStar, pageNo, elementEachPage);
+            var feedbacks = await _unitOfWork.FeedbackRepository.GetFeedbackByEventIdAndStar(eventId, numOfStar, pageNo, elementEachPage);
             
+            return _mapper.Map<PagedList<FeedbackEvent>>(feedbacks);
+
+        }
+        private async Task<CreatedByUserDto> getUserInfo(Guid userId)
+        {
+            var userInfo = await _unitOfWork.UserRepository.GetById(userId);
+            CreatedByUserDto response = new CreatedByUserDto();
+            response.avatar = userInfo!.Avatar;
+            response.Name = userInfo.FullName;
+            response.Id = userInfo.UserId;
+            return response;
+        }
+        private async Task<FeedbackView> ToFeebackView(Feedback feedback)
+        {
+            return new FeedbackView
+            {
+                EventId = feedback.EventId,
+                Content = feedback.Content,
+                Rating = feedback.Rating,
+                CreatedBy = await getUserInfo(feedback.UserId)
+            };
+        }
+        public async Task<FeedbackView> GetUserFeedback(Guid eventId, Guid userId)
+        {
+            var result = await _unitOfWork.FeedbackRepository.GetUserEventFeedback(eventId, userId);
+            return new FeedbackView
+            {
+                EventId = eventId,
+                Content = result.Content,
+                Rating = result.Rating,
+                CreatedBy = await getUserInfo(result.UserId)
+            };
+        }
+        public async Task<PagedList<FeedbackView>> GetAllUserFeebacks(Guid userId, int page, int eachPage)
+        {
+            var result = await _unitOfWork.FeedbackRepository.GetAllUserFeebacks(userId, page, eachPage);
+            List<FeedbackView> response  = new List<FeedbackView>();
+            foreach(var item in result!)
+            {
+                response.Add(await ToFeebackView(item));
+            }
+            return new PagedList<FeedbackView>
+            {
+                Items = response,
+                TotalItems = response.Count,
+                CurrentPage = page,
+                EachPage = eachPage
+            };
         }
     }
 }

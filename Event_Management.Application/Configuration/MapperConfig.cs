@@ -46,6 +46,10 @@ namespace Event_Management.Domain.Configuration
 
             //Mapper Feedback
             CreateMap<FeedbackDto, Feedback>().ReverseMap();
+            CreateMap<Feedback, FeedbackEvent>()
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.User.FullName))
+                .ReverseMap();
+            CreateMap<PagedList<Feedback>, PagedList<FeedbackEvent>>();
 
             CreateMap<Event, EventPreview>().ReverseMap();
             CreateMap<PagedList<Event>, PagedList<EventPreview>>().ReverseMap();

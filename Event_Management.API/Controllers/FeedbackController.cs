@@ -1,14 +1,9 @@
-﻿using Event_Management.Application.Dto;
-using Event_Management.Application.Dto.FeedbackDTO;
+﻿using Event_Management.Application.Dto.FeedbackDTO;
 using Event_Management.Application.Message;
 using Event_Management.Application.Service;
-using Event_Management.Application.Service.FeedbackEvent;
-using Event_Management.Domain;
 using Event_Management.Domain.Helper;
 using Event_Management.Domain.Models.System;
-using Event_Management.Domain.Service.TagEvent;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
@@ -123,6 +118,35 @@ namespace Event_Management.API.Controllers
            
             return response;
             
+        }
+        [Authorize]
+        [HttpGet("event/user")]
+        public async Task<IActionResult> GetUserFeedBack([FromQuery, Required] Guid eventId)
+        {
+            string? userId = User.GetUserIdFromToken();
+            var result = await _feedbackService.GetUserFeedback(eventId, Guid.Parse(userId));
+            APIResponse response = new APIResponse 
+            {
+                StatusResponse = HttpStatusCode.OK,
+                Message = MessageCommon.Complete,
+                Data = result
+            };
+            return Ok(response);
+        }
+        [Authorize]
+        [HttpGet("user")]
+        public async Task<IActionResult> GetAllUserFeebacks([FromQuery, Range(1, int.MaxValue)] int page = 1,
+                                                                   [FromQuery, Range(1, int.MaxValue)] int eachPage = 10)
+        {
+            string? userId = User.GetUserIdFromToken();
+            var result = await _feedbackService.GetAllUserFeebacks(Guid.Parse(userId), page,eachPage);
+            APIResponse response = new APIResponse
+            {
+                Message = MessageCommon.Complete,
+                StatusResponse = HttpStatusCode.OK,
+                Data = result
+            };
+            return Ok(response);
         }
     }
 }
