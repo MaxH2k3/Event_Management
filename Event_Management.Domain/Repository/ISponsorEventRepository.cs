@@ -9,5 +9,6 @@ namespace Event_Management.Domain.Repository
     {
         Task<SponsorEvent?> CheckSponsorEvent(Guid eventId, Guid userId);
         Task<PagedList<SponsorEvent>> GetSponsorEvents(SponsorEventFilter sponsorFilter);
+        Task<PagedList<SponsorEvent>> GetSponsoredEvent(Guid userId, int page, int eachPage);
     }
 }

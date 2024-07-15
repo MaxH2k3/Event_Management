@@ -14,10 +14,11 @@ namespace Event_Management.Application.Service
     public interface ISponsorEventService
     {
         //Task<PagedList<SponsorEvent>> GetSponsorByEventId(Expression<Func<Guid, bool>> eventId, int page, int eachPage);
-        Task<bool> AddSponsorEventRequest(SponsorDto sponsorEvent);
-        Task<bool> UpdateSponsorEventRequest(SponsorDto sponsorEvent);
+        Task<SponsorEvent> AddSponsorEventRequest(SponsorDto sponsorEvent);
+        Task<SponsorEvent> UpdateSponsorEventRequest(SponsorDto sponsorEvent);
         Task<PagedList<SponsorEventDto>> GetSponsorEventsById(SponsorEventFilter sponsorFilter);
+        Task<PagedList<SponsorEvent>> GetSponsoredEvent(Guid userId, int page, int eachPage);
 
-		Task<SponsorEvent?> CheckSponsorEvent(Guid eventId, Guid userId);
+		//Task<SponsorEvent?> CheckSponsorEvent(Guid eventId, Guid userId);
 	}
 }

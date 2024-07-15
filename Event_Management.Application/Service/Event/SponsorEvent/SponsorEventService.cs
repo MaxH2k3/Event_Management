@@ -3,6 +3,7 @@ using Azure;
 using Event_Management.Application.Dto.EventDTO.SponsorDTO;
 using Event_Management.Domain.Entity;
 using Event_Management.Domain.Enum.Sponsor;
+using Event_Management.Domain.Helper;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Models.Sponsor;
 using Event_Management.Domain.UnitOfWork;
@@ -29,22 +30,33 @@ namespace Event_Management.Application.Service
             _config = configuration;
         }
 
-		public async Task<bool> AddSponsorEventRequest(SponsorDto sponsorEvent)
+		public async Task<SponsorEvent> AddSponsorEventRequest(SponsorDto sponsorEvent)
 		{
-            sponsorEvent.Status = SponsorRequest.PROCESSING;
             
-            sponsorEvent.UpdatedAt = DateTime.Now;
+            
+           
             var sponsorEntity = _mapper.Map<SponsorEvent>(sponsorEvent);
+
+            sponsorEntity.CreatedAt = DateTimeHelper.GetDateTimeNow();
+            sponsorEntity.UpdatedAt = DateTimeHelper.GetDateTimeNow();
+            sponsorEntity.Status = SponsorRequest.PROCESSING.ToString();
             await _unitOfWork.SponsorEventRepository.Add(sponsorEntity);
-            return await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
+            return sponsorEntity;
 
-		}
 
-		public async Task<SponsorEvent?> CheckSponsorEvent(Guid eventId, Guid userId)
-		{
-			return await _unitOfWork.SponsorEventRepository.CheckSponsorEvent(eventId, userId);
+        }
 
-		}
+        public async Task<PagedList<SponsorEvent>> GetSponsoredEvent(Guid userId, int page, int eachPage)
+        {
+            return await _unitOfWork.SponsorEventRepository.GetSponsoredEvent(userId, page, eachPage);
+        }
+
+        //public async Task<SponsorEvent?> CheckSponsorEvent(Guid eventId, Guid userId)
+        //{
+        //	return await _unitOfWork.SponsorEventRepository.CheckSponsorEvent(eventId, userId);
+
+        //}
 
         public async Task<PagedList<SponsorEventDto>> GetSponsorEventsById(SponsorEventFilter sponsorFilter)
         {
@@ -58,13 +70,14 @@ namespace Event_Management.Application.Service
         //          return await _unitOfWork.SponsorEventRepository.GetAll(page, eachPage);
         //      }
 
-        public async Task<bool> UpdateSponsorEventRequest(SponsorDto sponsorEvent)
+        public async Task<SponsorEvent> UpdateSponsorEventRequest(SponsorDto sponsorEvent)
 		{
-            sponsorEvent.UpdatedAt = DateTime.Now;
-           
 			var sponsorEntity = _mapper.Map<SponsorEvent>(sponsorEvent);
-			await _unitOfWork.SponsorEventRepository.Update(sponsorEntity);
-            return await _unitOfWork.SaveChangesAsync();
+            sponsorEntity.UpdatedAt = DateTimeHelper.GetDateTimeNow();
+            sponsorEntity.Status = SponsorRequest.PROCESSING.ToString();
+            await _unitOfWork.SponsorEventRepository.Update(sponsorEntity);
+            await _unitOfWork.SaveChangesAsync();
+            return sponsorEntity;
 		}
 	}
 }

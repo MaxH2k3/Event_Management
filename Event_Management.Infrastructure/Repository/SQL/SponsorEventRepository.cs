@@ -28,6 +28,12 @@ namespace Event_Management.Infrastructure.Repository.SQL
 			
 		}
 
+        public async Task<PagedList<SponsorEvent>> GetSponsoredEvent(Guid userId, int page, int eachPage)
+        {
+            var list = _context.SponsorEvents.Where(s => s.UserId.Equals(userId)).OrderByDescending(p => p.UpdatedAt);
+            return await list.ToPagedListAsync(page, eachPage);
+        }
+
         public async Task<PagedList<SponsorEvent>> GetSponsorEvents(SponsorEventFilter sponsorFilter)
         {
             var list = _context.SponsorEvents.Where(s => s.EventId.Equals(sponsorFilter.EventId)).OrderByDescending(p => p.CreatedAt).AsNoTracking().AsQueryable();

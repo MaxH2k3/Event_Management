@@ -260,7 +260,7 @@ namespace Event_Management.Infrastructure.Repository.SQL
                 .Select(p => p.EventId)
                 .ToListAsync();
 
-            return _context.Events
+            return _context.Events.Include(e => e.Participants)
                 .Where(e => participants.Contains(e.EventId))
                 .AsNoTracking();
         }
@@ -300,18 +300,23 @@ namespace Event_Management.Infrastructure.Repository.SQL
 
         public async Task<List<Event>> UserPastEvents(Guid userId)
         {
+            var eventResponse = await _context.Events
+                .Where(e => e.CreatedBy == userId && e.EndDate.Date < DateTime.Now)
+                .ToListAsync();
             var events = await GetUserRegisterdEventsQuery(userId);
-            return events.Where(e => e.EndDate.Date < DateTime.Now)
-
-                .OrderByDescending(e => e.EndDate)
-                .ToList();
+            var eventList = await events.Where(e => e.EndDate.Date < DateTime.Now)
+                .OrderByDescending(e => e.EndDate).ToListAsync();
+            return eventResponse.Concat(eventList).ToList();
         }
         public async Task<List<Event>> UserIncomingEvents(Guid userId)
         {
+            var eventResponse = await _context.Events
+                .Where(e => e.CreatedBy == userId && e.StartDate.Date >= DateTime.Now)
+                .ToListAsync();
             var incomingEvents = await GetUserRegisterdEventsQuery(userId);
-            return incomingEvents.Where(e => e.StartDate.Date >= DateTime.Now)
-                .OrderByDescending(e => e.StartDate)
-                .ToList();
+            var eventList = await incomingEvents.Where(e => e.StartDate.Date >= DateTime.Now)
+                .OrderByDescending(e => e.StartDate).ToListAsync();
+            return eventResponse.Concat(eventList).ToList();
         }
 
         public bool UpdateEventStatusToOnGoing(Guid eventId)

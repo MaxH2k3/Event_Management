@@ -47,7 +47,7 @@ namespace Event_Management.API.Controllers
             }
 			sponsorEvent.UserId = Guid.Parse(userId);
 			var result = await _sponsorEventService.AddSponsorEventRequest(sponsorEvent);
-			if(result)
+			if(result != null)
 			{
 				response.StatusResponse = HttpStatusCode.Created;
 				response.Message = MessageCommon.CreateSuccesfully;
@@ -113,6 +113,33 @@ namespace Event_Management.API.Controllers
 			}
 
 			var result = await _sponsorEventService.GetSponsorEventsById(sponsorFilter);
+            if (result.Count() > 0)
+            {
+                response.StatusResponse = HttpStatusCode.OK;
+                response.Message = MessageCommon.Complete;
+                response.Data = result;
+            }
+            else
+            {
+                response.StatusResponse = HttpStatusCode.NotFound;
+                response.Message = MessageCommon.NotFound;
+                response.Data = result;
+            }
+
+            return response;
+
+        }
+
+
+        [Authorize]
+        [HttpGet("sponsored-event")]
+        public async Task<APIResponse> GetSponsoredEvent([FromQuery, Range(1, int.MaxValue)] int pageNo = 1,
+                                                        [FromQuery, Range(1, int.MaxValue)] int elementEachPage = 10)
+        {
+            var response = new APIResponse();
+
+            
+            var result = await _sponsorEventService.GetSponsoredEvent(Guid.Parse(User.GetUserIdFromToken()), pageNo, elementEachPage);
             if (result.Count() > 0)
             {
                 response.StatusResponse = HttpStatusCode.OK;
