@@ -301,22 +301,22 @@ namespace Event_Management.Infrastructure.Repository.SQL
         public async Task<List<Event>> UserPastEvents(Guid userId)
         {
             var eventResponse = await _context.Events
-                .Where(e => e.CreatedBy == userId && e.EndDate.Date < DateTime.Now)
+                .Where(e => e.CreatedBy == userId && e.EndDate < DateTime.Now)
                 .ToListAsync();
             var events = await GetUserRegisterdEventsQuery(userId);
-            var eventList = await events.Where(e => e.EndDate.Date < DateTime.Now)
+            var eventList = await events.Where(e => e.EndDate < DateTime.Now)
                 .OrderByDescending(e => e.EndDate).ToListAsync();
-            return eventResponse.Concat(eventList).ToList();
+            return eventResponse.Concat(eventList).DistinctBy(e => e.EventId).ToList();
         }
         public async Task<List<Event>> UserIncomingEvents(Guid userId)
         {
             var eventResponse = await _context.Events
-                .Where(e => e.CreatedBy == userId && e.StartDate.Date >= DateTime.Now)
+                .Where(e => e.CreatedBy == userId && e.StartDate >= DateTime.Now)
                 .ToListAsync();
             var incomingEvents = await GetUserRegisterdEventsQuery(userId);
-            var eventList = await incomingEvents.Where(e => e.StartDate.Date >= DateTime.Now)
+            var eventList = await incomingEvents.Where(e => e.StartDate >= DateTime.Now)
                 .OrderByDescending(e => e.StartDate).ToListAsync();
-            return eventResponse.Concat(eventList).ToList();
+            return eventResponse.Concat(eventList).DistinctBy(e => e.EventId).ToList();
         }
 
         public bool UpdateEventStatusToOnGoing(Guid eventId)

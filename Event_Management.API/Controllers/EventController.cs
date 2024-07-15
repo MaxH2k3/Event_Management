@@ -147,7 +147,7 @@ namespace Event_Management.API.Controllers
         [HttpGet("user-past-and-incoming")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetUserPastAndIncomingEvent()
+        public async Task<IActionResult> GetUserPastAndIncomingEvent(/*[FromQuery, Required]Guid userId*/)
         {
             Guid userId = Guid.Parse(User.GetUserIdFromToken());
             var response = await _eventService.GetUserPastAndFutureEvents(userId);
