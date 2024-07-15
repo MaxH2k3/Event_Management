@@ -1,4 +1,5 @@
 ﻿using Event_Management.Domain.Entity;
+using Event_Management.Domain.Enum.Sponsor;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Models.Sponsor;
 using Event_Management.Domain.Repository;
@@ -24,13 +25,27 @@ namespace Event_Management.Infrastructure.Repository.SQL
 			return await _context.SponsorEvents
 						 .FirstOrDefaultAsync(s => s.EventId == eventId
 												&& s.UserId == userId
-												&& s.Status == "CONFIRMED");
+												);
 			
 		}
 
-        public async Task<PagedList<SponsorEvent>> GetSponsoredEvent(Guid userId, int page, int eachPage)
+        public async Task<SponsorEvent?> DeleteSponsorRequest(Guid eventId, Guid userId)
         {
-            var list = _context.SponsorEvents.Where(s => s.UserId.Equals(userId)).OrderByDescending(p => p.UpdatedAt);
+            var sponsorRequest = await CheckSponsorEvent(eventId, userId);
+            _context.SponsorEvents.Remove(sponsorRequest);
+            await _context.SaveChangesAsync();
+            return sponsorRequest;
+        }
+
+        public async Task<PagedList<SponsorEvent>> GetRequestSponsor(Guid userId, string? status, int page, int eachPage)
+        {
+            var list = _context.SponsorEvents.Where(s => s.UserId.Equals(userId));
+            if(status != null)
+            {
+                list = list.Where(p => p.Status.Equals(status));
+            }
+            list = list.Include(p => p.Event);
+            list = list.OrderByDescending(p => p.UpdatedAt);
             return await list.ToPagedListAsync(page, eachPage);
         }
 
