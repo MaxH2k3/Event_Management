@@ -81,8 +81,18 @@ namespace Event_Management.API.Controllers
 
         [HttpPost("register")]
         [Authorize]
-        public async Task<IActionResult> RegisterEvent(Guid eventId)
+        public async Task<IActionResult> RegisterEvent(Guid eventId, Guid? transactionId)
         {
+            if (transactionId != null && !Guid.TryParse(transactionId.ToString(), out _))
+            {
+                return BadRequest(new APIResponse()
+                {
+                    StatusResponse = HttpStatusCode.BadRequest,
+                    Message = MessageParticipant.TransactionIsNotValid,
+                    Data = null
+                });
+            }
+
             var isOwner = await _eventService.IsOwner(eventId, Guid.Parse(User.GetUserIdFromToken()));
 
             if (isOwner)

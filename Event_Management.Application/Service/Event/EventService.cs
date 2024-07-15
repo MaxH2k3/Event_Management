@@ -116,7 +116,7 @@ namespace Event_Management.Application.Service
             eventEntity.EndDate = DateTimeOffset.FromUnixTimeMilliseconds(eventDto.EndDate + dateTimeConvertValue).DateTime;
             if (eventDto.Image != null)
             {
-                eventEntity.Image = await _fileService.UploadImage(eventDto.Image, eventEntity.EventId);
+                eventEntity.Image = await _fileService.UploadImage(eventDto.Image, Guid.NewGuid());
             }
             if (string.IsNullOrEmpty(userId))
             {
@@ -378,8 +378,11 @@ namespace Event_Management.Application.Service
             //image
             if (!string.IsNullOrWhiteSpace(eventDto.Image))
             {
-                if(await _fileService.DeleteBlob(eventEntity.EventId.ToString()))
-                eventEntity.Image = await _fileService.UploadImage(eventDto.Image, eventEntity.EventId);
+                string url = eventEntity.Image!;
+                int startIndex = url.LastIndexOf("/eventcontainer/") + "/eventcontainer/".Length;
+                string result = url.Substring(startIndex);
+                if (await _fileService.DeleteBlob(result))
+                eventEntity.Image = await _fileService.UploadImage(eventDto.Image, Guid.NewGuid());
             }
             //location
             eventEntity.Location = eventDto.Location!.Name;

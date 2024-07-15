@@ -15,5 +15,6 @@ namespace Event_Management.Application.Dto.FeedbackDTO
         public int? Rating { get; set; }
         public DateTime? CreatedAt { get; set; }
         public string Name { get; set; } = string.Empty;
+        public string Avatar { get; set; } = string.Empty;
     }
 }
