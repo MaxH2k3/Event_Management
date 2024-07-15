@@ -10,5 +10,7 @@ namespace Event_Management.Domain.Repository
 {
     public interface INotificationRepository : IRepository<Notification>
     {
+        Task<IEnumerable<Notification>> GetAllNotiByUserId(Guid userId);
+        Task<IEnumerable<Notification>> GetAllNoti();
     }
 }

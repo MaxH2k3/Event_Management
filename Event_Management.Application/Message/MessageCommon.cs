@@ -8,6 +8,8 @@ namespace Event_Management.Application.Message
 {
     public static class MessageCommon
     {
+        public const string GetSuccesfully = "Get Succesfully!";
+        public const string GetFailed = "Get Failed";
         public const string SavingSuccesfully = "Saving Succesfully!";
         public const string SavingFailed = "Saving Failed";
         public const string DeleteSuccessfully = "Delete Successfully";

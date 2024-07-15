@@ -7,7 +7,7 @@ namespace Event_Management.Domain.Repository
 {
 	public interface IUserRepository : IExtendRepository<User>
     {
-
+        Task<IEnumerable<User>> GetUsersByKeywordAsync(string keyword);
         Task<User?> GetUserByIdAsync(Guid userId);
         Task<User?> GetUserByEmailAsync(string email);
         Task<bool?> IsExisted(UserFieldType field, string value);
@@ -15,6 +15,7 @@ namespace Event_Management.Domain.Repository
         User? GetByEmail(string email);
         User? GetUserById(Guid userId);
         Task<IEnumerable<User>> GetAllUser(int page, int eachPage, string sortBy, bool isAscending = false);
+        Task<IEnumerable<User>> GetUsersCreatedInMonthAsync(int year, int month);
         //Task<bool?> CheckRefreshTokenByUser(UserFieldType field, string value);
     }
 }

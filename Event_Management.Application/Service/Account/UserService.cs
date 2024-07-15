@@ -21,6 +21,17 @@ namespace Event_Management.Application.Service
             _mapper = mapper;
         }
 
+        public async Task<APIResponse> GetByKeyWord(string keyWord)
+        {
+            var users = await _unitOfWork.UserRepository.GetUsersByKeywordAsync(keyWord);
+            var usersResponse = _mapper.Map<IEnumerable<UserByKeywordResponseDto>>(users);
+            return new APIResponse
+            {
+                StatusResponse = HttpStatusCode.OK,
+                Message = Message.MessageCommon.GetSuccesfully,
+                Data = usersResponse
+            };
+        }
 
         public User? GetUserById(Guid userId)
         {

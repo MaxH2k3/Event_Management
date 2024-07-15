@@ -20,12 +20,26 @@ public class UserController : Controller
         _userService = userService;
     }
 
+
     [HttpGet("all")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetAllUsers([FromQuery, Range(1, int.MaxValue)] int pageNo = 1, int eachPage = 10)
     {
         var result = await _userService.GetAllUser(pageNo, eachPage);
+        if (result.StatusResponse != HttpStatusCode.OK)
+        {
+            return BadRequest(result.StatusResponse);
+        }
+        return Ok(result);
+    }
+
+    [HttpGet("keyword")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetUserByKeyword([FromQuery] string keyword)
+    {
+        var result = await _userService.GetByKeyWord(keyword);
         if (result.StatusResponse != HttpStatusCode.OK)
         {
             return BadRequest(result.StatusResponse);

@@ -23,7 +23,7 @@ namespace Event_Management.Domain.UnitOfWork
         IRefreshTokenRepository RefreshTokenRepository { get; } 
         IUserValidationRepository UserValidationRepository { get; } 
         IEventStatisticsRepository EventStatisticsRepository { get; }
-
-		Task<bool> SaveChangesAsync();
+        INotificationRepository NotificationRepository { get; }
+        Task<bool> SaveChangesAsync();
     }
 }

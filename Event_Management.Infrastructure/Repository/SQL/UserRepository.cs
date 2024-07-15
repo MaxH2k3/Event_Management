@@ -28,6 +28,11 @@ namespace Event_Management.Infrastructure.Repository.SQL
             return _context.Users.Find(userId);
         }
 
+        public async Task<IEnumerable<User>> GetUsersByKeywordAsync(string keyword) 
+        {
+            return await _context.Users.Where(a => a.Email!.StartsWith(keyword) || a.Email.Contains(keyword)).ToListAsync();
+        }
+
         public async Task<User?> GetUserByIdAsync(Guid userId)
         {
             return await _context.Users.FirstOrDefaultAsync(x => x.UserId!.Equals(userId));
@@ -78,11 +83,20 @@ namespace Event_Management.Infrastructure.Repository.SQL
                 return cachedUsers;
             }
 
-            IEnumerable<User> entities = await _context.Users.Include(a => a.Role).PaginateAndSort(page, pagesize, sortBy, isAscending).ToListAsync();
+            IEnumerable<User> entities = await _context.Users.Include(a => a.Role).Where(x => x.Status == "active").PaginateAndSort(page, pagesize, sortBy, isAscending).ToListAsync();
             await _cacheRepository.SetAsync(cacheKey, entities);
             return entities;
         }
 
-      
+        public async Task<IEnumerable<User>> GetUsersCreatedInMonthAsync(int year, int month)
+        {
+            return await _context.Users
+                .Where(a => a.CreatedAt.HasValue &&
+                            a.CreatedAt.Value.Year == year &&
+                            a.CreatedAt.Value.Month == month)
+                .ToListAsync();
+        }
+
+
     }
 }

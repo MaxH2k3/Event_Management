@@ -174,13 +174,13 @@ namespace Event_Management.API.Controllers
             return BadRequest(result);
         }
 
-        //[Authorize]
+        [Authorize]
         [HttpPut("")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateEvent([FromBody] EventRequestDto eventDto, [FromQuery, Required] Guid eventId, [FromQuery, Required] Guid userId)
+        public async Task<IActionResult> UpdateEvent([FromBody] EventRequestDto eventDto, [FromQuery, Required] Guid eventId)
         {
-            //string userId = User.GetUserIdFromToken();
+            string userId = User.GetUserIdFromToken();
             var result = await _eventService.UpdateEvent(eventDto, userId.ToString(), eventId);
             if (result.StatusResponse == HttpStatusCode.OK)
             {
