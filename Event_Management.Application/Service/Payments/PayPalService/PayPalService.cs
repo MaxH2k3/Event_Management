@@ -31,7 +31,8 @@ namespace Event_Management.Application.Service.Payments.PayPalService
         {
             
             var apiContext = GetApiContext();
-            string baseUrl = "https://localhost:7153";
+            string eventIdUrl = createPaymentDto.EventId.ToString();
+            string baseUrl = "https://event-manage-nine.vercel.app/events";
             var eventEntity = await _unitOfWork.EventRepository.GetById(createPaymentDto.EventId);
             var sponsor = await _unitOfWork.SponsorEventRepository.CheckSponsoredEvent(createPaymentDto.EventId, userId);
 
@@ -65,8 +66,9 @@ namespace Event_Management.Application.Service.Payments.PayPalService
             },
                 redirect_urls = new RedirectUrls
                 {
-                    cancel_url = $"{baseUrl}/paypal/cancel",
-                    return_url = $"{baseUrl}/paypal/execute"
+                    
+                    cancel_url = $"{baseUrl}/{eventIdUrl}",
+                    return_url = $"{baseUrl}/{eventIdUrl}"
                 }
             };
           
