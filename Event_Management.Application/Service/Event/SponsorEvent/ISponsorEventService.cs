@@ -12,6 +12,7 @@ namespace Event_Management.Application.Service
         Task<PagedList<SponsorEventDto>> GetSponsorEventsById(SponsorEventFilter sponsorFilter);
         Task<PagedList<SponsorEvent>> GetRequestSponsor(Guid userId, string? status, int page, int eachPage);
         Task<SponsorEvent?> DeleteRequest(Guid eventId, Guid userId);
+        Task<SponsorEvent?> GetRequestedDetail(Guid eventId, Guid userId);
 
 		//Task<SponsorEvent?> CheckSponsorEvent(Guid eventId, Guid userId);
 	}

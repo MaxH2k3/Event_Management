@@ -64,6 +64,11 @@ namespace Event_Management.Application.Service
             return requestEvent;
         }
 
+        public async Task<SponsorEvent?> GetRequestedDetail(Guid eventId, Guid userId)
+        {
+            return await _unitOfWork.SponsorEventRepository.CheckSponsorEvent(eventId, userId);
+        }
+
         public async Task<PagedList<SponsorEvent>> GetRequestSponsor(Guid userId, string? status, int page, int eachPage)
         {
             return await _unitOfWork.SponsorEventRepository.GetRequestSponsor(userId, status, page, eachPage);

@@ -137,9 +137,7 @@ namespace Event_Management.API.Controllers
         public async Task<APIResponse> GetRequestSponsor(string? status, [FromQuery, Range(1, int.MaxValue)] int pageNo = 1,
                                                         [FromQuery, Range(1, int.MaxValue)] int elementEachPage = 10)
         {
-            var response = new APIResponse();
-
-            
+            var response = new APIResponse();   
             var result = await _sponsorEventService.GetRequestSponsor(Guid.Parse(User.GetUserIdFromToken()), status, pageNo, elementEachPage);
             if (result.Count() > 0)
             {
@@ -156,9 +154,36 @@ namespace Event_Management.API.Controllers
 
             return response;
 
+
         }
 
-		[Authorize]
+        [Authorize]
+        [HttpGet("requested-detail")]
+        //Get requested-sponsor of this person
+        public async Task<APIResponse> GetRequestDetail(Guid eventId)
+        {
+            var response = new APIResponse();
+
+
+            var result = await _sponsorEventService.GetRequestedDetail(eventId, Guid.Parse(User.GetUserIdFromToken()));
+            if (result != null)
+            {
+                response.StatusResponse = HttpStatusCode.OK;
+                response.Message = MessageCommon.Complete;
+                response.Data = result;
+            }
+            else
+            {
+                response.StatusResponse = HttpStatusCode.NotFound;
+                response.Message = MessageCommon.NotFound;
+                response.Data = result;
+            }
+
+            return response;
+
+        }
+
+        [Authorize]
 		[HttpDelete("request")]
 		public async Task<APIResponse> DeleteRequest(Guid eventId)
 		{
