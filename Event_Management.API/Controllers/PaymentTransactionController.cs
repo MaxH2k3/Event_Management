@@ -24,7 +24,7 @@ namespace Event_Management.API.Controllers
         }
 
 
-        [Authorize]
+        //[Authorize]
         [HttpPost("")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -32,17 +32,17 @@ namespace Event_Management.API.Controllers
         public async Task<APIResponse> CreateRequest([FromBody] TransactionRequestDto transactionRequestDto)
         {
             APIResponse response = new APIResponse();
-            var userId = Guid.Parse(User.GetUserIdFromToken());
-            var userEntity = await _userService.GetUserByIdAsync(userId);
-            if (userEntity == null)
-            {
-                response.StatusResponse = HttpStatusCode.BadRequest;
-                response.Message = MessageUser.UserNotFound;
-                response.Data = null;
-                return response;
-            }
+            //var userId = Guid.Parse(User.GetUserIdFromToken());
+            //var userEntity = await _userService.GetUserByIdAsync(userId);
+            //if (userEntity == null)
+            //{
+            //    response.StatusResponse = HttpStatusCode.BadRequest;
+            //    response.Message = MessageUser.UserNotFound;
+            //    response.Data = null;
+            //    return response;
+            //}
 
-            var result = await _transactionService.AddTransaction(transactionRequestDto, userId);
+            var result = await _transactionService.AddTransaction(transactionRequestDto);
             if (result != null)
             {
                 response.StatusResponse = HttpStatusCode.OK;

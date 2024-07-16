@@ -5,6 +5,6 @@ namespace Event_Management.Application.Service
 {
     public interface IPaymentTransactionService
     {
-        Task<PaymentTransaction> AddTransaction(TransactionRequestDto transactionRequestDto, Guid userId);
+        Task<PaymentTransaction> AddTransaction(TransactionRequestDto transactionRequestDto);
     }
 }

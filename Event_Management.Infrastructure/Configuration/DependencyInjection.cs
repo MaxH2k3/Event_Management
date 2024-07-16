@@ -125,6 +125,7 @@ namespace Event_Management.Infastructure.Configuration
             builder.Services.AddScoped<IFeedbackService, FeedbackService>();
             
             builder.Services.AddScoped<ISendMailTask, SendMailTask>();
+            builder.Services.AddScoped<IPaymentTransactionService, PaymentTransactionService>();
 
             builder.Services.AddTransient<PaymentHandler>();
 

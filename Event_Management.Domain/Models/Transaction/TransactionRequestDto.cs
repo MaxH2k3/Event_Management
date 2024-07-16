@@ -11,8 +11,8 @@ namespace Event_Management.Domain.Models
         public string? PayId { get; set; }
         public string? EmailPaypal { get; set; }
         public Guid UserId {  get; set; }
-        public string? TranMessage { get; set; }
-        public decimal? TranAmount { get; set; }
+        public string? TransMessage { get; set; }
+        public decimal? TransAmount { get; set; }
         public Guid EventId { get; set; }
 
     }
