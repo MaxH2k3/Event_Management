@@ -12,8 +12,13 @@ namespace Event_Management.Domain.Constants
         {
             public const string Title = "Ticket for event";
             public const string PathTemplate = "Views/Template/TicketUser.cshtml";
-        } 
+        }
 
+        public class ReminderMail
+        {
+            public const string Title = "Reminder for event";
+            public const string PathTemplate = "Views/Template/ReminderEmail.cshtml";
+        }
 
     }
 }

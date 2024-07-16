@@ -9,7 +9,7 @@ namespace Event_Management.Domain.Models
     public class TransactionRequestDto
     {
         public string? PayId { get; set; }
-        public string? PayerId { get; set; }
+        public string? EmailPaypal { get; set; }
         public Guid UserId {  get; set; }
         public string? TranMessage { get; set; }
         public decimal? TranAmount { get; set; }

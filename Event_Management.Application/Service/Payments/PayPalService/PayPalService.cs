@@ -140,11 +140,11 @@ namespace Event_Management.Application.Service.Payments.PayPalService
         public APIContext GetApiContext()
         {
             var config = new Dictionary<string, string>
-        {
-            { "mode", "sandbox" }, // Change to "live" in production
-            { "clientId",  _configuration["PayPal:ClientId"]},
-            { "clientSecret", _configuration["PayPal:Secret"] }
-        };
+            {
+                { "mode", "sandbox" }, // Change to "live" in production
+                { "clientId",  _configuration["PayPal:ClientId"]},
+                { "clientSecret", _configuration["PayPal:Secret"] }
+            };
 
             var accessToken = new OAuthTokenCredential(config).GetAccessToken();
             return new APIContext(accessToken);

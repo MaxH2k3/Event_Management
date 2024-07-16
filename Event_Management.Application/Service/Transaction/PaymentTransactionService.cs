@@ -22,7 +22,7 @@ namespace Event_Management.Application.Service
             newTransaction.RemitterId = userId;
             newTransaction.TranMessage = transactionRequestDto.TranMessage;
             newTransaction.PayId = transactionRequestDto.PayId;
-            newTransaction.PayerId = transactionRequestDto.PayerId;
+            newTransaction.EmailPaypal = transactionRequestDto.EmailPaypal;
             newTransaction.TranAmount = transactionRequestDto.TranAmount;
             newTransaction.TranDate = DateTimeHelper.GetDateTimeNow();
             await _unitOfWork.PaymentTransactionRepository.Add(newTransaction);

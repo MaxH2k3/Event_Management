@@ -11,7 +11,6 @@ using Event_Management.Application.Service.Payments;
 using Event_Management.Application.Service.Payments.PayPalService;
 using Event_Management.Application.ServiceTask;
 using Event_Management.Application.Validators;
-using Event_Management.Domain.Repository;
 using Event_Management.Domain.Repository.Common;
 using Event_Management.Domain.Service;
 using Event_Management.Domain.Service.TagEvent;
@@ -125,7 +124,7 @@ namespace Event_Management.Infastructure.Configuration
             builder.Services.AddScoped<IQuartzService, QuartzService>();
             builder.Services.AddScoped<IFeedbackService, FeedbackService>();
             
-            builder.Services.AddScoped<SendMailTask>();
+            builder.Services.AddScoped<ISendMailTask, SendMailTask>();
 
             builder.Services.AddTransient<PaymentHandler>();
 

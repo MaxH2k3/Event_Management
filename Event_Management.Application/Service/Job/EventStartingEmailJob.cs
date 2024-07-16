@@ -1,4 +1,5 @@
-﻿using Quartz;
+﻿using Event_Management.Application.ServiceTask;
+using Quartz;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +11,12 @@ namespace Event_Management.Application.Service.Job
     public class EventStartingEmailJob : IJob
     {
         private readonly ISchedulerFactory _schedulerFactory;
-        public EventStartingEmailJob(ISchedulerFactory schedulerFactory)
+        private readonly ISendMailTask _sendMailTask;
+
+        public EventStartingEmailJob(ISchedulerFactory schedulerFactory, ISendMailTask sendMailTask)
         {
             _schedulerFactory = schedulerFactory;
+            _sendMailTask = sendMailTask;
         }
 
         public async Task Execute(IJobExecutionContext context)
@@ -23,6 +27,11 @@ namespace Event_Management.Application.Service.Job
             // get job and trigger
             IJobDetail currentJob = context.JobDetail;
             ITrigger currentTrigger = context.Trigger;
+
+            // call send mail task
+            Console.WriteLine(currentJob.Key.ToString());
+            _sendMailTask.SendMailReminder(Guid.Parse(currentJob.Key.ToString().Substring(16)));
+
             Console.WriteLine("Task run: Sending Event starting notice email!");
 
             // delete job and trigger

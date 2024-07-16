@@ -9,6 +9,7 @@ using Event_Management.Infrastructure.Extensions;
 using Event_Management.Infrastructure.Repository.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Globalization;
 using System.Linq.Expressions;
 
 namespace Event_Management.Infrastructure.Repository.SQL
@@ -80,6 +81,17 @@ namespace Event_Management.Infrastructure.Repository.SQL
 
             return new PagedList<Participant>(entities, entities.Count, page, eachPage);
 
+        }
+
+		public new async Task<IEnumerable<Participant>> GetAll(Expression<Func<Participant, bool>> predicate)
+		{
+            var entities = await _context.Participants
+				.Include(p => p.Event)
+                .Include(p => p.User)
+				.Where(predicate)
+                .ToListAsync();
+
+            return entities;
         }
 
         private static IQueryable<Participant> SortParticipants(IQueryable<Participant> participants, ParticipantSortBy sortBy)

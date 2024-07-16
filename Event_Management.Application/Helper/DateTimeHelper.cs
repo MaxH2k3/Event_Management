@@ -65,5 +65,10 @@ namespace Event_Management.Domain.Helper
             return startDate.ToString("HH:mm:tt") + " - " + endDate.ToString("HH:mm:tt");
         }
 
+        public static bool IsTheSameDate(this DateTime dateTime, DateTime compare)
+        {
+            return dateTime.ToString("dd/MM/yyyy").Equals(compare.ToString("dd/MM/yyyy"));
+        }
+
     }
 }

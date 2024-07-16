@@ -295,8 +295,8 @@ namespace Event_Management.Infrastructure.DBContext
                     .HasColumnName("ID");
                 entity.Property(e => e.PayId)
                     .HasMaxLength(40);
-                entity.Property(e => e.PayerId)
-                    .HasMaxLength(20);
+                entity.Property(e => e.EmailPaypal)
+                    .HasMaxLength(50);
                 entity.Property(e => e.EventId).HasColumnName("EventID");
 
                 entity.Property(e => e.RemitterId).HasColumnName("RemitterID");

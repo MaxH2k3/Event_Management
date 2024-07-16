@@ -46,7 +46,7 @@ namespace Event_Management.Application.Service
             var eventInfo = await _unitOfWork.EventRepository.getAllEventInfo(eventId);
             /*await _quartzService.StartEventStartingEmailNoticeJob(eventId, DateTime.Now.AddMinutes(1));
             await _quartzService.StartEventEndingEmailNoticeJob(eventId, DateTime.Now.AddMinutes(1));
-            await _quartzService.DeleteJobsByEventId("start-" +eventId);
+            await _quartzService.DeleteJobsByEventId("start-" + eventId);
             await _quartzService.DeleteJobsByEventId("ended-" + eventId);*/
             if(eventInfo!.Status!.Equals(EventStatus.Deleted.ToString(), StringComparison.OrdinalIgnoreCase))
             {
