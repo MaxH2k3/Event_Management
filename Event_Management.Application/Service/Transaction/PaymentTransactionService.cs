@@ -17,13 +17,7 @@ namespace Event_Management.Application.Service
 
         public async Task<PaymentTransaction> AddTransaction(TransactionRequestDto transactionRequestDto, Guid userId)
         {
-            var sponsorRequest = await _unitOfWork.SponsorEventRepository.CheckSponsorEvent(transactionRequestDto.EventId, transactionRequestDto.UserId);
-            if (sponsorRequest != null)
-            {
-                sponsorRequest.IsSponsored = true;
-                await _unitOfWork.SponsorEventRepository.Update(sponsorRequest);
-            }
-
+           
             var newTransaction = new PaymentTransaction();
             newTransaction.RemitterId = userId;
             newTransaction.TranMessage = transactionRequestDto.TranMessage;

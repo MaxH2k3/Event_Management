@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
 using Event_Management.Domain.Entity;
+using Event_Management.Domain.Enum;
 using Event_Management.Domain.Enum.Sponsor;
 using Event_Management.Domain.Helper;
 using Event_Management.Domain.Models.Common;
+using Event_Management.Domain.Models.ParticipantDTO;
 using Event_Management.Domain.Models.Sponsor;
+using Event_Management.Domain.Service;
 using Event_Management.Domain.UnitOfWork;
 using Microsoft.Extensions.Configuration;
 
@@ -14,13 +17,15 @@ namespace Event_Management.Application.Service
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IConfiguration _config;
+        private readonly IRegisterEventService _registerEventService;
         
 
-        public SponsorEventService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration)
+        public SponsorEventService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration, IRegisterEventService registerEventService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _config = configuration;
+            _registerEventService = registerEventService;
         }
 
 		public async Task<SponsorEvent> AddSponsorEventRequest(SponsorDto sponsorEvent, Guid userId)
@@ -98,8 +103,16 @@ namespace Event_Management.Application.Service
             if (sponsorRequest != null)
             {
                 sponsorRequest.Status = sponsorRequestUpdate.Status;
-               
                 sponsorRequest.UpdatedAt = DateTimeHelper.GetDateTimeNow();
+                if (sponsorRequest.Status.Equals(SponsorRequest.Confirmed.ToString()))
+                {
+                    var newParticipant = new RegisterEventModel((Guid)sponsorRequest.UserId, (Guid)sponsorRequest.EventId, (int)EventRole.Sponsor);
+                    var result = await _registerEventService.AddToEvent(newParticipant);
+                    if(result.Data == null)
+                    {
+                        return null;
+                    }
+                }
             }
             await _unitOfWork.SponsorEventRepository.Update(sponsorRequest);
             await _unitOfWork.SaveChangesAsync();

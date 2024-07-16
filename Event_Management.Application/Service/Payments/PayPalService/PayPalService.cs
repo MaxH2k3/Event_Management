@@ -27,16 +27,24 @@ namespace Event_Management.Application.Service.Payments.PayPalService
             _unitOfWork = unitOfWork;
             _httpClient = httpClient;
         }
-        public async Task<PayPal.Api.Payment> CreatePayment(Guid eventId, Guid userId, string description)
+        public async Task<PayPal.Api.Payment> CreatePayment(CreatePaymentDto createPaymentDto, Guid userId)
         {
             
             var apiContext = GetApiContext();
             string baseUrl = "https://localhost:7153";
-            var eventEntity = await _unitOfWork.EventRepository.GetById(eventId);
-            var sponsor = await _unitOfWork.SponsorEventRepository.CheckSponsoredEvent(eventId, userId);
+            var eventEntity = await _unitOfWork.EventRepository.GetById(createPaymentDto.EventId);
+            var sponsor = await _unitOfWork.SponsorEventRepository.CheckSponsoredEvent(createPaymentDto.EventId, userId);
 
 
-			decimal? totalAmount = sponsor?.Amount ?? eventEntity.Fare;
+            decimal? totalAmount;
+            if(createPaymentDto.Amount > 0)
+            {
+                totalAmount = createPaymentDto.Amount;
+            }
+            else
+            {
+                totalAmount = eventEntity!.Fare;
+            }
             string apiUrl = "https://api.currencyapi.com/v3/latest?apikey=cur_live_YmCF5RSIievrfTvYMaZV82SIUD4zwtmW5asnZNI6&base_currency=USD&currencies=VND";
             string translateAmount = await CurrencyHelper.GetExchangeRate(apiUrl, totalAmount);
             var payment = new PayPal.Api.Payment
@@ -47,7 +55,7 @@ namespace Event_Management.Application.Service.Payments.PayPalService
             {
                 new Transaction
                 {
-                    description = description,
+                    description = createPaymentDto.Message,
                     amount = new Amount
                     {
                         currency = "USD",

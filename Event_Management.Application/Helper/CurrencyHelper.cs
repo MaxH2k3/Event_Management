@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Event_Management.Application.Helper
 {
-    public class CurrencyHelper
+    public static class CurrencyHelper
     {
         public static async Task<string> GetExchangeRate(string url, decimal? amount)
         {

@@ -38,11 +38,11 @@ namespace Event_Management.API.Controllers
 
         [Authorize]
         [HttpPost("paypal")]
-        public async Task<APIResponse> CreatePayment(Guid eventId, string description)
+        public async Task<APIResponse> CreatePayment([FromBody] CreatePaymentDto createPaymentDto)
         {
             APIResponse response = new APIResponse();
 			var userId = Guid.Parse(User.GetUserIdFromToken());
-			var result = await _payPalService.CreatePayment(eventId, userId, description);
+			var result = await _payPalService.CreatePayment(createPaymentDto, userId);
 
             if (result != null)
             {
