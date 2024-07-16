@@ -1,6 +1,7 @@
 ﻿using Event_Management.Domain.Entity;
 using Event_Management.Domain.Helper;
 using Event_Management.Domain.Models;
+using Event_Management.Domain.Models.Sponsor;
 using Event_Management.Domain.UnitOfWork;
 
 namespace Event_Management.Application.Service
@@ -16,6 +17,13 @@ namespace Event_Management.Application.Service
 
         public async Task<PaymentTransaction> AddTransaction(TransactionRequestDto transactionRequestDto, Guid userId)
         {
+            var sponsorRequest = await _unitOfWork.SponsorEventRepository.CheckSponsorEvent(transactionRequestDto.EventId, transactionRequestDto.UserId);
+            if (sponsorRequest != null)
+            {
+                sponsorRequest.IsSponsored = true;
+                await _unitOfWork.SponsorEventRepository.Update(sponsorRequest);
+            }
+
             var newTransaction = new PaymentTransaction();
             newTransaction.RemitterId = userId;
             newTransaction.TranMessage = transactionRequestDto.TranMessage;

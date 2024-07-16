@@ -98,13 +98,7 @@ namespace Event_Management.Application.Service
             if (sponsorRequest != null)
             {
                 sponsorRequest.Status = sponsorRequestUpdate.Status;
-                if (sponsorRequestUpdate.Status.Equals(SponsorRequest.Confirmed.ToString()))
-                {
-                    sponsorRequest.IsSponsored = true;
-                } else
-                {
-                    sponsorRequest.IsSponsored = false;
-                }
+               
                 sponsorRequest.UpdatedAt = DateTimeHelper.GetDateTimeNow();
             }
             await _unitOfWork.SponsorEventRepository.Update(sponsorRequest);

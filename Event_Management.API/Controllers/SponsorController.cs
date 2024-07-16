@@ -68,6 +68,15 @@ namespace Event_Management.API.Controllers
 		{
 			APIResponse response = new APIResponse();
 			var userId = Guid.Parse(User.GetUserIdFromToken());
+            var userEntity = await _userService.GetUserByIdAsync(userId);
+            if (userEntity == null)
+            {
+                response.StatusResponse = HttpStatusCode.BadRequest;
+                response.Message = MessageUser.UserNotFound;
+                response.Data = null;
+                return response;
+            }
+
             var isOwner = await _eventService.IsOwner(sponsorRequestUpdate.EventId, userId);
 
             if (!isOwner)
@@ -100,11 +109,24 @@ namespace Event_Management.API.Controllers
 
         [Authorize]
         [HttpGet("event-filter")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         //Get requested-sponsor of this event
         public async Task<APIResponse> GetSponsorEvent([FromQuery] SponsorEventFilter sponsorFilter)
         {
             var response = new APIResponse();
-            var isOwner = await _eventService.IsOwner(sponsorFilter.EventId, Guid.Parse(User.GetUserIdFromToken()));
+            var userId = Guid.Parse(User.GetUserIdFromToken());
+            var userEntity = await _userService.GetUserByIdAsync(userId);
+            if (userEntity == null)
+            {
+                response.StatusResponse = HttpStatusCode.BadRequest;
+                response.Message = MessageUser.UserNotFound;
+                response.Data = null;
+                return response;
+            }
+
+            var isOwner = await _eventService.IsOwner(sponsorFilter.EventId, userId);
             if (!isOwner)
             {
                 response.StatusResponse = HttpStatusCode.BadRequest;
@@ -134,12 +156,26 @@ namespace Event_Management.API.Controllers
 
         [Authorize]
         [HttpGet("requested-sponsor")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         //Get requested-sponsor of this person
         public async Task<APIResponse> GetRequestSponsor(string? status, [FromQuery, Range(1, int.MaxValue)] int pageNo = 1,
                                                         [FromQuery, Range(1, int.MaxValue)] int elementEachPage = 10)
         {
-            var response = new APIResponse();   
-            var result = await _sponsorEventService.GetRequestSponsor(Guid.Parse(User.GetUserIdFromToken()), status, pageNo, elementEachPage);
+            var response = new APIResponse();
+
+            var userId = Guid.Parse(User.GetUserIdFromToken());
+            var userEntity = await _userService.GetUserByIdAsync(userId);
+            if (userEntity == null)
+            {
+                response.StatusResponse = HttpStatusCode.BadRequest;
+                response.Message = MessageUser.UserNotFound;
+                response.Data = null;
+                return response;
+            }
+
+            var result = await _sponsorEventService.GetRequestSponsor(userId, status, pageNo, elementEachPage);
             if (result.Count() > 0)
             {
                 response.StatusResponse = HttpStatusCode.OK;
@@ -164,9 +200,17 @@ namespace Event_Management.API.Controllers
         public async Task<APIResponse> GetRequestDetail(Guid eventId)
         {
             var response = new APIResponse();
+            var userId = Guid.Parse(User.GetUserIdFromToken());
+            var userEntity = await _userService.GetUserByIdAsync(userId);
+            if (userEntity == null)
+            {
+                response.StatusResponse = HttpStatusCode.BadRequest;
+                response.Message = MessageUser.UserNotFound;
+                response.Data = null;
+                return response;
+            }
 
-
-            var result = await _sponsorEventService.GetRequestedDetail(eventId, Guid.Parse(User.GetUserIdFromToken()));
+            var result = await _sponsorEventService.GetRequestedDetail(eventId, userId);
             if (result != null)
             {
                 response.StatusResponse = HttpStatusCode.OK;

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Azure;
 using Event_Management.Application.Dto;
+using Event_Management.Application.Helper;
 using Event_Management.Domain.Entity;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Repository;
@@ -54,7 +55,7 @@ namespace Event_Management.Domain.Service.TagEvent
         {
             var tags = await _unitOfWork.TagRepository.GetAll();
             var filteredTags = tags
-            .OrderBy(tag => CalculateSimilarity(tag.TagName, searchTerm))
+            .OrderBy(tag => SystemHelper.CalculateSimilarity(tag.TagName, searchTerm))
             .Take(10) // Limit to 10 elements
             .ToList();
 
@@ -66,47 +67,7 @@ namespace Event_Management.Domain.Service.TagEvent
             return tagDtos;
         }
 
-        private int CalculateSimilarity(string tagName, string searchTerm)
-        {
-            // Chuyển đổi thành chữ thường để so sánh không phân biệt chữ hoa chữ thường
-            tagName = tagName.ToLower();
-            searchTerm = searchTerm.ToLower();
-
-            // Nếu tagName chứa searchTerm, trả về điểm âm để ưu tiên
-            int index = tagName.IndexOf(searchTerm);
-            if (index != -1)
-            {
-                // Điểm càng thấp khi searchTerm xuất hiện càng sớm trong tagName
-                return index;
-            }
-
-            // Nếu không chứa, sử dụng thuật toán Levenshtein để tính điểm tương tự
-            int[,] dp = new int[tagName.Length + 1, searchTerm.Length + 1];
-
-            for (int i = 0; i <= tagName.Length; i++)
-            {
-                for (int j = 0; j <= searchTerm.Length; j++)
-                {
-                    if (i == 0)
-                    {
-                        dp[i, j] = j;
-                    }
-                    else if (j == 0)
-                    {
-                        dp[i, j] = i;
-                    }
-                    else
-                    {
-                        dp[i, j] = Math.Min(Math.Min(
-                            dp[i - 1, j] + 1,
-                            dp[i, j - 1] + 1),
-                            dp[i - 1, j - 1] + (tagName[i - 1] == searchTerm[j - 1] ? 0 : 1));
-                    }
-                }
-            }
-
-            return dp[tagName.Length, searchTerm.Length] + 1000; // Thêm 1000 để các tag không chứa searchTerm có điểm cao hơn
-        }
+        
         public async Task<Tag> GetById(int TagId)
         {
             var result = await _unitOfWork.TagRepository.GetById(TagId);
