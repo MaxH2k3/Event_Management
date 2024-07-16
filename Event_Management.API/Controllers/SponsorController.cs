@@ -12,62 +12,63 @@ using System.Net.WebSockets;
 namespace Event_Management.API.Controllers
 {
     [Route("api/v1/sponsor")]
-	[ApiController]
-	public class SponsorController : ControllerBase
-	{
-		private readonly ISponsorEventService _sponsorEventService;
-		private readonly IUserService _userService;
-		private readonly IEventService _eventService;
+    [ApiController]
+    public class SponsorController : ControllerBase
+    {
+        private readonly ISponsorEventService _sponsorEventService;
+        private readonly IUserService _userService;
+        private readonly IEventService _eventService;
 
-		public SponsorController(ISponsorEventService sponsorEventService, IUserService userService, IEventService eventService)
-		{
-			_sponsorEventService = sponsorEventService;
-			_userService = userService;
-			_eventService = eventService;
-		}
+        public SponsorController(ISponsorEventService sponsorEventService, IUserService userService, IEventService eventService)
+        {
+            _sponsorEventService = sponsorEventService;
+            _userService = userService;
+            _eventService = eventService;
+        }
 
-		[Authorize]
-		[HttpPost("request")]
-		[ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
-		[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-		[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-		public async Task<APIResponse> CreateRequest([FromBody] SponsorDto sponsorEvent)
-		{
-			APIResponse response = new APIResponse();
-			var userId = Guid.Parse(User.GetUserIdFromToken());
-			var userEntity = await _userService.GetUserByIdAsync(userId);
-			if (userEntity == null)
-			{
-				response.StatusResponse = HttpStatusCode.BadRequest;
-				response.Message = MessageUser.UserNotFound;
-				response.Data = null;
-				return response;
-			}
+        [Authorize]
+        [HttpPost("request")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<APIResponse> CreateRequest([FromBody] SponsorDto sponsorEvent)
+        {
+            APIResponse response = new APIResponse();
+            var userId = Guid.Parse(User.GetUserIdFromToken());
+            var userEntity = await _userService.GetUserByIdAsync(userId);
+            if (userEntity == null)
+            {
+                response.StatusResponse = HttpStatusCode.BadRequest;
+                response.Message = MessageUser.UserNotFound;
+                response.Data = null;
+                return response;
+            }
 
-			var result = await _sponsorEventService.AddSponsorEventRequest(sponsorEvent, userId);
-			if(result != null)
-			{
-				response.StatusResponse = HttpStatusCode.Created;
-				response.Message = MessageCommon.CreateSuccesfully;
-				response.Data = result;
-			} else
-			{
-				response.StatusResponse = HttpStatusCode.BadRequest;
-				response.Message = MessageCommon.CreateFailed;
-			}
-			
-			return response;
-		}
+            var result = await _sponsorEventService.AddSponsorEventRequest(sponsorEvent, userId);
+            if (result != null)
+            {
+                response.StatusResponse = HttpStatusCode.Created;
+                response.Message = MessageCommon.CreateSuccesfully;
+                response.Data = result;
+            }
+            else
+            {
+                response.StatusResponse = HttpStatusCode.BadRequest;
+                response.Message = MessageCommon.CreateFailed;
+            }
+
+            return response;
+        }
 
         [Authorize]
         [HttpPut("request-status")]
-		[ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
-		[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-		[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-		public async Task<APIResponse> UpdateRequest([FromBody] SponsorRequestUpdate sponsorRequestUpdate)
-		{
-			APIResponse response = new APIResponse();
-			var userId = Guid.Parse(User.GetUserIdFromToken());
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<APIResponse> UpdateRequest([FromBody] SponsorRequestUpdate sponsorRequestUpdate)
+        {
+            APIResponse response = new APIResponse();
+            var userId = Guid.Parse(User.GetUserIdFromToken());
             var isOwner = await _eventService.IsOwner(sponsorRequestUpdate.EventId, userId);
 
             if (!isOwner)
@@ -78,21 +79,21 @@ namespace Event_Management.API.Controllers
                 return response;
             }
 
-            
-			var result = await _sponsorEventService.UpdateSponsorEventRequest(sponsorRequestUpdate.EventId, userId, sponsorRequestUpdate.Status);
-			if (result != null)
-			{
-				response.StatusResponse = HttpStatusCode.OK;
-				response.Message = MessageCommon.UpdateSuccesfully;
-				response.Data = result;
-			}
-			else
-			{
-				response.StatusResponse = HttpStatusCode.BadRequest;
-				response.Message = MessageCommon.UpdateFailed;
-			}
 
-			return response;
+            var result = await _sponsorEventService.UpdateSponsorEventRequest(sponsorRequestUpdate.EventId, userId, sponsorRequestUpdate.Status);
+            if (result != null)
+            {
+                response.StatusResponse = HttpStatusCode.OK;
+                response.Message = MessageCommon.UpdateSuccesfully;
+                response.Data = result;
+            }
+            else
+            {
+                response.StatusResponse = HttpStatusCode.BadRequest;
+                response.Message = MessageCommon.UpdateFailed;
+            }
+
+            return response;
 
         }
 
@@ -109,6 +110,7 @@ namespace Event_Management.API.Controllers
                 response.StatusResponse = HttpStatusCode.BadRequest;
                 response.Message = MessageParticipant.NotOwner;
                 response.Data = null;
+                return response;
             }
 
 
@@ -137,7 +139,7 @@ namespace Event_Management.API.Controllers
         public async Task<APIResponse> GetRequestSponsor(string? status, [FromQuery, Range(1, int.MaxValue)] int pageNo = 1,
                                                         [FromQuery, Range(1, int.MaxValue)] int elementEachPage = 10)
         {
-            var response = new APIResponse();   
+            var response = new APIResponse();
             var result = await _sponsorEventService.GetRequestSponsor(Guid.Parse(User.GetUserIdFromToken()), status, pageNo, elementEachPage);
             if (result.Count() > 0)
             {
@@ -184,9 +186,9 @@ namespace Event_Management.API.Controllers
         }
 
         [Authorize]
-		[HttpDelete("request")]
-		public async Task<APIResponse> DeleteRequest(Guid eventId)
-		{
+        [HttpDelete("request")]
+        public async Task<APIResponse> DeleteRequest(Guid eventId)
+        {
             APIResponse response = new APIResponse();
             var userId = Guid.Parse(User.GetUserIdFromToken());
             var userEntity = await _userService.GetUserByIdAsync(userId);
@@ -198,7 +200,7 @@ namespace Event_Management.API.Controllers
                 return response;
             }
 
-			var result = await _sponsorEventService.DeleteRequest(eventId, userId);
+            var result = await _sponsorEventService.DeleteRequest(eventId, userId);
 
             if (result != null)
             {
