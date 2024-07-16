@@ -31,7 +31,7 @@ namespace Event_Management.API.Controllers
 		[ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
 		[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
 		[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-		public async Task<APIResponse> CreateRequest([FromQuery] SponsorDto sponsorEvent)
+		public async Task<APIResponse> CreateRequest([FromBody] SponsorDto sponsorEvent)
 		{
 			APIResponse response = new APIResponse();
 			var userId = Guid.Parse(User.GetUserIdFromToken());
@@ -64,11 +64,11 @@ namespace Event_Management.API.Controllers
 		[ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
 		[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
 		[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-		public async Task<APIResponse> UpdateRequest(Guid eventId, string status)
+		public async Task<APIResponse> UpdateRequest([FromBody] SponsorRequestUpdate sponsorRequestUpdate)
 		{
 			APIResponse response = new APIResponse();
 			var userId = Guid.Parse(User.GetUserIdFromToken());
-            var isOwner = await _eventService.IsOwner(eventId, userId);
+            var isOwner = await _eventService.IsOwner(sponsorRequestUpdate.EventId, userId);
 
             if (!isOwner)
             {
@@ -79,7 +79,7 @@ namespace Event_Management.API.Controllers
             }
 
             
-			var result = await _sponsorEventService.UpdateSponsorEventRequest(eventId, userId, status);
+			var result = await _sponsorEventService.UpdateSponsorEventRequest(sponsorRequestUpdate.EventId, userId, sponsorRequestUpdate.Status);
 			if (result != null)
 			{
 				response.StatusResponse = HttpStatusCode.OK;
