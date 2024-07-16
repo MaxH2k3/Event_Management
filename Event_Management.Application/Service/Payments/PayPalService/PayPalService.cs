@@ -3,7 +3,9 @@ using Event_Management.Application.Dto.PaymentDTO;
 using Event_Management.Application.Dto.PaymentDTO.PayPalPayment;
 using Event_Management.Domain.UnitOfWork;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json.Linq;
 using PayPal.Api;
+using RestSharp;
 using System.Text.Json;
 
 namespace Event_Management.Application.Service.Payments.PayPalService
@@ -13,11 +15,15 @@ namespace Event_Management.Application.Service.Payments.PayPalService
         private readonly IConfiguration _configuration;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IUnitOfWork _unitOfWork;
-        public PayPalService(IConfiguration configuration, IHttpClientFactory httpClientFactory, IUnitOfWork unitOfWork)
+        private readonly HttpClient _httpClient;
+       
+
+        public PayPalService(IConfiguration configuration, IHttpClientFactory httpClientFactory, IUnitOfWork unitOfWork, HttpClient httpClient)
         {
             _configuration = configuration;
             _httpClientFactory = httpClientFactory;
             _unitOfWork = unitOfWork;
+            _httpClient = httpClient;
         }
         public async Task<PayPal.Api.Payment> CreatePayment(Guid eventId, Guid userId, string description)
         {
@@ -25,11 +31,13 @@ namespace Event_Management.Application.Service.Payments.PayPalService
             var apiContext = GetApiContext();
             string baseUrl = "https://localhost:7153";
             var eventEntity = await _unitOfWork.EventRepository.GetById(eventId);
-            var sponsor = await _unitOfWork.SponsorEventRepository.CheckSponsorEvent(eventId, userId);
+            var sponsor = await _unitOfWork.SponsorEventRepository.CheckSponsoredEvent(eventId, userId);
 
-			string totalAmount = sponsor?.Amount?.ToString() ?? eventEntity.Fare.ToString();
 
-			var payment = new PayPal.Api.Payment
+			decimal? totalAmount = sponsor?.Amount ?? eventEntity.Fare;
+            string apiUrl = "https://api.currencyapi.com/v3/latest?apikey=cur_live_YmCF5RSIievrfTvYMaZV82SIUD4zwtmW5asnZNI6&base_currency=USD&currencies=VND";
+            string translateAmount = await GetExchangeRate(apiUrl, totalAmount);
+            var payment = new PayPal.Api.Payment
             {
                 intent = "sale",
                 payer = new Payer { payment_method = "paypal" },
@@ -42,8 +50,8 @@ namespace Event_Management.Application.Service.Payments.PayPalService
                     amount = new Amount
                     {
                         currency = "USD",
-                        total = totalAmount
-					}
+                        total = translateAmount
+                    }
                 }
             },
                 redirect_urls = new RedirectUrls
@@ -56,13 +64,15 @@ namespace Event_Management.Application.Service.Payments.PayPalService
 
 
 
-            return payment.Create(apiContext); ;
+            return payment.Create(apiContext); 
         }
 
-        public async Task<PayoutBatchHeader> CreatePayout(Guid eventId, string emailReceiver)
+        public async Task<PayoutBatchHeader> CreatePayout(Guid eventId, string emailReceiver, decimal amount)
         {
             var apiContext = GetApiContext();
             var eventEtity = await _unitOfWork.EventRepository.GetById(eventId);
+            string apiUrl = "https://api.currencyapi.com/v3/latest?apikey=cur_live_YmCF5RSIievrfTvYMaZV82SIUD4zwtmW5asnZNI6&base_currency=USD&currencies=VND";
+            string translateAmount = await GetExchangeRate(apiUrl, amount);
             var payoutBatchHeader = new PayoutBatchHeader();
             var payoutRequest = new Payout
             {
@@ -76,7 +86,7 @@ namespace Event_Management.Application.Service.Payments.PayPalService
                         amount = new Currency
                         {
                             currency = "USD",
-                            value = "5.00",
+                            value = translateAmount,
                         },
                         note = "Thanks for your participation!",
                         sender_item_id = $"{DateTime.UtcNow.Ticks}-{new Random().Next(1000, 9999)}",
@@ -147,6 +157,25 @@ namespace Event_Management.Application.Service.Payments.PayPalService
             string senderBatchId = $"{dateStr}_{randomNumber.ToString("D5")}";
 
             return senderBatchId;
+        }
+
+        public static async Task<string> GetExchangeRate(string url, decimal? amount)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                HttpResponseMessage response = await client.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+
+                string responseBody = await response.Content.ReadAsStringAsync();
+                var data = JObject.Parse(responseBody);
+
+               
+                decimal exchangeRate = data["data"]["VND"]["value"].Value<decimal>();
+
+                // Tính toán số tiền sau khi chuyển đổi
+                decimal translatedAmount = (decimal)amount / exchangeRate;
+                return translatedAmount.ToString("F2");
+            }
         }
 
     }

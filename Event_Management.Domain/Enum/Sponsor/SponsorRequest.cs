@@ -8,8 +8,8 @@ namespace Event_Management.Domain.Enum.Sponsor
 {
 	public enum SponsorRequest
 	{
-		Confirmed,
-		Processing,
+        Confirmed,
+        Processing,
 		Reject
 	}
 }

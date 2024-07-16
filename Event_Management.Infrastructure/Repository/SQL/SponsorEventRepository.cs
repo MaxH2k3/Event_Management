@@ -20,7 +20,15 @@ namespace Event_Management.Infrastructure.Repository.SQL
             _context = context;
         }
 
-		public async Task<SponsorEvent?> CheckSponsorEvent(Guid eventId, Guid userId)
+        public async Task<SponsorEvent?> CheckSponsoredEvent(Guid eventId, Guid userId)
+        {
+            return await _context.SponsorEvents
+                         .FirstOrDefaultAsync(s => s.EventId == eventId
+                                                && s.UserId == userId
+                                                && s.Status.Equals("Confirmed"));
+        }
+
+        public async Task<SponsorEvent?> CheckSponsorEvent(Guid eventId, Guid userId)
 		{
 			return await _context.SponsorEvents
 						 .FirstOrDefaultAsync(s => s.EventId == eventId

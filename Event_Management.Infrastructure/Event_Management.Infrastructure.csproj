@@ -49,8 +49,4 @@
     <ProjectReference Include="..\Event_Management.Domain\Event_Management.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="ExternalServices\PayPal\" />
-  </ItemGroup>
-
 </Project>

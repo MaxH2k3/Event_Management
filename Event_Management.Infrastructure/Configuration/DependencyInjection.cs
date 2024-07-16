@@ -75,6 +75,9 @@ namespace Event_Management.Infastructure.Configuration
             //Set up Paypal
             builder.Services.AddPayPal(builder.Configuration);
 
+            //Setup Currency
+            builder.Services.UpdateCurrency(builder.Configuration); 
+
             // Set up Swagger
             builder.Services.AddSwagger();
 

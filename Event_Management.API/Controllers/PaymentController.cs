@@ -59,12 +59,19 @@ namespace Event_Management.API.Controllers
 
         }
 
+        [Authorize]
         [HttpPost("payout")]
-        public async Task<APIResponse> CreatePayout(Guid eventId, string emailReceiver)
+        public async Task<APIResponse> CreatePayout(Guid eventId, string emailReceiver, decimal amount)
         {
             APIResponse response = new APIResponse();
-
-            var result = await _payPalService.CreatePayout(eventId, emailReceiver);
+            var isOwner = await _eventService.IsOwner(eventId, Guid.Parse(User.GetUserIdFromToken()));
+            if (!isOwner)
+            {
+                response.StatusResponse = HttpStatusCode.BadRequest;
+                response.Message = MessageParticipant.NotOwner;
+                response.Data = null;
+            }
+            var result = await _payPalService.CreatePayout(eventId, emailReceiver, amount);
 
             if (result != null)
             {
