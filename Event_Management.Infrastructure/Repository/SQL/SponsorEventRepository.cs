@@ -19,13 +19,18 @@ namespace Event_Management.Infrastructure.Repository.SQL
         {
             _context = context;
         }
-
+        public async Task<bool> IsSponsored(Guid eventId)
+        {
+            var sponsorList = await _context.SponsorEvents.Where(s => s.EventId == eventId 
+            && s.Status!.Equals(SponsorRequest.Confirmed.ToString())).ToListAsync();
+            return sponsorList.Any();
+        }
         public async Task<SponsorEvent?> CheckSponsoredEvent(Guid eventId, Guid userId)
         {
             return await _context.SponsorEvents
                          .FirstOrDefaultAsync(s => s.EventId == eventId
                                                 && s.UserId == userId
-                                                && s.Status.Equals("Confirmed"));
+                                                && s.Status!.Equals(SponsorRequest.Confirmed.ToString()));
         }
 
         public async Task<SponsorEvent?> CheckSponsorEvent(Guid eventId, Guid userId)

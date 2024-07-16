@@ -48,6 +48,14 @@ namespace Event_Management.Application.Service
             await _quartzService.StartEventEndingEmailNoticeJob(eventId, DateTime.Now.AddMinutes(1));
             await _quartzService.DeleteJobsByEventId("start-" +eventId);
             await _quartzService.DeleteJobsByEventId("ended-" + eventId);*/
+            if(eventInfo!.Status!.Equals(EventStatus.Deleted.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                return new APIResponse
+                {
+                    Message = MessageCommon.NotFound,
+                    StatusResponse = HttpStatusCode.NotFound,
+                };
+            }
             if (eventInfo != null)
             {
                 EventDetailDto eventDetailDto = new EventDetailDto();
@@ -240,18 +248,45 @@ namespace Event_Management.Application.Service
             response.Host = getHostInfo((Guid)entity.CreatedBy!);
             return response;
         }
-        public async Task<bool> DeleteEvent(Guid eventId)
+        private async Task<bool> IsDeletable(Guid eventId)
         {
-            Event? existEvent = await _unitOfWork.EventRepository.GetById(eventId);
-            if (existEvent == null || existEvent.Status!.Equals(EventStatus.OnGoing))
+            Event? existEvent = await _unitOfWork.EventRepository.getAllEventInfo(eventId);
+            bool isSponsored = await _unitOfWork.SponsorEventRepository.IsSponsored(eventId);
+            var participantList = existEvent.Participants.Where(p => p.Status!.Equals(ParticipantStatus.Confirmed.ToString())).ToList();
+
+            return existEvent!.Fare <= 0 && !participantList.Any() && !existEvent.Status!.Equals(EventStatus.OnGoing) 
+                || !isSponsored && !existEvent.Status!.Equals(EventStatus.OnGoing);
+        }
+        public async Task<bool> DeleteEvent(Guid eventId, Guid userId)
+        {
+            try
+            {
+                bool isOwner = await IsOwner(eventId, userId);
+                bool isDeletable = await IsDeletable(eventId);
+                var userInfo = await _unitOfWork.UserRepository.GetById(userId);
+                Event? existEvent = await _unitOfWork.EventRepository.getAllEventInfo(eventId);
+                if (existEvent == null || existEvent.Status!.Equals(EventStatus.OnGoing) || !isDeletable)
+                {
+                    return false;
+                }
+                if (isOwner)
+                {
+                    if (existEvent.StartDate.CompareTo(DateTime.Now.AddHours(6)) < 0)
+                    {
+                        return await _unitOfWork.EventRepository.ChangeEventStatus(eventId, EventStatus.Cancel);
+                    }
+                    return await _unitOfWork.EventRepository.ChangeEventStatus(eventId, EventStatus.Deleted);
+                }
+                if (!isOwner && userInfo!.RoleId == 3)
+                {
+                    return await _unitOfWork.EventRepository.ChangeEventStatus(eventId, EventStatus.Aborted);
+                }
+            }catch (Exception)
             {
                 return false;
             }
-            return await _unitOfWork.EventRepository.DeleteEvent(eventId);
+            return false;
         }
-
-        //	_distributedCache = distributedCache;
-        //}
         public async Task<Dictionary<string, List<EventPreview>>> GetUserPastAndFutureEvents(Guid userId)
         {
             List<Event> pastEvent = await _unitOfWork.EventRepository.UserPastEvents(userId);
@@ -273,7 +308,6 @@ namespace Event_Management.Application.Service
                 (response, result.TotalItems, pageNo, elementEachPage);
             return pages;
         }
-
         public async Task<PagedList<EventResponseDto>> GetUserParticipatedEvents(EventFilterObject filter, string userId, int pageNo, int elementEachPage)
         {
             var result = await _unitOfWork.EventRepository.GetUserParticipatedEvents(filter, userId, pageNo, elementEachPage);
@@ -303,7 +337,6 @@ namespace Event_Management.Application.Service
                 (response, response.Count, pageNo, elementEachPage);
             return pages;
         }
-
         public async Task<APIResponse> UpdateEvent(EventRequestDto eventDto, string userId, Guid eventId)
         {
             var eventEntity = await _unitOfWork.EventRepository.getAllEventInfo(eventId);
@@ -468,12 +501,10 @@ namespace Event_Management.Application.Service
         {
             return await _unitOfWork.EventRepository.IsOwner(userId, eventId);
         }
-
         public async Task<EventStatistics?> GetEventStatis(Guid eventId)
         {
             return await _unitOfWork.EventStatisticsRepository.GetById(eventId);
         }
-
         public async Task<Dictionary<string, int>> CountByStatus()
         {
             return await _unitOfWork.EventRepository.CountByStatus();

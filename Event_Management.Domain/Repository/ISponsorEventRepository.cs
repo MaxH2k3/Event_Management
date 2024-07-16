@@ -12,6 +12,7 @@ namespace Event_Management.Domain.Repository
         Task<PagedList<SponsorEvent>> GetSponsorEvents(SponsorEventFilter sponsorFilter);
         Task<PagedList<SponsorEvent>> GetRequestSponsor(Guid userId, string? status,  int page, int eachPage);
         Task<SponsorEvent?> DeleteSponsorRequest(Guid eventId, Guid userId);
+        Task<bool> IsSponsored(Guid eventId);
 
     }
 }

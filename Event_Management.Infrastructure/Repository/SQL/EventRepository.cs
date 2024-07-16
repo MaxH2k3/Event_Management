@@ -358,12 +358,13 @@ namespace Event_Management.Infrastructure.Repository.SQL
             _context.UpdateRange(endedEvents);
             return _context.SaveChanges() > 0;
         }
-        public async Task<bool> DeleteEvent(Guid eventId)
+        public async Task<bool> ChangeEventStatus(Guid eventId, EventStatus status)
         {
             var deleteEvent = await _context.Events.FindAsync(eventId);
-            deleteEvent.Status = EventStatus.Deleted.ToString();
+            deleteEvent!.Status = status.ToString();
             return await _context.SaveChangesAsync() > 0;
         }
+
         double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
         {
             var R = 6371.0; // Earth's radius in kilometers

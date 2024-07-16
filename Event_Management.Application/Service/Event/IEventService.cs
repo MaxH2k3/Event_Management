@@ -23,7 +23,7 @@ namespace Event_Management.Application.Service
         public Task<Dictionary<string, List<EventPreview>>> GetUserPastAndFutureEvents(Guid userId);
         public Task<APIResponse> AddEvent(EventRequestDto eventDto, string userId);// HttpContext http);
         public Task<APIResponse> UpdateEvent(EventRequestDto eventDto, string userId, Guid eventId);
-        public Task<bool> DeleteEvent(Guid eventId);
+        public Task<bool> DeleteEvent(Guid eventId, Guid userId);
         public void UpdateEventStatusEnded(Guid eventId);
         public void UpdateEventStatusOngoing(Guid eventId);
         public void UpdateEventStatusEnded();

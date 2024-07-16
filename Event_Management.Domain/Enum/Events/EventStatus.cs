@@ -6,6 +6,7 @@
         Ended,
         NotYet,
         Aborted,
-        Deleted
+        Deleted,
+        Cancel
     }
 }

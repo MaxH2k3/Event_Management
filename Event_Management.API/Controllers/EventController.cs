@@ -36,6 +36,10 @@ namespace Event_Management.API.Controllers
             {
                 return Ok(response);
             }
+            if(response.StatusResponse == HttpStatusCode.NotFound)
+            {
+                return NotFound(response);
+            }
             return BadRequest(response);
         }
         [Authorize]
@@ -195,23 +199,25 @@ namespace Event_Management.API.Controllers
 
         [Authorize]
         [HttpDelete("")]
-        public async Task<APIResponse> DeleteEvent(Guid packageId)
+        public async Task<IActionResult> DeleteEvent([FromQuery, Required]Guid eventId)
         {
+            string userId = User.GetUserIdFromToken();
             APIResponse response = new APIResponse();
-            var result = await _eventService.DeleteEvent(packageId);
+            var result = await _eventService.DeleteEvent(eventId, Guid.Parse(userId));
             if (result)
             {
                 response.StatusResponse = HttpStatusCode.OK;
                 response.Message = MessageCommon.DeleteSuccessfully;
                 response.Data = result;
-
+                return Ok(response);
             }
             else
             {
                 response.StatusResponse = HttpStatusCode.BadRequest;
                 response.Message = MessageCommon.DeleteFailed;
+                return BadRequest(response);
             }
-            return response;
+            
         }
 
         [HttpPost("logo-upload")]

@@ -32,7 +32,7 @@ namespace Event_Management.Domain.Repository
         public bool UpdateEventStatusToEnded(Guid eventId);
         public bool UpdateEventStatusToEnded();
 
-        public Task<bool> DeleteEvent(Guid eventId);
+        Task<bool> ChangeEventStatus(Guid eventId, EventStatus status);
         public List<EventCreatorLeaderBoardDto> GetTop10CreatorsByEventCount();
         public List<EventLocationLeaderBoardDto> GetTop10LocationByEventCount();
         public List<EventCreatorLeaderBoardDto> GetTop20SpeakerEventCount();

@@ -57,7 +57,7 @@ namespace Event_Management.Application.Service
         public async Task<SponsorEvent?> DeleteRequest(Guid eventId, Guid userId)
         {
             var requestEvent = await _unitOfWork.SponsorEventRepository.CheckSponsorEvent(eventId, userId);
-            if(!requestEvent.Status.Equals("Confirmed") || !requestEvent.Status.Equals("Reject"))
+            if(!requestEvent.Status.Equals(SponsorRequest.Confirmed.ToString()) || !requestEvent.Status.Equals(SponsorRequest.Reject.ToString()))
             {
                 await _unitOfWork.SponsorEventRepository.DeleteSponsorRequest(eventId, userId);
             }
@@ -98,7 +98,7 @@ namespace Event_Management.Application.Service
             if (sponsorRequest != null)
             {
                 sponsorRequest.Status = sponsorRequestUpdate.Status;
-                if (sponsorRequestUpdate.Status.Equals("Confirmed"))
+                if (sponsorRequestUpdate.Status.Equals(SponsorRequest.Confirmed.ToString()))
                 {
                     sponsorRequest.IsSponsored = true;
                 } else

@@ -1,6 +1,8 @@
 ﻿using Azure;
 using Event_Management.Application.Dto.PaymentDTO;
 using Event_Management.Application.Dto.PaymentDTO.PayPalPayment;
+using Event_Management.Application.Helper;
+using Event_Management.Application.Message;
 using Event_Management.Domain.UnitOfWork;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
@@ -36,7 +38,7 @@ namespace Event_Management.Application.Service.Payments.PayPalService
 
 			decimal? totalAmount = sponsor?.Amount ?? eventEntity.Fare;
             string apiUrl = "https://api.currencyapi.com/v3/latest?apikey=cur_live_YmCF5RSIievrfTvYMaZV82SIUD4zwtmW5asnZNI6&base_currency=USD&currencies=VND";
-            string translateAmount = await GetExchangeRate(apiUrl, totalAmount);
+            string translateAmount = await CurrencyHelper.GetExchangeRate(apiUrl, totalAmount);
             var payment = new PayPal.Api.Payment
             {
                 intent = "sale",
@@ -46,7 +48,6 @@ namespace Event_Management.Application.Service.Payments.PayPalService
                 new Transaction
                 {
                     description = description,
-                    
                     amount = new Amount
                     {
                         currency = "USD",
@@ -67,12 +68,12 @@ namespace Event_Management.Application.Service.Payments.PayPalService
             return payment.Create(apiContext); 
         }
 
-        public async Task<PayoutBatchHeader> CreatePayout(Guid eventId, string emailReceiver, decimal amount)
+        public async Task<PayoutBatchHeader> CreatePayout(PayoutDto payoutDto)
         {
             var apiContext = GetApiContext();
-            var eventEtity = await _unitOfWork.EventRepository.GetById(eventId);
+            var eventEtity = await _unitOfWork.EventRepository.GetById(payoutDto.EventId);
             string apiUrl = "https://api.currencyapi.com/v3/latest?apikey=cur_live_YmCF5RSIievrfTvYMaZV82SIUD4zwtmW5asnZNI6&base_currency=USD&currencies=VND";
-            string translateAmount = await GetExchangeRate(apiUrl, amount);
+            string translateAmount = await CurrencyHelper.GetExchangeRate(apiUrl, payoutDto.Amount);
             var payoutBatchHeader = new PayoutBatchHeader();
             var payoutRequest = new Payout
             {
@@ -81,14 +82,14 @@ namespace Event_Management.Application.Service.Payments.PayPalService
 
                     new PayoutItem
                     {
-                        receiver = emailReceiver,
+                        receiver = payoutDto.EmailReceiver,
                         recipient_type = PayoutRecipientType.EMAIL,
                         amount = new Currency
                         {
                             currency = "USD",
                             value = translateAmount,
                         },
-                        note = "Thanks for your participation!",
+                        note = MessagePayment.MessageNotification,
                         sender_item_id = $"{DateTime.UtcNow.Ticks}-{new Random().Next(1000, 9999)}",
                         
                     }
@@ -96,8 +97,8 @@ namespace Event_Management.Application.Service.Payments.PayPalService
 
                 sender_batch_header = new PayoutSenderBatchHeader
                 {
-                    sender_batch_id = GenerateSenderBatchId(),
-                    email_subject = "You have a payout!",
+                    sender_batch_id = SystemHelper.GenerateSenderBatchId(),
+                    email_subject = payoutDto.EmailSubject,
 
                 }
             };
@@ -126,7 +127,7 @@ namespace Event_Management.Application.Service.Payments.PayPalService
             return payoutBatch;
         }
 
-        private APIContext GetApiContext()
+        public APIContext GetApiContext()
         {
             var config = new Dictionary<string, string>
         {
@@ -139,44 +140,9 @@ namespace Event_Management.Application.Service.Payments.PayPalService
             return new APIContext(accessToken);
         }
 
-        public static string GenerateSenderBatchId()
-        {
-            Random random = new Random();
-            /**
-             * Generates a unique sender_batch_id based on the current date and a sequential number.
-             * 
-             * Returns:
-             *     A unique sender_batch_id string.
-             */
-            DateTime today = DateTime.Today;
-            string dateStr = today.ToString("yyyyMMdd");
+        
 
-            // Retrieve the last used number from a database or a file
-            int randomNumber = random.Next(100000, 999999);
-
-            string senderBatchId = $"{dateStr}_{randomNumber.ToString("D5")}";
-
-            return senderBatchId;
-        }
-
-        public static async Task<string> GetExchangeRate(string url, decimal? amount)
-        {
-            using (HttpClient client = new HttpClient())
-            {
-                HttpResponseMessage response = await client.GetAsync(url);
-                response.EnsureSuccessStatusCode();
-
-                string responseBody = await response.Content.ReadAsStringAsync();
-                var data = JObject.Parse(responseBody);
-
-               
-                decimal exchangeRate = data["data"]["VND"]["value"].Value<decimal>();
-
-                // Tính toán số tiền sau khi chuyển đổi
-                decimal translatedAmount = (decimal)amount / exchangeRate;
-                return translatedAmount.ToString("F2");
-            }
-        }
+        
 
     }
 }

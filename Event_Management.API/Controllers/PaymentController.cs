@@ -1,4 +1,5 @@
-﻿using Event_Management.Application.Message;
+﻿using Event_Management.Application.Dto.PaymentDTO.PayPalPayment;
+using Event_Management.Application.Message;
 using Event_Management.Application.Service;
 using Event_Management.Application.Service.Payments.PayPalService;
 using Event_Management.Domain.Helper;
@@ -61,17 +62,17 @@ namespace Event_Management.API.Controllers
 
         [Authorize]
         [HttpPost("payout")]
-        public async Task<APIResponse> CreatePayout(Guid eventId, string emailReceiver, decimal amount)
+        public async Task<APIResponse> CreatePayout([FromBody] PayoutDto payoutDto)
         {
             APIResponse response = new APIResponse();
-            var isOwner = await _eventService.IsOwner(eventId, Guid.Parse(User.GetUserIdFromToken()));
+            var isOwner = await _eventService.IsOwner(payoutDto.EventId, Guid.Parse(User.GetUserIdFromToken()));
             if (!isOwner)
             {
                 response.StatusResponse = HttpStatusCode.BadRequest;
                 response.Message = MessageParticipant.NotOwner;
                 response.Data = null;
             }
-            var result = await _payPalService.CreatePayout(eventId, emailReceiver, amount);
+            var result = await _payPalService.CreatePayout(payoutDto);
 
             if (result != null)
             {
