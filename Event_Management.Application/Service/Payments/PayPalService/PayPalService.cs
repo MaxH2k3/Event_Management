@@ -32,14 +32,21 @@ namespace Event_Management.Application.Service.Payments.PayPalService
             
             var apiContext = GetApiContext();
             string eventIdUrl = createPaymentDto.EventId.ToString();
-            string baseUrl = "https://event-manage-nine.vercel.app/events";
+            string baseUrl = "http://localhost:3000/";
+
+            //string baseUrl = "https://event-manage-nine.vercel.app/events";
             var eventEntity = await _unitOfWork.EventRepository.GetById(createPaymentDto.EventId);
-            var sponsor = await _unitOfWork.SponsorEventRepository.CheckSponsoredEvent(createPaymentDto.EventId, userId);
+            
 
 
             decimal? totalAmount;
             if(createPaymentDto.Amount > 0)
             {
+                var sponsor = await _unitOfWork.SponsorEventRepository.CheckSponsoredEvent(createPaymentDto.EventId, userId);
+                if(sponsor == null)
+                {
+                    return null;
+                }
                 totalAmount = createPaymentDto.Amount;
             }
             else
