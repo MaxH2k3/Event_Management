@@ -8,11 +8,14 @@ namespace Event_Management.Application.Service.Job
 {
     public interface IQuartzService
     {
-        public Task StartEventStatusToOngoingJob(Guid eventId, DateTime startTime);
-        public Task StartEventStatusToEndedJob(Guid eventId, DateTime startTime);
-        public Task StartEventStartingEmailNoticeJob(Guid eventId, DateTime startTime);
-        public Task StartEventEndingEmailNoticeJob(Guid eventId, DateTime endTime);
-        public Task DeleteJobsByEventId(string eventId);
+        Task StartEventStatusToOngoingJob(Guid eventId, DateTime startTime);
+        Task StartEventStatusToEndedJob(Guid eventId, DateTime startTime);
+        Task StartEventStartingEmailNoticeJob(Guid eventId, DateTime startTime);
+        Task StartEventEndingEmailNoticeJob(Guid eventId, DateTime endTime);
+        Task DeleteJobsByEventId(string eventId);
+        Task<IEnumerable<string>> GetAllJob();
+        Task ExcuteJob(string key, int type);
+
     }
     public class QuartzService : IQuartzService
     {
@@ -22,6 +25,55 @@ namespace Event_Management.Application.Service.Job
         {
             _schedulerFactory = schedulerFactory;
         }
+
+        public async Task<IEnumerable<string>> GetAllJob()
+        {
+            IScheduler scheduler = await _schedulerFactory.GetScheduler();
+            var allJobKeys = await scheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup());
+
+            return allJobKeys.Select(jobKey => jobKey.Name);
+        }
+
+        public async Task ExcuteJob(string key, int type)
+        {
+            var eventId = Guid.Parse(key);
+            switch (type)
+            {
+                case 1:
+                {
+                    await StartEventStatusToOngoingJob(eventId, DateTime.Now.AddMinutes(1));
+                    break;
+                }
+                case 2:
+                {
+                    await StartEventStatusToEndedJob(eventId, DateTime.Now.AddMinutes(1));
+                    break;
+                }
+                case 3:
+                {
+                    await StartEventStartingEmailNoticeJob(eventId, DateTime.Now.AddMinutes(1));
+                    break;
+                }
+                case 4:
+                {
+                    await StartEventEndingEmailNoticeJob(eventId, DateTime.Now.AddMinutes(1));
+                    break;
+                }
+                case 5:
+                {
+                    await StartEventStatusToOngoingJob(eventId, DateTime.Now.AddMinutes(1));
+                    await StartEventStatusToOngoingJob(eventId, DateTime.Now.AddMinutes(1));
+                    await StartEventStartingEmailNoticeJob(eventId, DateTime.Now.AddMinutes(1));
+                    await StartEventEndingEmailNoticeJob(eventId, DateTime.Now.AddMinutes(1));
+                    break;
+                } default:
+                {
+                    break;
+                }
+            }
+                
+        }
+
         public async Task StartEventStatusToOngoingJob(Guid eventId, DateTime startTime)
         {
             var jobKey = new JobKey("start-" + eventId);

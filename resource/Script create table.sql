@@ -6,50 +6,53 @@ CREATE TABLE "Role" (
 );
 
 CREATE TABLE "User" (
-  "UserID" UNIQUEIDENTIFIER PRIMARY KEY NOT NULL,
-  "FirstName" VARCHAR(255),
-  "LastName" VARCHAR(255),
-  "Age" INT NOT NULL,
-  "Gender" VARCHAR(50),
+  "UserID" UNIQUEIDENTIFIER PRIMARY KEY,
+  "FullName" NVARCHAR(255),
   "Email" VARCHAR(255),
   "Phone" VARCHAR(15),
-  "Password" VARBINARY(MAX),
-  "PasswordSalt" VARBINARY(MAX) NOT NULL,
-  "UpdatedAt" DATE,
-  "CreatedAt" DATE,
+  "UpdatedAt" DATETIME,
+  "CreatedAt" DATETIME,
   "Status" VARCHAR(50) NOT NULL,
   "RoleID" INT NOT NULL,
+  "Avatar"  VARCHAR(1000),
   FOREIGN KEY ("RoleID") REFERENCES "Role" ("RoleID")
 );
 
-CREATE TABLE "Permission" (
-  "PermissionID" INT PRIMARY KEY IDENTITY(1,1),
-  "PermissionName" VARCHAR(255) NOT NULL,
-  "Description" VARCHAR(255),
-  "Status" VARCHAR(10)
-);
+CREATE TABLE "UserValidation" (
+	"UserID" UNIQUEIDENTIFIER PRIMARY KEY,
+	"OTP" VARCHAR(6),
+	"VerifyToken" VARCHAR(MAX),
+	"ExpiredAt" DATETIME,
+	"CreatedAt" DATETIME,
+	FOREIGN KEY ("UserID") REFERENCES "User" ("UserID")
+)
 
 CREATE TABLE "Event" (
   "EventID" UNIQUEIDENTIFIER PRIMARY KEY NOT NULL,
-  "EventName" VARCHAR(255) NOT NULL,
-  "Description" VARCHAR(MAX),
+  "EventName" NVARCHAR(250) NOT NULL,
+  "Description" NVARCHAR(MAX),
   "Status" VARCHAR(10),
-  "StartDate" DATE,
-  "EndDate" DATE,
+  "StartDate" DATETIME,
+  "EndDate" DATETIME,
   "CreatedBy" UNIQUEIDENTIFIER,
   "Image" VARCHAR(5000),
-  "Location" VARCHAR(255),
-  "CreatedAt" DATE,
-  "UpdatedAt" DATE,
+  "Location" NVARCHAR(500),
+  "CreatedAt" DATETIME,
+  "UpdatedAt" DATETIME,
   "Capacity" INT,
   "Approval" BIT,
-  "Ticket" FLOAT,
+  "Fare" DECIMAL(19, 2),
+  "LocationUrl" varchar (2000),
+  "LocationCoord" varchar (500),
+  "LocationID" varchar(1000),
+  "LocationAddress" nvarchar(1000),
+  "Theme" varchar(20),
   FOREIGN KEY ("CreatedBy") REFERENCES "User" ("UserID")
 );
 
 CREATE TABLE "Tag" (
   "TagID" INT PRIMARY KEY IDENTITY(1,1),
-  "TagName" VARCHAR(255)
+  "TagName" NVARCHAR(255)
 );
 
 CREATE TABLE "EventTag" (
@@ -82,49 +85,20 @@ CREATE TABLE "Participant" (
 CREATE TABLE "Feedback" (
   "UserID" UNIQUEIDENTIFIER,
   "EventID" UNIQUEIDENTIFIER,
-  "Content" VARCHAR(5000),
+  "Content" text,
   "Rating" INT,
-  "CreatedAt" DATE,
+  "CreatedAt" DATETIME,
   PRIMARY KEY ("UserID", "EventID"),
   FOREIGN KEY ("UserID") REFERENCES "User" ("UserID"),
   FOREIGN KEY ("EventID") REFERENCES "Event" ("EventID")
 );
 
-CREATE TABLE "PaymentMethod" (
-  "PaymentMethodID" INT PRIMARY KEY IDENTITY(1,1),
-  "PaymentMethodName" VARCHAR(255),
-  "PaymentMethodStatus" BIT
-);
-
-CREATE TABLE "Payment" (
-  "PaymentID" UNIQUEIDENTIFIER PRIMARY KEY,
-  "PaymentMethodID" INT REFERENCES "PaymentMethod" ("PaymentMethodID"),
-  "PaymentOwner" VARCHAR(50),
-  "UserID" UNIQUEIDENTIFIER REFERENCES "User" ("UserID"),
-  "SerialNumber" VARCHAR(20),
-  "PaymentStatus" BIT,
-  "CreatedAt" DATETIME,
-  "UpdatedAt" DATETIME
-);
-
-CREATE TABLE "Transaction" (
-  "TransactionID" INT PRIMARY KEY IDENTITY(1,1),
-  "UserID" UNIQUEIDENTIFIER,
-  "EventID" UNIQUEIDENTIFIER,
-  "PaymentID" UNIQUEIDENTIFIER REFERENCES "Payment" ("PaymentID"),
-  "Money" FLOAT,
-  "CreatedAt" DATETIME,
-  "Type" VARCHAR(255),
-  "Status" VARCHAR(20),
-  FOREIGN KEY ("UserID") REFERENCES "User" ("UserID"),
-  FOREIGN KEY ("EventID") REFERENCES "Event" ("EventID")
-);
 
 CREATE TABLE "EventMailSystem" (
   "EventID" UNIQUEIDENTIFIER,
   "TimeExecute" DATE,
   "MethodKey" VARCHAR(50),
-  "Description" VARCHAR(250),
+  "Description" NVARCHAR(250),
   "Title" VARCHAR(255),
   "Body" VARCHAR(MAX),
   "Type" VARCHAR(255),
@@ -132,20 +106,11 @@ CREATE TABLE "EventMailSystem" (
   FOREIGN KEY ("EventID") REFERENCES "Event" ("EventID")
 );
 
-CREATE TABLE "EventPayment" (
-  "PaymentID" UNIQUEIDENTIFIER REFERENCES "Payment" ("PaymentID"),
-  "EventID" UNIQUEIDENTIFIER REFERENCES "Event" ("EventID")
-);
-
-CREATE TABLE "SponsorMethod" (
-  "SponsorMethodId" INT PRIMARY KEY IDENTITY(1,1),
-  "SponsorMethodName" VARCHAR(255)
-);
 
 CREATE TABLE "RefreshToken" (
-  "RefreshTokenId" INT PRIMARY KEY IDENTITY(1,1),
+  "RefreshTokenID" INT PRIMARY KEY IDENTITY(1,1),
   "UserID" UNIQUEIDENTIFIER,
-  "Token" NVARCHAR(500) NOT NULL,
+  "Token" NVARCHAR(300) NOT NULL,
   "CreatedAt" DATETIME,
   "ExpireAt" DATETIME,
   FOREIGN KEY ("UserID") REFERENCES "User" ("UserID")
@@ -154,34 +119,55 @@ CREATE TABLE "RefreshToken" (
 CREATE TABLE "Notification" (
   "NotificationId" INT PRIMARY KEY IDENTITY(1,1),
   "UserID" UNIQUEIDENTIFIER,
-  "Description" VARCHAR(100),
+  "Description" NVARCHAR(255),
   "CreatedAt" DATETIME,
   "IsRead" BIT,
   FOREIGN KEY ("UserID") REFERENCES "User" ("UserID")
 );
 
 CREATE TABLE "Logo" (
-  "LogoId" INT PRIMARY KEY IDENTITY(1,1),
+  "LogoID" INT PRIMARY KEY IDENTITY(1,1),
   "SponsorBrand" VARCHAR(500),
   "LogoUrl" VARCHAR(1000)
 );
 
 CREATE TABLE "EventLogo" (
-  "LogoId" INT,
+  "LogoID" INT,
   "EventID" UNIQUEIDENTIFIER,
-  PRIMARY KEY ("LogoId", "EventID"),
+  PRIMARY KEY ("LogoID", "EventID"),
   FOREIGN KEY ("EventID") REFERENCES "Event" ("EventID"),
-  FOREIGN KEY ("LogoId") REFERENCES "Logo" ("LogoId")
+  FOREIGN KEY ("LogoID") REFERENCES "Logo" ("LogoID")
 );
 
 CREATE TABLE "SponsorEvent" (
   "EventID" UNIQUEIDENTIFIER,
-  "SponsorMethodId" INT,
+  "SponsorMethodID" INT,
   "UserID" UNIQUEIDENTIFIER,
   "Status" VARCHAR(50),
+  "IsSponsored" BIT,
+  "Amount" DECIMAL(19, 2),
+  "Message" NVARCHAR(200),
+  "SponsorType" varchar(20),
   "CreatedAt" DATETIME,
   "UpdatedAt" DATETIME,
+  PRIMARY KEY ("EventID", "UserID"),
   FOREIGN KEY ("EventID") REFERENCES "Event" ("EventID"),
-  FOREIGN KEY ("SponsorMethodId") REFERENCES "SponsorMethod" ("SponsorMethodId"),
   FOREIGN KEY ("UserID") REFERENCES "User" ("UserID")
 );
+
+-- Tạo bảng PaymentTransaction
+CREATE TABLE PaymentTransaction (
+    ID UNIQUEIDENTIFIER PRIMARY KEY,
+	PayID VARCHAR(40),
+	PayerID VARCHAR(20),
+    TranMessage NVARCHAR(MAX),
+    TranStatus VARCHAR(50),
+    TranAmount DECIMAL(19, 2),
+    TranDate DATETIME,
+	"RemitterID" UNIQUEIDENTIFIER,
+	"EventID" UNIQUEIDENTIFIER,
+	FOREIGN KEY ("EventID") REFERENCES "Event" ("EventID"),
+	FOREIGN KEY ("RemitterID") REFERENCES "User" ("UserID")
+);
+
+

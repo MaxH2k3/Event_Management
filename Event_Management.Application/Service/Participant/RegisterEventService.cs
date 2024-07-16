@@ -17,10 +17,10 @@ namespace Event_Management.Domain.Service
 	{
 		private readonly IUnitOfWork _unitOfWork;
 		private readonly IMapper _mapper;
-		private readonly SendMailTask _sendMailTask;
+		private readonly ISendMailTask _sendMailTask;
 
         public RegisterEventService(IUnitOfWork unitOfWork, IMapper mapper,
-			SendMailTask sendMailTask)
+			ISendMailTask sendMailTask)
 		{
 			_unitOfWork = unitOfWork;
 			_mapper = mapper;
@@ -91,7 +91,7 @@ namespace Event_Management.Domain.Service
 			{
 				if(!currentEvent!.Approval)
 				{
-                    _sendMailTask.SendMail(registerEventModel);
+                    _sendMailTask.SendMailTicket(registerEventModel);
                 }
 				
                 return new APIResponse()
@@ -119,14 +119,14 @@ namespace Event_Management.Domain.Service
                 RoleEventId = registerEventModel.RoleEventId,
                 CreatedAt = DateTime.Now,
                 IsCheckedMail = false,
-                Status = ParticipantStatus.Pending.ToString()
+                Status = ParticipantStatus.Confirmed.ToString()
             };
 
             await _unitOfWork.ParticipantRepository.UpSert(participant);
 
             if (await _unitOfWork.SaveChangesAsync())
             {
-                _sendMailTask.SendMail(registerEventModel);
+                _sendMailTask.SendMailTicket(registerEventModel);
 
                 return new APIResponse()
                 {

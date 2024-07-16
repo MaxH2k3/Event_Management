@@ -212,15 +212,14 @@
                                                               <tr>
                                                                 <td
                                                                   style="padding:0;margin:0;background-color:#eceded!important;border:1px solid #eceded;font-size:8px!important;line-height:2!important;border-top-right-radius:8px;border-top-left-radius:8px"
-                                                                  valign="middle" align="center"><span
-                                                                    style="color:#737577!important;font-size:8px!important;line-height:2!important;font-weight:500">JUL</span>
+                                                                  valign="middle" align="center"><span style="color:#737577!important;font-size:8px!important;line-height:2!important;font-weight:500">@Model.StartDate.ToString("MMM")</span>
                                                                 </td>
                                                               </tr>
                                                               <tr>
                                                                 <td
                                                                   style="padding:0;margin:0;background-color:#ffffff;border:1px solid #eceded;border-bottom-right-radius:8px;border-bottom-left-radius:8px;font-size:16!important;line-height:1.5!important"
                                                                   valign="top" align="center"><span
-                                                                    style="font-size:16!important;line-height:1.5!important;font-weight:500;color:#737577">5</span>
+                                                                    style="font-size:16!important;line-height:1.5!important;font-weight:500;color:#737577">@Model.StartDate.ToString("dd")</span>
                                                                 </td>
                                                               </tr>
                                                             </tbody>
@@ -230,7 +229,7 @@
                                                           <div>
                                                             <div
                                                               style="font-size:16px;color:#131517;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
-                                                              @Model.StartDate</div>
+                                                              @Model.StartDate.ToString("dd/MM/yyyy") @(Model.EndDate is null ? "" : "-" + Model.EndDate.ToString("dd/MM/yyyy"))</div>
                                                             <div
                                                               style="font-size:14px;color:#737577;font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
                                                               @Model.Time</div>
@@ -264,7 +263,7 @@
                                                         </td>
                                                         <td style="vertical-align:middle;padding-left:12px"><a
                                                             style="text-decoration:none"
-                                                            href="https://www.google.com/maps/search/?api=1&amp;query=53%20L%C3%AA%20Tr%E1%BB%B1c&amp;query_place_id=EkQ1My81IEzDqiBUcuG7sWMsIFBoxrDhu51uZyA3LCBCw6xuaCBUaOG6oW5oLCBI4buTIENow60gTWluaCwgVmlldG5hbSIwEi4KFAoSCUVhfiXDKHUxEZ5VC_TN02cNEDUqFAoSCQ-rx-jCKHUxEd8ejY6FJdtg"
+                                                            href="@Model.LocationUrl"
                                                             target="_blank"
                                                             data-saferedirecturl="https://www.google.com/url?q=https://www.google.com/maps/search/?api%3D1%26query%3D53%2520L%25C3%25AA%2520Tr%25E1%25BB%25B1c%26query_place_id%3DEkQ1My81IEzDqiBUcuG7sWMsIFBoxrDhu51uZyA3LCBCw6xuaCBUaOG6oW5oLCBI4buTIENow60gTWluaCwgVmlldG5hbSIwEi4KFAoSCUVhfiXDKHUxEZ5VC_TN02cNEDUqFAoSCQ-rx-jCKHUxEd8ejY6FJdtg&amp;source=gmail&amp;ust=1720140596616000&amp;usg=AOvVaw0ATeW5Onb9Y15UAplRgOND">
                                                             <div>
@@ -320,7 +319,7 @@
                                                         <td align="center" bgcolor="#c72464" role="presentation"
                                                           style="border:none;border-radius:8px;background:#c72464;text-decoration:none"
                                                           valign="middle"><a
-                                                            href="https://lu.ma/olpq7ojr?pk=g-FLqSHZOg9moaAP0"
+                                                            href="https://event-manage-nine.vercel.app/events/@Model.EventId"
                                                             style="display:inline-block;background-color:#c72464;color:white;font-size:16px;line-height:1;margin:0;text-decoration:none;text-transform:none;border-radius:8px;font-weight:700;padding:12px 24px"
                                                             target="_blank"
                                                             data-saferedirecturl="https://www.google.com/url?q=https://lu.ma/olpq7ojr?pk%3Dg-FLqSHZOg9moaAP0&amp;source=gmail&amp;ust=1720140596616000&amp;usg=AOvVaw1csSN5S3EZ9Yi2IBiEEjWq">Event
@@ -337,8 +336,7 @@
                                                         <td align="center" bgcolor="#f4f5f6" role="presentation"
                                                           style="border:none;border-radius:8px;background:#f4f5f6;text-decoration:none"
                                                           valign="middle">
-                                                          <a
-                                                                    href="https://lu.ma/e/ticket/evt-g6Q6b03wyP7mBwB?pk=g-FLqSHZOg9moaAP0"
+                                                          <a href="https://event-manage-nine.vercel.app/events/@(Model.EventId)?showCheckinQr=true"
                                                                     style="display:inline-block;background-color:#f4f5f6;color:#737577;font-size:16px;line-height:1;margin:0;text-decoration:none;text-transform:none;border-radius:8px;font-weight:500;padding:12px 24px"
                                                                     target="_blank"
                                                                     data-saferedirecturl="https://www.google.com/url?q=https://lu.ma/e/ticket/evt-g6Q6b03wyP7mBwB?pk%3Dg-FLqSHZOg9moaAP0&amp;source=gmail&amp;ust=1720140596616000&amp;usg=AOvVaw3VVR5Hr4zkWuJwp6MgNgyf">
