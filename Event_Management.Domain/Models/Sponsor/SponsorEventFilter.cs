@@ -17,6 +17,7 @@ namespace Event_Management.Domain.Models.Sponsor
         [Range(1, int.MaxValue)]
         public int EachPage { get; set; } = 10;
         public string? Status { get; set; }
+        public string? SponsorType { get; set; }
         public bool? IsSponsored { get; set; }
     }
 }

@@ -13,6 +13,7 @@ namespace Event_Management.Domain.Models.Sponsor
         public Guid? UserId { get; set; }
         public string? Status { get; set; }
         public bool? IsSponsored { get; set; }
+        public string? SponsorType { get; set; }
         public decimal? Amount { get; set; }
         public string? Message { get; set; }
         public DateTime? CreatedAt { get; set; }

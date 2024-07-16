@@ -70,6 +70,10 @@ namespace Event_Management.Infrastructure.Repository.SQL
             {
                 list = list.Where(s => s.IsSponsored == sponsorFilter.IsSponsored);
             }
+            if(sponsorFilter.SponsorType != null)
+            {
+                list = list.Where(s => s.SponsorType.Equals(sponsorFilter.SponsorType));
+            }
             list = list.Include(p => p.User);
             return await list.ToPagedListAsync(sponsorFilter.Page, sponsorFilter.EachPage);
         }
