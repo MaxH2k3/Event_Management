@@ -14,9 +14,11 @@ namespace Event_Management.Domain.Models.Sponsor
         public string? Status { get; set; }
         public bool? IsSponsored { get; set; }
         public decimal? Amount { get; set; }
+        public string? Message { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
 
         public string FullName { get; set; }
+        public string Email { get; set; }
     }
 }

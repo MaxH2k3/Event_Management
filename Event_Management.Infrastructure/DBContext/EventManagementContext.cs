@@ -293,7 +293,10 @@ namespace Event_Management.Infrastructure.DBContext
                 entity.Property(e => e.Id)
                     .ValueGeneratedNever()
                     .HasColumnName("ID");
-
+                entity.Property(e => e.PayId)
+                    .HasMaxLength(40);
+                entity.Property(e => e.PayerId)
+                    .HasMaxLength(20);
                 entity.Property(e => e.EventId).HasColumnName("EventID");
 
                 entity.Property(e => e.RemitterId).HasColumnName("RemitterID");
@@ -378,6 +381,7 @@ namespace Event_Management.Infrastructure.DBContext
                 entity.Property(e => e.Status)
                     .HasMaxLength(50)
                     .IsUnicode(false);
+                entity.Property(e => e.Message).HasMaxLength(200);
 
                 entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
 

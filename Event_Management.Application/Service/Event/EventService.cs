@@ -9,6 +9,7 @@ using Event_Management.Domain.Entity;
 using Event_Management.Domain.Enum;
 using Event_Management.Domain.Helper;
 using Event_Management.Domain.Models.Common;
+using Event_Management.Domain.Models.Event;
 using Event_Management.Domain.Models.EventDTO.ResponseDTO;
 using Event_Management.Domain.Models.System;
 using Event_Management.Domain.Service.TagEvent;
@@ -59,6 +60,7 @@ namespace Event_Management.Application.Service
                 var user = _userService.GetUserById((Guid)eventInfo.CreatedBy!);
                 eventDetailDto.Host!.Name = user!.FullName;
                 eventDetailDto.Host.avatar = user!.Avatar;
+                eventDetailDto.Host.email = user!.Email!;
                 eventDetailDto.Host.Id = eventInfo.CreatedBy.HasValue ? eventInfo.CreatedBy.Value : null;
                 eventDetailDto.Image = eventInfo.Image;
                 eventDetailDto.Theme = eventInfo.Theme;
@@ -100,7 +102,7 @@ namespace Event_Management.Application.Service
         }
         public async Task<APIResponse> AddEvent(EventRequestDto eventDto, string userId)// HttpContext context)
         {
-            
+
             bool validate = DateTimeHelper.ValidateStartTimeAndEndTime(eventDto.StartDate, eventDto.EndDate);
             if (!validate)
             {
@@ -136,10 +138,10 @@ namespace Event_Management.Application.Service
                 else
                 {
                     return new APIResponse
-                {
+                    {
                         Message = MessageEvent.UserNotAllow,
                         StatusResponse = HttpStatusCode.BadRequest
-                };
+                    };
                 }
             }
             eventEntity.Fare = eventDto.Ticket;
@@ -150,7 +152,7 @@ namespace Event_Management.Application.Service
             eventEntity.LocationUrl = eventDto.Location.Url;
             if (!IsValidCoordinateString(eventDto.Location.Coord!))
             {
-                return new APIResponse 
+                return new APIResponse
                 {
                     Message = MessageEvent.LocationCoordInvalid,
                     StatusResponse = HttpStatusCode.BadRequest
@@ -158,7 +160,7 @@ namespace Event_Management.Application.Service
             }
             eventEntity.LocationCoord = eventDto.Location.Coord;
             eventEntity.Status = EventStatus.NotYet.ToString();
-            if(eventDto.TagId.Count > 5)
+            if (eventDto.TagId.Count > 5)
             {
                 return new APIResponse
                 {
@@ -202,7 +204,7 @@ namespace Event_Management.Application.Service
             return response;
         }
         private EventResponseDto ToResponseDto(Event eventEntity)
-        { 
+        {
             EventResponseDto response = new EventResponseDto();
             response.StartDate = DateTimeHelper.ToJsDateType(eventEntity.StartDate);
             response.EndDate = DateTimeHelper.ToJsDateType(eventEntity.EndDate);
@@ -221,7 +223,7 @@ namespace Event_Management.Application.Service
             response.Image = eventEntity.Image;
             response.Theme = eventEntity.Theme;
             response.eventTags = _mapper.Map<List<EventTag>>(eventEntity.Tags);
-            response.UpdatedAt = eventEntity.UpdatedAt.HasValue ? DateTimeHelper.ToJsDateType(eventEntity.UpdatedAt.Value): null;  
+            response.UpdatedAt = eventEntity.UpdatedAt.HasValue ? DateTimeHelper.ToJsDateType(eventEntity.UpdatedAt.Value) : null;
             response.Fare = eventEntity.Fare;
             response.Capacity = eventEntity.Capacity;
             return response;
@@ -277,7 +279,7 @@ namespace Event_Management.Application.Service
             var result = await _unitOfWork.EventRepository.GetUserParticipatedEvents(filter, userId, pageNo, elementEachPage);
             //List<EventResponseDto> response = _mapper.Map<List<EventResponseDto>>(result);
             List<EventResponseDto> response = new List<EventResponseDto>();
-            response = result.Select (ToResponseDto).ToList();
+            response = result.Select(ToResponseDto).ToList();
             PagedList<EventResponseDto> pages = new PagedList<EventResponseDto>
                 (response, response.Count, pageNo, elementEachPage);
             return pages;
@@ -321,7 +323,7 @@ namespace Event_Management.Application.Service
                     StatusResponse = HttpStatusCode.Unauthorized,
                 };
             }
-            if(!userId.Equals(eventEntity.CreatedBy!.Value.ToString()))
+            if (!userId.Equals(eventEntity.CreatedBy!.Value.ToString()))
             {
                 return new APIResponse
                 {
@@ -346,7 +348,7 @@ namespace Event_Management.Application.Service
             {
                 return new APIResponse
                 {
-                    Message= MessageEvent.UpdateStartEndTimeValidation,
+                    Message = MessageEvent.UpdateStartEndTimeValidation,
                     StatusResponse = HttpStatusCode.BadRequest,
                 };
             }
@@ -372,7 +374,7 @@ namespace Event_Management.Application.Service
                 await _quartzService.DeleteJobsByEventId("ended-" + eventEntity.EventId);
                 await _quartzService.StartEventStatusToEndedJob(eventEntity.EventId, eventEntity.EndDate);
                 await _quartzService.StartEventEndingEmailNoticeJob(eventEntity.EventId, eventEntity.EndDate.AddHours(1));
-            }            
+            }
             //theme
             eventEntity.Theme = eventDto.Theme;
             //image
@@ -382,7 +384,7 @@ namespace Event_Management.Application.Service
                 int startIndex = url.LastIndexOf("/eventcontainer/") + "/eventcontainer/".Length;
                 string result = url.Substring(startIndex);
                 if (await _fileService.DeleteBlob(result))
-                eventEntity.Image = await _fileService.UploadImage(eventDto.Image, Guid.NewGuid());
+                    eventEntity.Image = await _fileService.UploadImage(eventDto.Image, Guid.NewGuid());
             }
             //location
             eventEntity.Location = eventDto.Location!.Name;
@@ -470,6 +472,16 @@ namespace Event_Management.Application.Service
         public async Task<EventStatistics?> GetEventStatis(Guid eventId)
         {
             return await _unitOfWork.EventStatisticsRepository.GetById(eventId);
+        }
+
+        public async Task<Dictionary<string, int>> CountByStatus()
+        {
+            return await _unitOfWork.EventRepository.CountByStatus();
+        }
+        public async Task<List<EventPerMonth>> EventsPerMonth(DateTime startDate, DateTime endDate)
+        {
+            var result = await _unitOfWork.EventRepository.EventsPerMonth(startDate, endDate);
+            return result;
         }
     }
 }

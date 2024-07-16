@@ -5,6 +5,7 @@ using Event_Management.Domain;
 using Event_Management.Domain.Entity;
 using Event_Management.Domain.Enum;
 using Event_Management.Domain.Models.Common;
+using Event_Management.Domain.Models.Event;
 using Event_Management.Domain.Models.EventDTO.ResponseDTO;
 using Event_Management.Domain.Models.System;
 using Microsoft.AspNetCore.Http;
@@ -35,6 +36,8 @@ namespace Event_Management.Application.Service
         Task<bool> IsOwner(Guid eventId, Guid userId);
 
         Task<EventStatistics?> GetEventStatis(Guid eventId);
+        Task<Dictionary<string, int>> CountByStatus();
+        Task<List<EventPerMonth>> EventsPerMonth(DateTime startDate, DateTime endDate);
     }
         
         

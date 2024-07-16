@@ -11,6 +11,8 @@ namespace Event_Management.Domain.Entity
         public string? Status { get; set; }
         public bool? IsSponsored { get; set; }
         public decimal? Amount { get; set; }
+        public string? SponsorType { get; set; }
+        public string? Message { get; set; }
         public DateTime? CreatedAt { get; set; } = DateTime.Now;
         public DateTime? UpdatedAt { get; set; }
 

@@ -3,6 +3,7 @@ using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Entity;
 using Event_Management.Domain.Enum;
 using Event_Management.Application.Dto.EventDTO.ResponseDTO;
+using Event_Management.Domain.Models.Event;
 
 namespace Event_Management.Domain.Repository
 {
@@ -43,5 +44,10 @@ namespace Event_Management.Domain.Repository
         public Task<PagedList<Event>> GetEventsByTag(int tagId, int pageNo, int elementEachPage);
         public Task<PagedList<Event>> GetEventsByListTags(List<int> tagIds, int pageNo, int elementEachPage);
         Task<Event?> GetEventById(Guid eventId);
+
+
+        //Statistics
+        Task<Dictionary<string, int>> CountByStatus();
+        Task<List<EventPerMonth>> EventsPerMonth(DateTime startDate, DateTime endDate);
     }
 }

@@ -337,13 +337,6 @@ namespace Event_Management.API.Controllers
     }
 }
 
-//      [HttpGet("GetTest")]
-//public async Task<IActionResult> GetTest()
-//      {
-//          var response = await _eventService.GetAllEventTest();
-
-//          return Ok(response);
-//}
 
 
 

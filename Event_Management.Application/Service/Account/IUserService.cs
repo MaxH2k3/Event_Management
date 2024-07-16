@@ -9,6 +9,8 @@ namespace Event_Management.Application.Service
 {
     public interface IUserService
     {
+        Task<APIResponse> GetTotalUser();
+        Task<APIResponse> GetTotalUserByYear(int year);
         Task<APIResponse> GetByKeyWord(string keyWord);
         Task<APIResponse> GetAllUser(int page, int eachPage);
         Task<User?> GetUserByIdAsync(Guid userId);

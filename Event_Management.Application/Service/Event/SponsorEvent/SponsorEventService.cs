@@ -1,6 +1,4 @@
 ﻿using AutoMapper;
-using Azure;
-using Event_Management.Application.Dto.EventDTO.SponsorDTO;
 using Event_Management.Domain.Entity;
 using Event_Management.Domain.Enum.Sponsor;
 using Event_Management.Domain.Helper;
@@ -8,12 +6,6 @@ using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Models.Sponsor;
 using Event_Management.Domain.UnitOfWork;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Event_Management.Application.Service
 {
@@ -22,6 +14,7 @@ namespace Event_Management.Application.Service
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IConfiguration _config;
+        
 
         public SponsorEventService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration)
         {
@@ -30,26 +23,55 @@ namespace Event_Management.Application.Service
             _config = configuration;
         }
 
-		public async Task<SponsorEvent> AddSponsorEventRequest(SponsorDto sponsorEvent)
+		public async Task<SponsorEvent> AddSponsorEventRequest(SponsorDto sponsorEvent, Guid userId)
 		{
-            
-            
-           
-            var sponsorEntity = _mapper.Map<SponsorEvent>(sponsorEvent);
 
-            sponsorEntity.CreatedAt = DateTimeHelper.GetDateTimeNow();
-            sponsorEntity.UpdatedAt = DateTimeHelper.GetDateTimeNow();
-            sponsorEntity.Status = SponsorRequest.PROCESSING.ToString();
-            await _unitOfWork.SponsorEventRepository.Add(sponsorEntity);
-            await _unitOfWork.SaveChangesAsync();
-            return sponsorEntity;
+            var newSponsorRequest = new SponsorEvent();
+            newSponsorRequest.EventId = sponsorEvent.EventId;
+
+            var eventEntity = await _unitOfWork.EventRepository.GetById(sponsorEvent.EventId);
+            if(sponsorEvent.Amount >= 2 * (eventEntity.Fare))
+            {
+                newSponsorRequest.UserId = userId;
+                newSponsorRequest.SponsorType = sponsorEvent.SponsorType;
+                newSponsorRequest.Message = sponsorEvent.Message;
+                newSponsorRequest.Amount = sponsorEvent.Amount;
+
+                newSponsorRequest.CreatedAt = DateTimeHelper.GetDateTimeNow();
+                newSponsorRequest.UpdatedAt = DateTimeHelper.GetDateTimeNow();
+                newSponsorRequest.Status = SponsorRequest.Processing.ToString();
+                newSponsorRequest.IsSponsored = false;
+                await _unitOfWork.SponsorEventRepository.Add(newSponsorRequest);
+                await _unitOfWork.SaveChangesAsync();
+            }
+            else
+            {
+                return null;
+            }
+           
+            return newSponsorRequest;
 
 
         }
 
-        public async Task<PagedList<SponsorEvent>> GetSponsoredEvent(Guid userId, int page, int eachPage)
+        public async Task<SponsorEvent?> DeleteRequest(Guid eventId, Guid userId)
         {
-            return await _unitOfWork.SponsorEventRepository.GetSponsoredEvent(userId, page, eachPage);
+            var requestEvent = await _unitOfWork.SponsorEventRepository.CheckSponsorEvent(eventId, userId);
+            if(!requestEvent.Status.Equals("Confirmed") || !requestEvent.Status.Equals("Reject"))
+            {
+                await _unitOfWork.SponsorEventRepository.DeleteSponsorRequest(eventId, userId);
+            }
+            return requestEvent;
+        }
+
+        public async Task<SponsorEvent?> GetRequestedDetail(Guid eventId, Guid userId)
+        {
+            return await _unitOfWork.SponsorEventRepository.CheckSponsorEvent(eventId, userId);
+        }
+
+        public async Task<PagedList<SponsorEvent>> GetRequestSponsor(Guid userId, string? status, int page, int eachPage)
+        {
+            return await _unitOfWork.SponsorEventRepository.GetRequestSponsor(userId, status, page, eachPage);
         }
 
         //public async Task<SponsorEvent?> CheckSponsorEvent(Guid eventId, Guid userId)
@@ -70,14 +92,21 @@ namespace Event_Management.Application.Service
         //          return await _unitOfWork.SponsorEventRepository.GetAll(page, eachPage);
         //      }
 
-        public async Task<SponsorEvent> UpdateSponsorEventRequest(SponsorDto sponsorEvent)
+        public async Task<SponsorEvent> UpdateSponsorEventRequest(Guid eventId, Guid userId, string status)
 		{
-			var sponsorEntity = _mapper.Map<SponsorEvent>(sponsorEvent);
-            sponsorEntity.UpdatedAt = DateTimeHelper.GetDateTimeNow();
-            sponsorEntity.Status = SponsorRequest.PROCESSING.ToString();
-            await _unitOfWork.SponsorEventRepository.Update(sponsorEntity);
+            var sponsorRequest = await _unitOfWork.SponsorEventRepository.CheckSponsorEvent(eventId, userId);
+            if (sponsorRequest != null)
+            {
+                sponsorRequest.Status = status;
+                if (status.Equals("Confirmed"))
+                {
+                    sponsorRequest.IsSponsored = true;
+                }
+                sponsorRequest.UpdatedAt = DateTimeHelper.GetDateTimeNow();
+            }
+            await _unitOfWork.SponsorEventRepository.Update(sponsorRequest);
             await _unitOfWork.SaveChangesAsync();
-            return sponsorEntity;
+            return sponsorRequest;
 		}
 	}
 }

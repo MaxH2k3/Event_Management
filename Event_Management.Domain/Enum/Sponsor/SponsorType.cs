@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace Event_Management.Domain.Enum.Sponsor
 {
-	public enum SponsorRequest
-	{
-        Confirmed,
-        Processing,
-		Reject
-	}
+    public enum SponsorType
+    {
+        Cash,
+        Artifact
+    }
 }

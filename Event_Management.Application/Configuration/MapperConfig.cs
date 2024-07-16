@@ -1,18 +1,15 @@
 using AutoMapper;
 using Event_Management.Application;
 using Event_Management.Application.Dto;
-using Event_Management.Domain;
 using Event_Management.Application.Dto.EventDTO.ResponseDTO;
-using Event_Management.Application.Dto.UserDTO.Response;
-using Event_Management.Domain.Models.Common;
+using Event_Management.Application.Dto.FeedbackDTO;
 using Event_Management.Application.Dto.PaymentDTO;
+using Event_Management.Application.Dto.SponsorLogoDTO;
+using Event_Management.Application.Dto.UserDTO.Response;
+using Event_Management.Domain.Entity;
+using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Models.EventDTO.ResponseDTO;
 using Event_Management.Domain.Models.ParticipantDTO;
-using Event_Management.Application.Dto.FeedbackDTO;
-using Event_Management.Domain.Entity;
-using Event_Management.Application.Dto.UserDTO.Request;
-using Event_Management.Application.Dto.SponsorLogoDTO;
-using Event_Management.Application.Dto.EventDTO.SponsorDTO;
 using Event_Management.Domain.Models.Sponsor;
 using Event_Management.Application.Dto.NotificationDTO.Response;
 
@@ -86,7 +83,16 @@ namespace Event_Management.Domain.Configuration
             CreateMap<Logo, SponsorLogoDto>().ReverseMap();
 
             //Notification
-            CreateMap<Notification, NotificationResponseDto>()
+            CreateMap<Notification, NotificationResponseDto>();
+
+            CreateMap<SponsorEvent, SponsorEventDto>()
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.User.FullName))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email))
+                .ReverseMap();
+
+
+            CreateMap<PagedList<SponsorEvent>, PagedList<SponsorEventDto>>()
+                .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.ToList()))
                 .ReverseMap();
 
         }

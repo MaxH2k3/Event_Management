@@ -8,10 +8,12 @@ using Event_Management.Domain.Entity;
 using Event_Management.Domain.Repository.Common;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Infrastructure.Extensions;
+using Event_Management.Application.Dto.UserDTO.Response;
+using System.Globalization;
 
 namespace Event_Management.Infrastructure.Repository.SQL
 {
-	public class UserRepository : SQLExtendRepository<User>, IUserRepository
+    public class UserRepository : SQLExtendRepository<User>, IUserRepository
     {
         private readonly EventManagementContext _context;
 
@@ -28,7 +30,7 @@ namespace Event_Management.Infrastructure.Repository.SQL
             return _context.Users.Find(userId);
         }
 
-        public async Task<IEnumerable<User>> GetUsersByKeywordAsync(string keyword) 
+        public async Task<IEnumerable<User>> GetUsersByKeywordAsync(string keyword)
         {
             return await _context.Users.Where(a => a.Email!.StartsWith(keyword) || a.Email.Contains(keyword)).ToListAsync();
         }
@@ -65,7 +67,8 @@ namespace Event_Management.Infrastructure.Repository.SQL
 
         public async Task<bool> AddUser(User newUser)
         {
-            if (_context.Users.Any(x => x.Email!.Equals(newUser.Email))){
+            if (_context.Users.Any(x => x.Email!.Equals(newUser.Email)))
+            {
                 return false;
             }
             await _context.Users.AddAsync(newUser);
@@ -88,15 +91,27 @@ namespace Event_Management.Infrastructure.Repository.SQL
             return entities;
         }
 
-        public async Task<IEnumerable<User>> GetUsersCreatedInMonthAsync(int year, int month)
+        public async Task<IEnumerable<IGrouping<int, User>>> GetUsersCreatedInMonthAsync(int year)
         {
-            return await _context.Users
-                .Where(a => a.CreatedAt.HasValue &&
-                            a.CreatedAt.Value.Year == year &&
-                            a.CreatedAt.Value.Month == month)
-                .ToListAsync();
+
+
+            var users = await _context.Users
+                .Where(u => u.CreatedAt.HasValue && u.CreatedAt.Value.Year == year)
+            .ToListAsync();
+
+            var result = users
+                .GroupBy(u => u.CreatedAt!.Value.Month)
+                .OrderBy(g => g.Key);
+
+            return result;
         }
 
+        public async Task<int> GetTotalUsersAsync()
+        {
+            var totalUsers = await _context.Users.CountAsync();
+
+            return totalUsers;
+        }
 
     }
 }

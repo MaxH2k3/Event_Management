@@ -6,6 +6,7 @@ using Event_Management.Domain.Enum;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Models.System;
 using Event_Management.Domain.UnitOfWork;
+using System.Globalization;
 using System.Net;
 
 namespace Event_Management.Application.Service
@@ -21,6 +22,20 @@ namespace Event_Management.Application.Service
             _mapper = mapper;
         }
 
+        public async Task<APIResponse> GetTotalUser()
+        {
+            var totalUser = await _unitOfWork.UserRepository.GetTotalUsersAsync();
+            return new APIResponse
+            {
+                StatusResponse = HttpStatusCode.OK,
+                Message = Message.MessageCommon.Complete,
+                Data = new
+                {
+                    Total = totalUser
+                }
+            };
+        }
+
         public async Task<APIResponse> GetByKeyWord(string keyWord)
         {
             var users = await _unitOfWork.UserRepository.GetUsersByKeywordAsync(keyWord);
@@ -28,10 +43,31 @@ namespace Event_Management.Application.Service
             return new APIResponse
             {
                 StatusResponse = HttpStatusCode.OK,
-                Message = Message.MessageCommon.GetSuccesfully,
+                Message = Message.MessageCommon.Complete,
                 Data = usersResponse
             };
         }
+
+        public async Task<APIResponse> GetTotalUserByYear(int year)
+        {
+            var usersGroupedByMonth = await _unitOfWork.UserRepository.GetUsersCreatedInMonthAsync(year);
+
+            var monthlyUserCounts = usersGroupedByMonth.Select(g => new
+            {
+                //get current culture and translate to coresspond month
+                //Month = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(g.Key),
+                Month = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(g.Key),
+                Total = g.Count()
+            }).ToList();
+
+            return new APIResponse
+            {
+                StatusResponse = HttpStatusCode.OK,
+                Message = Message.MessageCommon.Complete,
+                Data = monthlyUserCounts
+            };
+        }
+
 
         public User? GetUserById(Guid userId)
         {

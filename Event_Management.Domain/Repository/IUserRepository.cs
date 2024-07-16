@@ -15,7 +15,8 @@ namespace Event_Management.Domain.Repository
         User? GetByEmail(string email);
         User? GetUserById(Guid userId);
         Task<IEnumerable<User>> GetAllUser(int page, int eachPage, string sortBy, bool isAscending = false);
-        Task<IEnumerable<User>> GetUsersCreatedInMonthAsync(int year, int month);
+        Task<IEnumerable<IGrouping<int, User>>> GetUsersCreatedInMonthAsync(int year);
+        Task<int> GetTotalUsersAsync();
         //Task<bool?> CheckRefreshTokenByUser(UserFieldType field, string value);
     }
 }

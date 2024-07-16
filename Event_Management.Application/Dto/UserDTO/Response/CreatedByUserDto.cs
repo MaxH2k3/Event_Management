@@ -11,5 +11,6 @@ namespace Event_Management.Application.Dto.UserDTO.Response
         public string? Name { get; set; }
         public Guid? Id { get; set; }
         public string? avatar { get; set; }
+        public string email { get; set; } = string.Empty;
     }
 }

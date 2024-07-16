@@ -4,6 +4,7 @@ using Event_Management.Application.Service.Payments.PayPalService;
 using Event_Management.Domain.Helper;
 using Event_Management.Domain.Models.System;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -34,12 +35,12 @@ namespace Event_Management.API.Controllers
             _payPalService = payPalService;
         }
 
-
+        [Authorize]
         [HttpPost("paypal")]
-        public async Task<APIResponse> CreatePayment(Guid eventId, Guid userId, string description)
+        public async Task<APIResponse> CreatePayment(Guid eventId, string description)
         {
             APIResponse response = new APIResponse();
-			//Guid userId = Guid.Parse(User.GetUserIdFromToken());
+			var userId = Guid.Parse(User.GetUserIdFromToken());
 			var result = await _payPalService.CreatePayment(eventId, userId, description);
 
             if (result != null)
