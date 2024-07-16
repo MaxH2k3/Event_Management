@@ -7,6 +7,11 @@ The Event Management System is a web application developed using ASP.NET for the
 ## Demo
 
 - [API Swagger](https://fpt-event-management.azurewebsites.net/swagger/index.html)
+- [Watch Logs](https://fpt-event-management.azurewebsites.net/watchdog)
+
+# Account Logs
+- username: admin
+- password: 123
 
 
 ## Features
