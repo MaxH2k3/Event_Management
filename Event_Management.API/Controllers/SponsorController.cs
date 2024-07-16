@@ -78,8 +78,9 @@ namespace Event_Management.API.Controllers
                 return response;
             }
 
-            
-			var result = await _sponsorEventService.UpdateSponsorEventRequest(sponsorRequestUpdate.EventId, userId, sponsorRequestUpdate.Status);
+
+            var result = await _sponsorEventService.UpdateSponsorEventRequest(sponsorRequestUpdate);
+
 			if (result != null)
 			{
 				response.StatusResponse = HttpStatusCode.OK;

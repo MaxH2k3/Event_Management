@@ -92,15 +92,18 @@ namespace Event_Management.Application.Service
         //          return await _unitOfWork.SponsorEventRepository.GetAll(page, eachPage);
         //      }
 
-        public async Task<SponsorEvent> UpdateSponsorEventRequest(Guid eventId, Guid userId, string status)
+        public async Task<SponsorEvent> UpdateSponsorEventRequest(SponsorRequestUpdate sponsorRequestUpdate)
 		{
-            var sponsorRequest = await _unitOfWork.SponsorEventRepository.CheckSponsorEvent(eventId, userId);
+            var sponsorRequest = await _unitOfWork.SponsorEventRepository.CheckSponsorEvent(sponsorRequestUpdate.EventId, sponsorRequestUpdate.UserId);
             if (sponsorRequest != null)
             {
-                sponsorRequest.Status = status;
-                if (status.Equals("Confirmed"))
+                sponsorRequest.Status = sponsorRequestUpdate.Status;
+                if (sponsorRequestUpdate.Status.Equals("Confirmed"))
                 {
                     sponsorRequest.IsSponsored = true;
+                } else
+                {
+                    sponsorRequest.IsSponsored = false;
                 }
                 sponsorRequest.UpdatedAt = DateTimeHelper.GetDateTimeNow();
             }

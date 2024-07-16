@@ -9,6 +9,7 @@ namespace Event_Management.Domain.Models.Sponsor
     public class SponsorRequestUpdate
     {
         public Guid EventId { get; set; }
+        public Guid UserId { get; set; }
         public string? Status { get; set; }
     }
 }
