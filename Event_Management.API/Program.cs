@@ -39,10 +39,7 @@ builder.Services.AddSession(options =>
 
 // Default services
 builder.Services.AddControllers();
-builder.Services.AddControllers().AddJsonOptions(options =>
-{
-    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
-});
+
 builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
