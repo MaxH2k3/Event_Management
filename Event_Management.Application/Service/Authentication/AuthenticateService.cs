@@ -76,7 +76,7 @@ namespace Event_Management.Application.Service.Authentication
                 FullName = registerUser.FullName,
                 Status = AccountStatus.Pending.ToString(),
                 Avatar = avatarApiClient,
-                RoleId = Convert.ToInt32(UserRole.Guest),
+                RoleId = Convert.ToInt32(UserRole.User),
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = null
             };
@@ -115,7 +115,7 @@ namespace Event_Management.Application.Service.Authentication
                 FullName = googleUser.FullName,
                 Status = AccountStatus.Active.ToString(),
                 Avatar = googleUser.PhotoUrl,
-                RoleId = Convert.ToInt32(UserRole.Guest),
+                RoleId = Convert.ToInt32(UserRole.User),
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = null
             };

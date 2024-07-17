@@ -109,7 +109,15 @@ namespace Event_Management.Application.Service
         }
         public async Task<APIResponse> AddEvent(EventRequestDto eventDto, string userId)// HttpContext context)
         {
-
+            var tempStartDate = DateTimeOffset.FromUnixTimeMilliseconds(eventDto.StartDate).DateTime;
+            if(tempStartDate > DateTime.Now.AddMonths(4))
+            {
+                return new APIResponse
+                {
+                    Message = MessageEvent.StarTimeValidation,
+                    StatusResponse = HttpStatusCode.BadRequest
+                };
+            }
             bool validate = DateTimeHelper.ValidateStartTimeAndEndTime(eventDto.StartDate, eventDto.EndDate);
             if (!validate)
             {
