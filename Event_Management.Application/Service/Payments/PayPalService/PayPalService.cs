@@ -32,7 +32,7 @@ namespace Event_Management.Application.Service.Payments.PayPalService
             
             var apiContext = GetApiContext();
             string eventIdUrl = createPaymentDto.EventId.ToString();
-            string baseUrl = "http://localhost:3000/";
+            string baseUrl = createPaymentDto.BaseUrl;
 
             //string baseUrl = "https://event-manage-nine.vercel.app/events";
             var eventEntity = await _unitOfWork.EventRepository.GetById(createPaymentDto.EventId);

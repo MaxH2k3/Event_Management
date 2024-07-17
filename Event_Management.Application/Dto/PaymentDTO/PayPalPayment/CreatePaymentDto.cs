@@ -11,5 +11,6 @@ namespace Event_Management.Application.Dto.PaymentDTO.PayPalPayment
         public Guid EventId {  get; set; }
         public string Message {get; set; }
         public decimal Amount { get; set; }
+        public string BaseUrl { get; set; }
     }
 }
