@@ -47,7 +47,7 @@ namespace Event_Management.Application.Service.Authentication
                 return new APIResponse
                 {
                     StatusResponse = HttpStatusCode.NotFound,
-                    Message = "User not found",
+                    Message = MessageUser.UserNotFound,
                     Data = null
                 };
             }
@@ -251,7 +251,7 @@ namespace Event_Management.Application.Service.Authentication
                 return new APIResponse
                 {
                     StatusResponse = HttpStatusCode.BadRequest,
-                    Message = "User not found",
+                    Message = MessageUser.UserNotFound,
                     Data = null
                 };
             }
@@ -262,7 +262,7 @@ namespace Event_Management.Application.Service.Authentication
                 return new APIResponse
                 {
                     StatusResponse = HttpStatusCode.NotFound,
-                    Message = "OTP not found",
+                    Message = MessageUser.OTPNotFound,
                     Data = null
                 };
             }
@@ -271,7 +271,7 @@ namespace Event_Management.Application.Service.Authentication
                 return new APIResponse
                 {
                     StatusResponse = HttpStatusCode.NotFound,
-                    Message = "OTP Expired",
+                    Message = MessageUser.OTPExpired,
                     Data = null
                 };
             }

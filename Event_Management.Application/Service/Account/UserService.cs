@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Event_Management.Application.Dto.UserDTO.Request;
 using Event_Management.Application.Dto.UserDTO.Response;
+using Event_Management.Application.Message;
 using Event_Management.Domain.Entity;
 using Event_Management.Domain.Enum;
 using Event_Management.Domain.Models.Common;
@@ -113,7 +114,7 @@ namespace Event_Management.Application.Service
                 return new APIResponse
                 {
                     StatusResponse = HttpStatusCode.NotFound,
-                    Message = "User not existed",
+                    Message = MessageUser.UserNotFound,
                     Data = null,
                 };
             }
@@ -130,15 +131,15 @@ namespace Event_Management.Application.Service
             };
         }
 
-        public async Task<APIResponse> DeleteUser(UpdateDeleteUserDto deleteUser)
+        public async Task<APIResponse> DeleteUser(Guid userId)
         {
-            var existUsers = await _unitOfWork.UserRepository.GetUserByEmailAsync(deleteUser.Email!);
+            var existUsers = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
             if (existUsers == null)
             {
                 return new APIResponse
                 {
                     StatusResponse = HttpStatusCode.NotFound,
-                    Message = "User not existed",
+                    Message = MessageUser.UserNotFound,
                     Data = null,
                 };
             }

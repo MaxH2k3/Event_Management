@@ -61,7 +61,7 @@ namespace Event_Management.API.Controllers
         }
 
 
-        [Authorize(Roles = "Admin")]
+        [Authorize("Admin")]
         [HttpGet("")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]

@@ -1,5 +1,6 @@
 ﻿
 using Event_Management.Application.ExternalServices;
+using Event_Management.Domain.Models.Oauth2;
 using Event_Management.Domain.Models.System;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
@@ -56,20 +57,7 @@ namespace Event_Management.Infrastructure.ExternalServices.Oauth2
         }
     }
 
-    public class GoogleTokenInfo
-    {
-        [JsonProperty("azp")]
-        public string? AuthorizedParty { get; set; }
-
-        [JsonProperty("aud")]
-        public string? Audience { get; set; }
-
-        [JsonProperty("expires_in")]
-        public int ExpiresIn { get; set; }
-
-        [JsonProperty("email")]
-        public string? Email { get; set; }
-    }
+    
 
 
 }

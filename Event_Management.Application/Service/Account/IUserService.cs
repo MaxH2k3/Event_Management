@@ -16,7 +16,7 @@ namespace Event_Management.Application.Service
         Task<User?> GetUserByIdAsync(Guid userId);
         User? GetUserById(Guid userId);
         Task<APIResponse> UpdateUser(UpdateDeleteUserDto updateUser);
-        Task<APIResponse> DeleteUser(UpdateDeleteUserDto deleteUser);
+        Task<APIResponse> DeleteUser(Guid id);
 
 
     }

@@ -91,6 +91,8 @@ namespace Event_Management.API.Controllers
 
         [Authorize]
         [HttpGet("event")]
+
+        //Get all feedback for my event
         public async Task<APIResponse> GetEventFeedbacks([FromQuery, Required] Guid eventId, [FromQuery, Range(1, 5)]  int? numOfStar, [FromQuery, Range(1, int.MaxValue)] int page = 1,
                                                                    [FromQuery, Range(1, int.MaxValue)] int eachPage = 10)
         {
@@ -121,6 +123,7 @@ namespace Event_Management.API.Controllers
         }
         [Authorize]
         [HttpGet("event/user")]
+        //Gte feedback detail for specific event
         public async Task<IActionResult> GetUserFeedBack([FromQuery, Required] Guid eventId)
         {
             string? userId = User.GetUserIdFromToken();
@@ -135,6 +138,7 @@ namespace Event_Management.API.Controllers
         }
         [Authorize]
         [HttpGet("user")]
+        //Get all feedback of this user for all events
         public async Task<IActionResult> GetAllUserFeebacks([FromQuery, Range(1, int.MaxValue)] int page = 1,
                                                                    [FromQuery, Range(1, int.MaxValue)] int eachPage = 10)
         {

@@ -5,6 +5,8 @@ using Event_Management.Application.Message;
 using Event_Management.Domain.Models.System;
 using Microsoft.AspNetCore.Mvc;
 using Event_Management.Application.Dto.UserDTO.Request;
+using Event_Management.Domain.Helper;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Event_Management.API.Controllers;
 
@@ -20,7 +22,18 @@ public class UserController : Controller
         _userService = userService;
     }
 
+    [Authorize]
+    [HttpGet("id")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetUserById()
+    {
+        var userId = User.GetUserIdFromToken();
+        var result = await _userService.GetUserByIdAsync(Guid.Parse(userId));
+        return Ok(result);
+    }
 
+    [Authorize]
     [HttpGet("all")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -34,6 +47,7 @@ public class UserController : Controller
         return Ok(result);
     }
 
+    [Authorize]
     [HttpGet("keyword")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -47,6 +61,7 @@ public class UserController : Controller
         return Ok(result);
     }
 
+    [Authorize]
     [HttpPut("update")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -60,12 +75,13 @@ public class UserController : Controller
         return Ok(result);
     }
 
+    [Authorize("Admin")]
     [HttpDelete("delete")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Delete(UpdateDeleteUserDto userDto)
+    public async Task<IActionResult> Delete([FromQuery] Guid userId)
     {
-        var result = await _userService.DeleteUser(userDto);
+        var result = await _userService.DeleteUser(userId);
         if (result.StatusResponse != HttpStatusCode.OK)
         {
             return NotFound(result);
