@@ -8,5 +8,6 @@ namespace Event_Management.Application.Service
     {
         Task<PaymentTransaction> AddTransaction(TransactionRequestDto transactionRequestDto);
         Task<PagedList<PaymentTransaction>> GetAllTransaction(int page, int eachPage);
+        Task<PagedList<PaymentTransaction>> GetMyTransaction(Guid userId, int page, int eachPage);
     }
 }
