@@ -20,9 +20,11 @@ namespace Event_Management.Application.Service
         {
            
             var newTransaction = new PaymentTransaction();
+            newTransaction.Id = Guid.NewGuid();
             newTransaction.RemitterId = transactionRequestDto.UserId;
             newTransaction.TranMessage = transactionRequestDto.TransMessage;
             newTransaction.PayId = transactionRequestDto.PayId;
+            newTransaction.EventId = transactionRequestDto.EventId;
             newTransaction.EmailPaypal = transactionRequestDto.EmailPaypal;
             newTransaction.TranAmount = transactionRequestDto.TransAmount;
             newTransaction.TranDate = DateTimeHelper.GetDateTimeNow();
