@@ -1,15 +1,14 @@
 ﻿using Event_Management.Application.Dto;
 using Event_Management.Application.Message;
+using Event_Management.Application.Service;
 using Event_Management.Domain.Models.System;
-using Event_Management.Domain.Service;
-using Event_Management.Domain.Service.TagEvent;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 
 namespace Event_Management.API.Controllers
 {
-	[Route("api/v1/tags")]
+    [Route("api/v1/tags")]
     [ApiController]
     public class TagController : ControllerBase
     {

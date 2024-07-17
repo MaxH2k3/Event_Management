@@ -12,7 +12,6 @@ using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Models.Event;
 using Event_Management.Domain.Models.EventDTO.ResponseDTO;
 using Event_Management.Domain.Models.System;
-using Event_Management.Domain.Service.TagEvent;
 using Event_Management.Domain.UnitOfWork;
 using Microsoft.Extensions.Logging;
 using System.Net;
@@ -277,7 +276,7 @@ namespace Event_Management.Application.Service
                     }
                     return await _unitOfWork.EventRepository.ChangeEventStatus(eventId, EventStatus.Deleted);
                 }
-                if (!isOwner && userInfo!.RoleId == 3)
+                if (!isOwner && userInfo!.RoleId == ((int)UserRole.Admin))
                 {
                     return await _unitOfWork.EventRepository.ChangeEventStatus(eventId, EventStatus.Aborted);
                 }

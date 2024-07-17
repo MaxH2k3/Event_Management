@@ -1,17 +1,8 @@
 ﻿using Event_Management.Application.Dto;
-using Event_Management.Domain;
 using Event_Management.Domain.Entity;
 using Event_Management.Domain.Models.Common;
-using Event_Management.Domain.Models.System;
 
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Event_Management.Domain.Service.TagEvent
+namespace Event_Management.Application.Service
 {
     public interface ITagService
     {

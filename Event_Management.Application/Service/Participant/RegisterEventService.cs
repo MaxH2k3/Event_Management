@@ -11,7 +11,7 @@ using Event_Management.Domain.UnitOfWork;
 using System.Net;
 using System.Text.Json;
 
-namespace Event_Management.Domain.Service
+namespace Event_Management.Application.Service
 {
     public class RegisterEventService : IRegisterEventService
 	{

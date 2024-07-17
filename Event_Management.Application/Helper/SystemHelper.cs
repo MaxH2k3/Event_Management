@@ -54,7 +54,7 @@ namespace Event_Management.Application.Helper
             int index = tagName.IndexOf(searchTerm);
             if (index != -1)
             {
-                // Điểm càng thấp khi searchTerm xuất hiện càng sớm trong tagName
+                
                 return index;
             }
 

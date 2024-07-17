@@ -5,9 +5,12 @@ using Event_Management.Domain.Constants;
 using Event_Management.Domain.Enum;
 using Event_Management.Domain.Helper;
 using Event_Management.Domain.Models.ParticipantDTO;
+using Event_Management.Domain.Models.User;
 using Event_Management.Domain.UnitOfWork;
+using FluentEmail.Core;
 using Microsoft.Extensions.DependencyInjection;
 using PayPal;
+using static System.Net.WebRequestMethods;
 
 namespace Event_Management.Application.ServiceTask
 {
@@ -38,6 +41,27 @@ namespace Event_Management.Application.ServiceTask
             });
         }
 
+        public void SendMailVerify(UserMailDto userMailDto)
+        {
+            _taskQueue.QueueBackgroundWorkItem(async token =>
+            {
+                await VerifyMail(userMailDto);
+            });
+        }
+
+        public async Task VerifyMail(UserMailDto userMailDto)
+        {
+            var _emailService = _serviceScopeFactory.CreateScope().ServiceProvider.GetRequiredService<IEmailService>();
+            var emailSent = await _emailService.SendEmailWithTemplate("Your OTP Code", userMailDto);
+
+            if(emailSent)
+            {
+                Console.WriteLine("Send mail complete!");
+            }
+
+            Console.WriteLine("Send mail failed!");
+
+        }
 
         public async Task ReminderEvent(Guid eventId)
         {
@@ -115,6 +139,5 @@ namespace Event_Management.Application.ServiceTask
 
             Console.WriteLine("Send mail complete!");
         }
-
     }
 }

@@ -5,20 +5,14 @@ using Event_Management.Application.Dto.UserDTO.Response;
 using Event_Management.Application.ExternalServices;
 using Event_Management.Application.Helper;
 using Event_Management.Application.Message;
+using Event_Management.Application.ServiceTask;
 using Event_Management.Domain.Entity;
 using Event_Management.Domain.Enum;
 using Event_Management.Domain.Models.System;
 using Event_Management.Domain.Models.User;
 using Event_Management.Domain.UnitOfWork;
-using FluentEmail.Core;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Event_Management.Application.Service.Authentication
 {
@@ -27,19 +21,22 @@ namespace Event_Management.Application.Service.Authentication
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IJWTService _JWTService;
-        private readonly IEmailService _emailService;
         private readonly IConfiguration _configuration;
         private readonly IAvatarApiClient _avatarApiClient;
         private readonly IGoogleTokenValidation _googleTokenValidation;
-        public AuthenticateService(IUnitOfWork unitOfWork , IMapper mapper, IJWTService jWTService, IEmailService emailService, IConfiguration configuration, IAvatarApiClient avatarApiClient, IGoogleTokenValidation googleTokenValidation)
+        private readonly ISendMailTask _sendMailTask;
+
+        public AuthenticateService(IUnitOfWork unitOfWork , IMapper mapper, IJWTService jWTService, 
+            IConfiguration configuration, IAvatarApiClient avatarApiClient, 
+            IGoogleTokenValidation googleTokenValidation, ISendMailTask sendMailTask)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _JWTService = jWTService;
-            _emailService = emailService;
             _configuration = configuration;
             _avatarApiClient = avatarApiClient;
             _googleTokenValidation = googleTokenValidation;
+            _sendMailTask = sendMailTask;
         }
 
         public async Task<APIResponse> SignInWithOTP(string email)
@@ -199,7 +196,7 @@ namespace Event_Management.Application.Service.Authentication
                 return new APIResponse
                 {
                     StatusResponse = HttpStatusCode.BadRequest,
-                    Message = "Invalid refresh token",
+                    Message = Message.MessageCommon.InvalidToken,
                     Data = null
                 };
             }
@@ -232,7 +229,7 @@ namespace Event_Management.Application.Service.Authentication
                 return new APIResponse
                 {
                     StatusResponse = HttpStatusCode.NotFound,
-                    Message = "Invalid Token",
+                    Message = Message.MessageCommon.InvalidToken,
                     Data = null
                 };
             }
@@ -287,7 +284,7 @@ namespace Event_Management.Application.Service.Authentication
             return new APIResponse
             {
                 StatusResponse = HttpStatusCode.NotFound,
-                Message = "OTP validated failed",
+                Message = MessageUser.ValidateFailed,
                 Data = null
             };
         }
@@ -316,18 +313,19 @@ namespace Event_Management.Application.Service.Authentication
 
             await _unitOfWork.SaveChangesAsync();
 
-            var emailSent = await _emailService.SendEmailWithTemplate("Your OTP Code", new UserMailDto()
+            _sendMailTask.SendMailVerify(new UserMailDto()
             {
                 UserName = userName,
                 Email = email,
-                OTP = otp,
+                OTP = otp
             });
 
-           
+
+
                 return new APIResponse
                 {
                     StatusResponse = HttpStatusCode.OK,
-                    Message = "OTP sent successfully",
+                    Message = MessageUser.OTPSuccess,
                     Data = null
                 };
             
@@ -358,7 +356,7 @@ namespace Event_Management.Application.Service.Authentication
             return new APIResponse
             {
                 StatusResponse = HttpStatusCode.OK,
-                Message = "OTP validated successfully",
+                Message = MessageUser.ValidateSuccessfully,
                 Data = new LoginResponseDto
                 {
                     UserData = userDTO,

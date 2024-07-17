@@ -14,7 +14,7 @@ namespace Event_Management.Infrastructure.Configuration
         public static void UpdateCurrency(this IServiceCollection services, IConfiguration configuration)
         {
 
-            var jwtSettings = configuration.GetSection("CurrencyApi:ApiKey").Get<string>();
+            configuration.GetSection("CurrencyApi:ApiKey").Get<string>();
 
         }
     }

@@ -12,6 +12,7 @@ namespace Event_Management.API.Controllers
 {
     [Route("api/v1/admin")]
     [ApiController]
+    [Authorize("Admin")]
     public class DashBoardController : ControllerBase
     {
         private readonly IEventService _eventService;
@@ -23,7 +24,6 @@ namespace Event_Management.API.Controllers
             _userService = userService;
         }
 
-        [Authorize]
         [HttpGet("users/total")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -33,7 +33,6 @@ namespace Event_Management.API.Controllers
             return Ok(response);
         }
 
-        [Authorize]
         [HttpGet("users/monthly")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -43,7 +42,6 @@ namespace Event_Management.API.Controllers
             return Ok(response);
         }
 
-        [Authorize]
         [HttpGet("event/status")]
         public async Task<IActionResult> CountByStatus()
         {
@@ -54,7 +52,6 @@ namespace Event_Management.API.Controllers
             return Ok(response);
         }
 
-        [Authorize]
         [HttpGet("event/monthly")]
         public async Task<IActionResult> CountEventsPerMonth([FromQuery, Required] DateTime startDate, [FromQuery, Required] DateTime endDate)
         {

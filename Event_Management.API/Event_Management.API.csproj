@@ -60,6 +60,5 @@
 	<ItemGroup>
 	  <PackageReference Include="Microsoft.JSInterop" Version="6.0.28" />
 	  <PackageReference Include="Stripe.net" Version="45.0.0" />
-	  <PackageReference Include="WatchDog.NET" Version="1.4.11" />
 	</ItemGroup>
 </Project>

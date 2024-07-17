@@ -6,10 +6,8 @@ using Event_Management.Domain.Enum;
 using Event_Management.Domain.Helper;
 using Event_Management.Domain.Models.ParticipantDTO;
 using Event_Management.Domain.Models.System;
-using Event_Management.Domain.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 

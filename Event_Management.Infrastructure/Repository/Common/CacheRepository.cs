@@ -1,4 +1,5 @@
-﻿using Event_Management.Domain.Repository.Common;
+﻿using Event_Management.Domain.Constants;
+using Event_Management.Domain.Repository.Common;
 using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
 
@@ -11,7 +12,6 @@ namespace Event_Management.Infrastructure.Repository
 		public CacheRepository(IDistributedCache distributedCache)
 		{
 			_distributedCache = distributedCache;
-			Console.WriteLine("CacheRepository");
 		}
 
 		public async Task<T> GetAsync<T>(string key)
@@ -36,7 +36,7 @@ namespace Event_Management.Infrastructure.Repository
 		{
 			var cacheOpt = new DistributedCacheEntryOptions
 			{
-				AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(24) // Set cache time 1d
+				AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(DefaultSystem.CacheTime) // Set cache time 1d
 			};
 
 			var jsonOpt = new JsonSerializerSettings() {

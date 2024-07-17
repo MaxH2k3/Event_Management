@@ -1,13 +1,10 @@
 using Event_Management.API.Hub;
 using Event_Management.API.Middleware;
-using Event_Management.API.Utilities;
 using Event_Management.Domain.Constants;
 using Event_Management.Infastructure.Configuration;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Serilog;
 using SwaggerThemes;
-using WatchDog;
-using WatchDog.src.Enums;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,18 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Set up config
 builder.Services.AddScoped<GlobalException>();
 
-// Set up logs
-/*builder.Services.AddWatchDogServices(opt =>
-{
-    opt.IsAutoClear = true;
-    opt.ClearTimeSchedule = WatchDogAutoClearScheduleEnum.Hourly;
-    opt.SetExternalDbConnString = builder.Configuration.GetConnectionString("WatchDog");
-    opt.DbDriverOption = WatchDogDbDriverEnum.Mongo;
-});*/
-
-
 // Add services to the container.
-
 builder.AddInfrastructure();
 
 // Set up context
@@ -35,16 +21,13 @@ builder.Services.AddHttpContextAccessor();
 // Set up cors
 builder.Services.AddCors();
 
-//builder.Services.AddRazorPages();
-
-// Set up Azure storage
-
 //Set size limit for request
 builder.Services.Configure<KestrelServerOptions>(options =>
 {
-	options.Limits.MaxRequestBodySize = 1073741824; // 1GB
+	options.Limits.MaxRequestBodySize = DefaultSystem.LimitFile; // 1GB
 });
 
+// Set up session
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromSeconds(10);

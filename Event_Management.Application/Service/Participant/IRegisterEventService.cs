@@ -1,12 +1,11 @@
-﻿using Event_Management.Application.Dto.UserDTO.Response;
-using Event_Management.Domain.Enum;
+﻿using Event_Management.Domain.Enum;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Models.ParticipantDTO;
 using Event_Management.Domain.Models.System;
 
-namespace Event_Management.Domain.Service
+namespace Event_Management.Application.Service
 {
-	public interface IRegisterEventService
+    public interface IRegisterEventService
 	{
 		// Update role of participant in event
 		Task<APIResponse> UpdateRoleEvent(RegisterEventModel registerEventModel);

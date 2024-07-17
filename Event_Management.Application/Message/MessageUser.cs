@@ -14,7 +14,10 @@ namespace Event_Management.Application.Message
         public const string LoginSuccess = "Login successfully";
         public const string RegisterSuccess = "User registered successfully";
         public const string RegisterFailed = "Failed to register user";
+        public const string ValidateSuccessfully = "validate successfully";
+        public const string ValidateFailed = "validate failed";
         public const string LogoutSuccess = "Logged out successfully";
+        public const string OTPSuccess = "OTP sent successfully";
 
         //Authentication Message response
         public const string TokenInvalid = "Invalid token";

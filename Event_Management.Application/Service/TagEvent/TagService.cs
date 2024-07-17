@@ -1,17 +1,13 @@
 ﻿using AutoMapper;
-using Azure;
 using Event_Management.Application.Dto;
 using Event_Management.Application.Helper;
 using Event_Management.Domain.Entity;
 using Event_Management.Domain.Models.Common;
-using Event_Management.Domain.Repository;
 using Event_Management.Domain.UnitOfWork;
-using Microsoft.Extensions.Configuration;
-using System.Linq.Expressions;
 
-namespace Event_Management.Domain.Service.TagEvent
+namespace Event_Management.Application.Service
 {
-	public class TagService : ITagService
+    public class TagService : ITagService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -53,16 +49,12 @@ namespace Event_Management.Domain.Service.TagEvent
 
         public async Task<List<TagDto>> SearchTag(string searchTerm)
         {
-            var tags = await _unitOfWork.TagRepository.GetAll();
-            var filteredTags = tags
-            .OrderBy(tag => SystemHelper.CalculateSimilarity(tag.TagName, searchTerm))
-            .Take(10) // Limit to 10 elements
-            .ToList();
+
+            var filteredTags = await _unitOfWork.TagRepository.SearchTag(searchTerm);
 
             // Convert filtered tags to TagDto using AutoMapper
             var tagDtos = _mapper.Map<List<Tag>, List<TagDto>>(filteredTags);
 
-          
 
             return tagDtos;
         }

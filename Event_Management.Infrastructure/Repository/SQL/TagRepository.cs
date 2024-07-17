@@ -32,5 +32,10 @@ namespace Event_Management.Infrastructure.Repository.SQL
             }
 			return null;
 		}
-	}
+
+        public async Task<List<Tag>> SearchTag(string searchTerm)
+        {
+            return await _context.Tags.Where(p => p.TagName.Contains(searchTerm)).ToListAsync();
+        }
+    }
 }

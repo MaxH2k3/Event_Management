@@ -1,18 +1,10 @@
 ﻿using AutoMapper;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using Event_Management.Application.Dto.EventDTO.RequestDTO;
 using Event_Management.Application.Dto.SponsorLogoDTO;
-using Event_Management.Application.Service.Job;
 using Event_Management.Domain.Entity;
 using Event_Management.Domain.UnitOfWork;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Event_Management.Application.Service.FileService
 {
@@ -141,9 +133,9 @@ namespace Event_Management.Application.Service.FileService
                 SponsorBrand = sponsorName,
                 LogoUrl = absPath
             };
-            _unitOfWork.LogoRepository.Add(newLogo);
+            await _unitOfWork.LogoRepository.Add(newLogo);
             eventData.Logos.Add(newLogo);
-            _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
             return absPath;
             }
             return null;
@@ -155,9 +147,9 @@ namespace Event_Management.Application.Service.FileService
             {
                 BlobContainerClient blobContainerClient = GetBlobContainerClient();
                 BlobClient blobClient = blobContainerClient.GetBlobClient(blobName);
-                blobClient.DeleteAsync();
+                await blobClient.DeleteAsync();
                 return true;
-            }catch (Exception ex)
+            }catch (Exception)
             {
                 return false;
             }

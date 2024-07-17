@@ -14,5 +14,6 @@ namespace Event_Management.Domain.Repository
     {
         //Task<PagedList<Tag>> GetAllTagByEventId(Guid eventId);
         Task<Tag> GetTagByName(string name);
+        Task<List<Tag>> SearchTag(string searchTerm);
     }
 }

@@ -1,11 +1,10 @@
-﻿using Event_Management.Application.Message;
-using Event_Management.Domain.Service;
+﻿using Event_Management.Application.Service;
 using Microsoft.AspNetCore.SignalR;
 using System.Net;
 
 namespace Event_Management.API.Hub
 {
-	public class CheckinHub : Hub<ICheckinHub>
+    public class CheckinHub : Hub<ICheckinHub>
 	{
 		private readonly IRegisterEventService _registerEventService;
 

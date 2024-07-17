@@ -6,7 +6,6 @@ using Event_Management.Domain.Helper;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Models.ParticipantDTO;
 using Event_Management.Domain.Models.Sponsor;
-using Event_Management.Domain.Service;
 using Event_Management.Domain.UnitOfWork;
 using Microsoft.Extensions.Configuration;
 

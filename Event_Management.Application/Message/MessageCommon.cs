@@ -35,7 +35,9 @@ namespace Event_Management.Application.Message
 
         public const string Unauthorized = "Unauthorized";
 
-        
-        
+        public const string InvalidToken = "Invalid Token";
+
+
+
     }
 }

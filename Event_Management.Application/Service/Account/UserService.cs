@@ -54,17 +54,33 @@ namespace Event_Management.Application.Service
 
             var monthlyUserCounts = usersGroupedByMonth.Select(g => new
             {
-                //get current culture and translate to coresspond month
-                //Month = CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(g.Key),
-                Month = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(g.Key),
+                Month = g.Key,
                 Total = g.Count()
             }).ToList();
+
+            var allMonths = Enumerable.Range(1, 12).Select(i => new
+            {
+                Month = i,
+                Total = 0
+            }).ToList();
+
+            var result = allMonths
+                .GroupJoin(monthlyUserCounts,
+                           m => m.Month,
+                           u => u.Month,
+                           (m, u) => new { Month = m.Month, Total = u.Sum(x => x.Total) })
+                .Select(x => new
+                {
+                    Month = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(x.Month),
+                    Total = x.Total
+                })
+                .ToList();
 
             return new APIResponse
             {
                 StatusResponse = HttpStatusCode.OK,
                 Message = Message.MessageCommon.Complete,
-                Data = monthlyUserCounts
+                Data = result
             };
         }
 
@@ -84,7 +100,7 @@ namespace Event_Management.Application.Service
             return new APIResponse
             {
                 StatusResponse = HttpStatusCode.OK,
-                Message = "Ok",
+                Message = Message.MessageCommon.Complete,
                 Data = _mapper.Map<IEnumerable<UserResponseDto>>(users),
             };
         }
@@ -109,7 +125,7 @@ namespace Event_Management.Application.Service
             return new APIResponse
             {
                 StatusResponse = HttpStatusCode.OK,
-                Message = "Update successfully",
+                Message = Message.MessageCommon.UpdateSuccesfully,
                 Data = existUsers,
             };
         }
@@ -132,7 +148,7 @@ namespace Event_Management.Application.Service
             return new APIResponse
             {
                 StatusResponse = HttpStatusCode.OK,
-                Message = "Delete successfully",
+                Message = Message.MessageCommon.DeleteSuccessfully,
                 Data = null,
             };
         }
