@@ -4,7 +4,9 @@ using Event_Management.Domain.Constants;
 using Event_Management.Infastructure.Configuration;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Serilog;
+using Stripe;
 using SwaggerThemes;
+using System.Text.Json.Serialization;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,6 +39,10 @@ builder.Services.AddSession(options =>
 
 // Default services
 builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+});
 builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();

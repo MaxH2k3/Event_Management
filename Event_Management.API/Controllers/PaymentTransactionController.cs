@@ -7,6 +7,7 @@ using Event_Management.Domain.Models.Sponsor;
 using Event_Management.Domain.Models.System;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Stripe;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 
@@ -18,11 +19,13 @@ namespace Event_Management.API.Controllers
     {
         private readonly IPaymentTransactionService _transactionService;
         private readonly IUserService _userService;
+        private readonly IEventService _eventService;
 
-        public PaymentTransactionController(IPaymentTransactionService transactionService, IUserService userService)
+        public PaymentTransactionController(IPaymentTransactionService transactionService, IUserService userService, IEventService eventService)
         {
             _transactionService = transactionService;
             _userService = userService;
+            _eventService = eventService;
         }
 
 
@@ -81,17 +84,11 @@ namespace Event_Management.API.Controllers
             }
 
             var result = await _transactionService.GetAllTransaction(pageNo, elementEachPage);
-            if (result.Count() > 0)
-            {
-                response.StatusResponse = HttpStatusCode.OK;
-                response.Message = MessageCommon.Complete;
-                response.Data = result;
-            }
-            else { 
-                response.StatusResponse = HttpStatusCode.NotFound;
-                response.Message = MessageCommon.NotFound;
-                response.Data = result;
-            }
+           
+            response.StatusResponse = HttpStatusCode.OK;
+            response.Message = MessageCommon.Complete;
+            response.Data = result;
+          
 
             return response;
         }
@@ -121,18 +118,11 @@ namespace Event_Management.API.Controllers
             }
 
             var result = await _transactionService.GetMyTransaction(userId, pageNo, elementEachPage);
-            if (result.Count() > 0)
-            {
-                response.StatusResponse = HttpStatusCode.OK;
-                response.Message = MessageCommon.Complete;
-                response.Data = result;
-            }
-            else
-            {
-                response.StatusResponse = HttpStatusCode.NotFound;
-                response.Message = MessageCommon.NotFound;
-                response.Data = result;
-            }
+            
+            response.StatusResponse = HttpStatusCode.OK;
+            response.Message = MessageCommon.Complete;
+            response.Data = result;
+           
 
             return response;
 
@@ -150,30 +140,20 @@ namespace Event_Management.API.Controllers
                                                         [FromQuery, Range(1, int.MaxValue)] int elementEachPage = 10)
         {
             var response = new APIResponse();
-
-            var userId = Guid.Parse(User.GetUserIdFromToken());
-            var userEntity = await _userService.GetUserByIdAsync(userId);
-            if (userEntity == null)
+            var isOwner = await _eventService.IsOwner(eventId, Guid.Parse(User.GetUserIdFromToken()));
+            if (!isOwner)
             {
                 response.StatusResponse = HttpStatusCode.BadRequest;
-                response.Message = MessageUser.UserNotFound;
+                response.Message = MessageParticipant.NotOwner;
                 response.Data = null;
-                return response;
             }
 
             var result = await _transactionService.GetMyEventTransaction(eventId, pageNo, elementEachPage);
-            if (result.Count() > 0)
-            {
-                response.StatusResponse = HttpStatusCode.OK;
-                response.Message = MessageCommon.Complete;
-                response.Data = result;
-            }
-            else
-            {
-                response.StatusResponse = HttpStatusCode.NotFound;
-                response.Message = MessageCommon.NotFound;
-                response.Data = result;
-            }
+          
+            response.StatusResponse = HttpStatusCode.OK;
+            response.Message = MessageCommon.Complete;
+            response.Data = result;
+          
 
             return response;
 

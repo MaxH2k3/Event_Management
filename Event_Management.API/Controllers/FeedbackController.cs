@@ -18,12 +18,14 @@ namespace Event_Management.API.Controllers
 
         private readonly IWebHostEnvironment _environment;
         private readonly IEventService _eventService;
+        private readonly IUserService _userService;
 
-        public FeedbackController(IFeedbackService feedbackService, IWebHostEnvironment environment, IEventService eventService)
+        public FeedbackController(IFeedbackService feedbackService, IWebHostEnvironment environment, IEventService eventService, IUserService userService)
         {
             _feedbackService = feedbackService;
             _environment = environment;
             _eventService = eventService;
+            _userService = userService;
         }
 
         [Authorize]
@@ -34,11 +36,13 @@ namespace Event_Management.API.Controllers
         public async Task<APIResponse> CreateFeedback([FromBody] FeedbackDto feedbackDto)
         {
             APIResponse response = new APIResponse();
-            string userId = User.GetUserIdFromToken();
-            if (userId.Equals(""))
+            var userId = Guid.Parse(User.GetUserIdFromToken());
+            var userEntity = await _userService.GetUserByIdAsync(userId);
+            if (userEntity == null)
             {
-                response.StatusResponse = HttpStatusCode.Unauthorized;
-                response.Message = MessageCommon.Unauthorized;
+                response.StatusResponse = HttpStatusCode.BadRequest;
+                response.Message = MessageUser.UserNotFound;
+                response.Data = null;
                 return response;
             }
             //string userId = feedbackDto.UserId.ToString();
@@ -65,11 +69,13 @@ namespace Event_Management.API.Controllers
         public async Task<APIResponse> UpdateFeedback([FromBody] FeedbackDto feedbackDto)
         {
             APIResponse response = new APIResponse();
-            string userId = User.GetUserIdFromToken();
-            if (userId.Equals(""))
+            var userId = Guid.Parse(User.GetUserIdFromToken());
+            var userEntity = await _userService.GetUserByIdAsync(userId);
+            if (userEntity == null)
             {
-                response.StatusResponse = HttpStatusCode.Unauthorized;
-                response.Message = MessageCommon.Unauthorized;
+                response.StatusResponse = HttpStatusCode.BadRequest;
+                response.Message = MessageUser.UserNotFound;
+                response.Data = null;
                 return response;
             }
             //string userId = feedbackDto.UserId.ToString();
@@ -128,13 +134,22 @@ namespace Event_Management.API.Controllers
         {
             string? userId = User.GetUserIdFromToken();
             var result = await _feedbackService.GetUserFeedback(eventId, Guid.Parse(userId));
-            APIResponse response = new APIResponse 
+
+            if(result != null)
             {
-                StatusResponse = HttpStatusCode.OK,
-                Message = MessageCommon.Complete,
-                Data = result
-            };
-            return Ok(response);
+                APIResponse response = new APIResponse
+                {
+                    StatusResponse = HttpStatusCode.OK,
+                    Message = MessageCommon.Complete,
+                    Data = result
+                };
+                return Ok(response);
+            }
+            return NotFound(new APIResponse
+            {
+                StatusResponse = HttpStatusCode.NotFound,
+                Message = MessageCommon.NotFound,
+            });
         }
         [Authorize]
         [HttpGet("user")]

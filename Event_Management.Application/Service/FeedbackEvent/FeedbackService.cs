@@ -19,27 +19,25 @@ namespace Event_Management.Application.Service
             _mapper = mapper;
         }
 
-        public async Task<Feedback> AddFeedback(FeedbackDto feedbackDto, string userId)
+        public async Task<Feedback> AddFeedback(FeedbackDto feedbackDto, Guid userId)
         {
-            var feedbackEntity = _mapper.Map<Feedback>(feedbackDto);
+            var newFeedback = new Feedback();
+            newFeedback.EventId = feedbackDto.EventId;
+            newFeedback.Rating = feedbackDto.Rating;
+            newFeedback.Content = feedbackDto.Content;
+            newFeedback.UserId = userId;
 
-            if (!string.IsNullOrEmpty(userId))
-            {
-                feedbackEntity.UserId = Guid.Parse(userId);
-            }
-            feedbackEntity.CreatedAt = DateTimeHelper.GetDateTimeNow();
-            await _unitOfWork.FeedbackRepository.Add(feedbackEntity);
+            newFeedback.CreatedAt = DateTimeHelper.GetDateTimeNow();
+            await _unitOfWork.FeedbackRepository.Add(newFeedback);
             await _unitOfWork.SaveChangesAsync();
-            return feedbackEntity;
+            return newFeedback;
         }
 
-        public async Task<Feedback> UpdateFeedback(FeedbackDto feedbackDto, string userId)
+        public async Task<Feedback> UpdateFeedback(FeedbackDto feedbackDto, Guid userId)
         {
-            var feedbackEntity = _mapper.Map<Feedback>(feedbackDto);
-            if (!string.IsNullOrEmpty(userId))
-            {
-                feedbackEntity.UserId = Guid.Parse(userId);
-            }
+            var feedbackEntity = await _unitOfWork.FeedbackRepository.GetUserEventFeedback(feedbackDto.EventId, userId);
+            feedbackEntity.Rating = feedbackDto.Rating;
+            feedbackDto.Content = feedbackDto.Content;
             feedbackEntity.CreatedAt = DateTimeHelper.GetDateTimeNow();
             await _unitOfWork.FeedbackRepository.Update(feedbackEntity);
             await _unitOfWork.SaveChangesAsync();

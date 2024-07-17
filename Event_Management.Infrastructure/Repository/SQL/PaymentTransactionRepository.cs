@@ -33,7 +33,7 @@ namespace Event_Management.Infrastructure.Repository.SQL
 
         public async Task<PagedList<PaymentTransaction>> GetMyTransaction(Guid userId, int page, int eachPage)
         {
-            var list = _context.PaymentTransactions.Where(p => p.Remitter.Equals(userId)).OrderByDescending(p => p.TranDate);
+            var list = _context.PaymentTransactions.Where(p => p.RemitterId.Equals(userId)).OrderByDescending(p => p.TranDate);
 
             return await list.ToPagedListAsync(page, eachPage);
         }
