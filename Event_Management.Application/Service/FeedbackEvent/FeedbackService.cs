@@ -19,29 +19,25 @@ namespace Event_Management.Application.Service
             _mapper = mapper;
         }
 
-        public async Task<Feedback> AddFeedback(FeedbackDto feedbackDto, Guid userId)
+        public async Task<FeedbackDto> AddFeedback(FeedbackDto feedbackDto, Guid userId)
         {
-            var newFeedback = new Feedback();
-            newFeedback.EventId = feedbackDto.EventId;
-            newFeedback.Rating = feedbackDto.Rating;
-            newFeedback.Content = feedbackDto.Content;
-            newFeedback.UserId = userId;
+            var newFeedback = new Feedback(userId, feedbackDto.EventId, feedbackDto.Content, feedbackDto.Rating); 
 
             newFeedback.CreatedAt = DateTimeHelper.GetDateTimeNow();
             await _unitOfWork.FeedbackRepository.Add(newFeedback);
             await _unitOfWork.SaveChangesAsync();
-            return newFeedback;
+            return feedbackDto;
         }
 
-        public async Task<Feedback> UpdateFeedback(FeedbackDto feedbackDto, Guid userId)
+        public async Task<FeedbackDto> UpdateFeedback(FeedbackDto feedbackDto, Guid userId)
         {
             var feedbackEntity = await _unitOfWork.FeedbackRepository.GetUserEventFeedback(feedbackDto.EventId, userId);
             feedbackEntity.Rating = feedbackDto.Rating;
-            feedbackDto.Content = feedbackDto.Content;
+            feedbackEntity.Content = feedbackDto.Content;
             feedbackEntity.CreatedAt = DateTimeHelper.GetDateTimeNow();
             await _unitOfWork.FeedbackRepository.Update(feedbackEntity);
             await _unitOfWork.SaveChangesAsync();
-            return feedbackEntity;
+            return feedbackDto;
         }
         public async Task<PagedList<FeedbackEvent>?> GetEventFeedbacks(Guid eventId, int? numOfStar, int pageNo, int elementEachPage)
         {

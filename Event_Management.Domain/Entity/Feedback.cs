@@ -13,5 +13,14 @@ namespace Event_Management.Domain.Entity
 
         public virtual Event Event { get; set; } = null!;
         public virtual User User { get; set; } = null!;
+
+        public Feedback(Guid userId, Guid eventId, string? content, int? rating)
+        {
+            UserId = userId;
+            EventId = eventId;
+            Content = content;
+            Rating = rating;
+          
+        }
     }
 }
