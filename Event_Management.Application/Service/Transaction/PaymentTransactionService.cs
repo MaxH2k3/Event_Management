@@ -41,6 +41,11 @@ namespace Event_Management.Application.Service
             return await _unitOfWork.PaymentTransactionRepository.GetAll(page, eachPage);   
         }
 
+        public async Task<PagedList<PaymentTransaction>> GetMyEventTransaction(Guid eventId, int page, int eachPage)
+        {
+            return await _unitOfWork.PaymentTransactionRepository.GetMyEventTransaction(eventId, page, eachPage);
+        }
+
         public async Task<PagedList<PaymentTransaction>> GetMyTransaction(Guid userId, int page, int eachPage)
         {
             return await _unitOfWork.PaymentTransactionRepository.GetMyTransaction(userId, page, eachPage);

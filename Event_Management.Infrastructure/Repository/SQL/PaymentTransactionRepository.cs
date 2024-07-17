@@ -24,6 +24,13 @@ namespace Event_Management.Infrastructure.Repository.SQL
             _context = context;
         }
 
+        public async Task<PagedList<PaymentTransaction>> GetMyEventTransaction(Guid eventId, int page, int eachPage)
+        {
+            var list = _context.PaymentTransactions.Where(p => p.EventId.Equals(eventId)).OrderByDescending(p => p.TranDate);
+
+            return await list.ToPagedListAsync(page, eachPage);
+        }
+
         public async Task<PagedList<PaymentTransaction>> GetMyTransaction(Guid userId, int page, int eachPage)
         {
             var list = _context.PaymentTransactions.Where(p => p.Remitter.Equals(userId)).OrderByDescending(p => p.TranDate);

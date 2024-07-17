@@ -105,7 +105,7 @@ namespace Event_Management.API.Controllers
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         //Get transaction of this person
-        public async Task<APIResponse> GetRequestSponsor(string? status, [FromQuery, Range(1, int.MaxValue)] int pageNo = 1,
+        public async Task<APIResponse> GetMyTransaction([FromQuery, Range(1, int.MaxValue)] int pageNo = 1,
                                                         [FromQuery, Range(1, int.MaxValue)] int elementEachPage = 10)
         {
             var response = new APIResponse();
@@ -121,6 +121,47 @@ namespace Event_Management.API.Controllers
             }
 
             var result = await _transactionService.GetMyTransaction(userId, pageNo, elementEachPage);
+            if (result.Count() > 0)
+            {
+                response.StatusResponse = HttpStatusCode.OK;
+                response.Message = MessageCommon.Complete;
+                response.Data = result;
+            }
+            else
+            {
+                response.StatusResponse = HttpStatusCode.NotFound;
+                response.Message = MessageCommon.NotFound;
+                response.Data = result;
+            }
+
+            return response;
+
+
+        }
+
+
+        [Authorize]
+        [HttpGet("event")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        //Get transaction of this person
+        public async Task<APIResponse> GetMyEventTransaction(Guid eventId, [FromQuery, Range(1, int.MaxValue)] int pageNo = 1,
+                                                        [FromQuery, Range(1, int.MaxValue)] int elementEachPage = 10)
+        {
+            var response = new APIResponse();
+
+            var userId = Guid.Parse(User.GetUserIdFromToken());
+            var userEntity = await _userService.GetUserByIdAsync(userId);
+            if (userEntity == null)
+            {
+                response.StatusResponse = HttpStatusCode.BadRequest;
+                response.Message = MessageUser.UserNotFound;
+                response.Data = null;
+                return response;
+            }
+
+            var result = await _transactionService.GetMyEventTransaction(eventId, pageNo, elementEachPage);
             if (result.Count() > 0)
             {
                 response.StatusResponse = HttpStatusCode.OK;

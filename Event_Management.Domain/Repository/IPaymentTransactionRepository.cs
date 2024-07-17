@@ -12,5 +12,6 @@ namespace Event_Management.Domain.Repository
     public interface IPaymentTransactionRepository : IRepository<PaymentTransaction>
     {
         Task<PagedList<PaymentTransaction>> GetMyTransaction(Guid userId, int page, int eachPage);
+        Task<PagedList<PaymentTransaction>> GetMyEventTransaction(Guid eventId, int page, int eachPage);
     }
 }
