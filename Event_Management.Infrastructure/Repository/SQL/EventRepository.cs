@@ -587,5 +587,12 @@ namespace Event_Management.Infrastructure.Repository.SQL
                 currentDate = currentDate.AddMonths(1);
             }
         }
+
+        public async Task<List<Event>> GetUserHostEvent(Guid userId)
+        {
+            var eventList = await _context.Events.Where(e => e.CreatedBy == userId)
+                .OrderByDescending(e => e.StartDate).AsNoTracking().ToListAsync();
+            return eventList;
+        }
     }
 }

@@ -44,6 +44,7 @@ namespace Event_Management.Domain.Repository
         public Task<PagedList<Event>> GetEventsByTag(int tagId, int pageNo, int elementEachPage);
         public Task<PagedList<Event>> GetEventsByListTags(List<int> tagIds, int pageNo, int elementEachPage);
         Task<Event?> GetEventById(Guid eventId);
+        Task<List<Event>> GetUserHostEvent(Guid userId);
 
 
         //Statistics

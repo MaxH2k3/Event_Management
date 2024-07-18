@@ -339,6 +339,25 @@ namespace Event_Management.API.Controllers
 
 
         }
+        [HttpGet("user-hosted")]
+        public async Task<IActionResult> GetUserHostEvent([FromQuery, Required] Guid userId)
+        {
+            var result = await _eventService.GetUserHostEvent(userId);
+            if(result != null)
+            {
+                return Ok(new APIResponse
+                {
+                    StatusResponse = HttpStatusCode.OK,
+                    Message = MessageCommon.Complete,
+                    Data = result
+                });
+            }
+            return NotFound(new APIResponse
+                {
+                StatusResponse = HttpStatusCode.NotFound,
+                    Message = MessageCommon.NotFound
+                });
+        }
 
     }
 }

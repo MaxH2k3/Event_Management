@@ -34,6 +34,7 @@ namespace Event_Management.Application.Service
         public List<EventCreatorLeaderBoardDto> GetTop20SpeakerEventCount();
         public Dictionary<string, List<EventCreatorLeaderBoardDto>> GetEventLeaderBoards();
         Task<bool> IsOwner(Guid eventId, Guid userId);
+        Task<List<EventPreview>> GetUserHostEvent(Guid userId);
 
         Task<EventStatistics?> GetEventStatis(Guid eventId);
         Task<Dictionary<string, int>> CountByStatus();

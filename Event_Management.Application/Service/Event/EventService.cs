@@ -272,7 +272,7 @@ namespace Event_Management.Application.Service
                 bool isDeletable = await IsDeletable(eventId);
                 var userInfo = await _unitOfWork.UserRepository.GetById(userId);
                 Event? existEvent = await _unitOfWork.EventRepository.getAllEventInfo(eventId);
-                if (existEvent == null || existEvent.Status!.Equals(EventStatus.OnGoing) || !isDeletable)
+                if (existEvent == null || !existEvent.Status!.Equals(EventStatus.NotYet.ToString()) || !isDeletable)
                 {
                     return false;
                 }
@@ -515,6 +515,11 @@ namespace Event_Management.Application.Service
         public async Task<Dictionary<string, int>> CountByStatus()
         {
             return await _unitOfWork.EventRepository.CountByStatus();
+        }
+        public async Task<List<EventPreview>> GetUserHostEvent(Guid userId)
+        {
+            var result = await _unitOfWork.EventRepository.GetUserHostEvent(userId);
+            return result.Select(ToEventPreview).ToList();
         }
         public async Task<List<EventPerMonth>> EventsPerMonth(DateTime startDate, DateTime endDate)
         {
