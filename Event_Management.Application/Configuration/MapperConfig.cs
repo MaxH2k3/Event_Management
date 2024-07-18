@@ -12,6 +12,7 @@ using Event_Management.Domain.Models.EventDTO.ResponseDTO;
 using Event_Management.Domain.Models.ParticipantDTO;
 using Event_Management.Domain.Models.Sponsor;
 using Event_Management.Application.Dto.NotificationDTO.Response;
+using Event_Management.Domain.Models.Transaction;
 
 namespace Event_Management.Domain.Configuration
 {
@@ -94,6 +95,14 @@ namespace Event_Management.Domain.Configuration
             CreateMap<PagedList<SponsorEvent>, PagedList<SponsorEventDto>>()
                 .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.ToList()))
                 .ReverseMap();
+
+            //Transaction
+            CreateMap<PaymentTransaction, PaymentTransactionDto>()
+                .ForMember(dest => dest.EmailAccount, opt => opt.MapFrom(src => src.Remitter!.Email))
+                .ForMember(dest => dest.EventName, opt => opt.MapFrom(src => src.Event.EventName))
+                .ReverseMap();
+
+            CreateMap< PagedList<PaymentTransaction>, PagedList<PaymentTransactionDto>>().ReverseMap();
 
         }
     }
