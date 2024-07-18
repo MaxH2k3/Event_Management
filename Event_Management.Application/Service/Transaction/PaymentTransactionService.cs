@@ -17,7 +17,7 @@ namespace Event_Management.Application.Service
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<PaymentTransaction> AddTransaction(TransactionRequestDto transactionRequestDto)
+        public async Task<TransactionRequestDto> AddTransaction(TransactionRequestDto transactionRequestDto)
         {
            
             var newTransaction = new PaymentTransaction();
@@ -32,7 +32,7 @@ namespace Event_Management.Application.Service
             newTransaction.TranStatus = MessagePayment.TranStatus;
             await _unitOfWork.PaymentTransactionRepository.Add(newTransaction);
             await _unitOfWork.SaveChangesAsync();
-            return newTransaction;
+            return transactionRequestDto;
 
         }
 

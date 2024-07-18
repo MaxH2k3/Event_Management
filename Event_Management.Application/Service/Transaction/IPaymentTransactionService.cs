@@ -6,7 +6,7 @@ namespace Event_Management.Application.Service
 {
     public interface IPaymentTransactionService
     {
-        Task<PaymentTransaction> AddTransaction(TransactionRequestDto transactionRequestDto);
+        Task<TransactionRequestDto> AddTransaction(TransactionRequestDto transactionRequestDto);
         Task<PagedList<PaymentTransaction>> GetAllTransaction(int page, int eachPage);
         Task<PagedList<PaymentTransaction>> GetMyTransaction(Guid userId, int page, int eachPage);
         Task<PagedList<PaymentTransaction>> GetMyEventTransaction(Guid eventId, int page, int eachPage);
