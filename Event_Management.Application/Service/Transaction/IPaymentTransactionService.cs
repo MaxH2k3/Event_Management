@@ -11,5 +11,6 @@ namespace Event_Management.Application.Service
         Task<PagedList<PaymentTransactionDto>> GetAllTransaction(int page, int eachPage);
         Task<PagedList<PaymentTransactionDto>> GetMyTransaction(Guid userId, int page, int eachPage);
         Task<PagedList<PaymentTransactionDto>> GetMyEventTransaction(Guid eventId, int page, int eachPage);
+        Task<PaymentTransaction?> GetTransactionById(Guid transactionId);
     }
 }

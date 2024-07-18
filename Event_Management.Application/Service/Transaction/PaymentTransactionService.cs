@@ -60,5 +60,10 @@ namespace Event_Management.Application.Service
             var transactionDto = _mapper.Map<PagedList<PaymentTransactionDto>>(transactionList);
             return transactionDto;
         }
+
+        public async Task<PaymentTransaction?> GetTransactionById(Guid transactionId)
+        {
+            return await _unitOfWork.PaymentTransactionRepository.GetById(transactionId);
+        }
     }
 }

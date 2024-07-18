@@ -3,6 +3,7 @@ using Event_Management.Application.Message;
 using Event_Management.Application.Service;
 using Event_Management.Application.Service.Payments.PayPalService;
 using Event_Management.Domain.Helper;
+using Event_Management.Domain.Models.Payment;
 using Event_Management.Domain.Models.System;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -19,6 +20,7 @@ namespace Event_Management.API.Controllers
         //private readonly VnpaySetting _vnpaySetting;
         private readonly IEventService _eventService;
         private readonly IPayPalService _payPalService;
+        private readonly IPaymentTransactionService _paymentTransactionService;
 
 
 
@@ -27,17 +29,21 @@ namespace Event_Management.API.Controllers
         /// </summary>
         /// <param name="mediator"></param>
         /// <param name="vnpayConfigOptions"></param>
-        public PaymentController(IMediator mediator, IEventService eventService, IPayPalService payPalService)
+        public PaymentController(IMediator mediator, IEventService eventService, IPayPalService payPalService, IPaymentTransactionService paymentTransactionService)
         //IOptions<VnpaySetting> vnpayConfigOptions
         {
            _mediator = mediator;
            _eventService = eventService;
             //_vnpaySetting = vnpayConfigOptions.Value;
             _payPalService = payPalService;
+            _paymentTransactionService = paymentTransactionService;
         }
 
         [Authorize]
         [HttpPost("paypal")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
         public async Task<APIResponse> CreatePayment([FromBody] CreatePaymentDto createPaymentDto)
         {
             APIResponse response = new APIResponse();
@@ -61,8 +67,11 @@ namespace Event_Management.API.Controllers
         }
 
         [Authorize]
-        [HttpPost("payout")]
-        public async Task<APIResponse> CreatePayout([FromBody] PayoutDto payoutDto)
+        [HttpPost("payout-unstable")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<APIResponse> CreatePayoutEvent([FromBody] PayoutDto payoutDto)
         {
             APIResponse response = new APIResponse();
             var isOwner = await _eventService.IsOwner(payoutDto.EventId, Guid.Parse(User.GetUserIdFromToken()));
@@ -72,7 +81,34 @@ namespace Event_Management.API.Controllers
                 response.Message = MessageParticipant.NotOwner;
                 response.Data = null;
             }
-            var result = await _payPalService.CreatePayout(payoutDto);
+            var result = await _payPalService.CreatePayoutUnstable(payoutDto);
+
+            if (result != null)
+            {
+                response.StatusResponse = HttpStatusCode.Created;
+                response.Message = MessageCommon.CreateSuccesfully;
+                response.Data = result;
+            }
+            return response;
+        }
+
+        [Authorize]
+        [HttpPost("payout-fixed")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<APIResponse> CreatePayout(PayoutSponsorDto payoutSponsorDto)
+        {
+            APIResponse response = new APIResponse();
+            var paymentTransaction = await _paymentTransactionService.GetTransactionById(payoutSponsorDto.TransactionId);
+            var isOwner = await _eventService.IsOwner((Guid)paymentTransaction.EventId, Guid.Parse(User.GetUserIdFromToken()));
+            if (!isOwner)
+            {
+                response.StatusResponse = HttpStatusCode.BadRequest;
+                response.Message = MessageParticipant.NotOwner;
+                response.Data = null;
+            }
+            var result = await _payPalService.CreatePayoutById(payoutSponsorDto);
 
             if (result != null)
             {

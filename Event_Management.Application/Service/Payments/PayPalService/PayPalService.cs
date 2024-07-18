@@ -3,6 +3,7 @@ using Event_Management.Application.Dto.PaymentDTO;
 using Event_Management.Application.Dto.PaymentDTO.PayPalPayment;
 using Event_Management.Application.Helper;
 using Event_Management.Application.Message;
+using Event_Management.Domain.Models.Payment;
 using Event_Management.Domain.UnitOfWork;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
@@ -78,14 +79,11 @@ namespace Event_Management.Application.Service.Payments.PayPalService
                     return_url = $"{baseUrl}/events/{eventIdUrl}"
                 }
             };
-          
-
-
-
+  
             return payment.Create(apiContext); 
         }
 
-        public async Task<PayoutBatchHeader> CreatePayout(PayoutDto payoutDto)
+        public async Task<PayoutBatchHeader> CreatePayoutUnstable(PayoutDto payoutDto)
         {
             var apiContext = GetApiContext();
             var eventEtity = await _unitOfWork.EventRepository.GetById(payoutDto.EventId);
@@ -123,9 +121,6 @@ namespace Event_Management.Application.Service.Payments.PayPalService
             var createdPayout = payoutRequest.Create(apiContext, false); //createdPayout?.batch_header?.payout_batch_id
                                                                          //var responseObject = JsonSerializer.Deserialize<PayoutResponse>(payoutRequest.ToString());
 
-
-
-            
             var payoutBatch = new PayoutBatchHeader
             {
                 payout_batch_id = createdPayout.batch_header.payout_batch_id,
@@ -139,8 +134,67 @@ namespace Event_Management.Application.Service.Payments.PayPalService
                 amount = createdPayout.batch_header.amount,
 
             };
-
             
+            
+            return payoutBatch;
+        }
+
+
+        public async Task<PayoutBatchHeader> CreatePayoutById(PayoutSponsorDto payoutSponsorDto)
+        {
+            var apiContext = GetApiContext();
+            var transactionEntity = await _unitOfWork.PaymentTransactionRepository.GetById(payoutSponsorDto.TransactionId);
+            //var eventEtity = await _unitOfWork.EventRepository.GetById(payoutDto.EventId);
+            string apiUrl = "https://api.currencyapi.com/v3/latest?apikey=cur_live_YmCF5RSIievrfTvYMaZV82SIUD4zwtmW5asnZNI6&base_currency=USD&currencies=VND";
+            string translateAmount = await CurrencyHelper.GetExchangeRate(apiUrl, transactionEntity!.TranAmount);
+            var payoutBatchHeader = new PayoutBatchHeader();
+            var payoutRequest = new Payout
+            {
+                items = new List<PayoutItem>
+                {
+
+                    new PayoutItem
+                    {
+                        receiver = transactionEntity.EmailPaypal,
+                        recipient_type = PayoutRecipientType.EMAIL,
+                        amount = new Currency
+                        {
+                            currency = "USD",
+                            value = translateAmount,
+                        },
+                        note = MessagePayment.MessageNotification,
+                        sender_item_id = $"{DateTime.UtcNow.Ticks}-{new Random().Next(1000, 9999)}",
+
+                    }
+                },
+
+                sender_batch_header = new PayoutSenderBatchHeader
+                {
+                    sender_batch_id = SystemHelper.GenerateSenderBatchId(),
+                    email_subject = payoutSponsorDto.EmailSubject,
+
+                }
+            };
+
+            var createdPayout = payoutRequest.Create(apiContext, false); //createdPayout?.batch_header?.payout_batch_id
+                                                                         //var responseObject = JsonSerializer.Deserialize<PayoutResponse>(payoutRequest.ToString());
+
+            var payoutBatch = new PayoutBatchHeader
+            {
+                payout_batch_id = createdPayout.batch_header.payout_batch_id,
+                batch_status = createdPayout.batch_header.batch_status,
+                sender_batch_header = new PayoutSenderBatchHeader
+                {
+                    sender_batch_id = payoutRequest.sender_batch_header.sender_batch_id,
+                    email_subject = payoutRequest.sender_batch_header.email_subject,
+                    recipient_type = payoutRequest.items[0].recipient_type,
+                },
+                amount = createdPayout.batch_header.amount,
+
+            };
+            transactionEntity.TranStatus = MessagePayment.Payout;
+            await _unitOfWork.PaymentTransactionRepository.Update(transactionEntity);
+
             return payoutBatch;
         }
 
