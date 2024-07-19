@@ -140,7 +140,17 @@ namespace Event_Management.Application.Service
                 };
             }
 
-            
+            bool? a = await _unitOfWork.UserRepository.IsExisted(UserFieldType.Phone, updateUser.Phone);
+            if ((bool)a)
+            {
+                return new APIResponse
+                {
+                    StatusResponse = HttpStatusCode.BadRequest,
+                    Message = MessageUser.PhoneExisted,
+                    Data = null,
+                };
+            }
+            existUsers.FullName = updateUser.FullName;
             existUsers.Phone = updateUser.Phone;
             
             existUsers.FullName = updateUser.FullName;
