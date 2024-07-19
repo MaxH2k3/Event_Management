@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Event_Management.Application.Dto.UserDTO.Request;
 using Event_Management.Application.Dto.UserDTO.Response;
+using Event_Management.Application.Helper;
 using Event_Management.Application.Message;
 using Event_Management.Application.Service.FileService;
 using Event_Management.Domain.Entity;
@@ -140,23 +141,15 @@ namespace Event_Management.Application.Service
                 };
             }
 
-            bool? a = await _unitOfWork.UserRepository.IsExisted(UserFieldType.Phone, updateUser.Phone);
-            if ((bool)a)
-            {
-                return new APIResponse
-                {
-                    StatusResponse = HttpStatusCode.BadRequest,
-                    Message = MessageUser.PhoneExisted,
-                    Data = null,
-                };
-            }
-            existUsers.FullName = updateUser.FullName;
+            
             existUsers.Phone = updateUser.Phone;
             
             existUsers.FullName = updateUser.FullName;
-            if (!string.IsNullOrWhiteSpace(updateUser.Avatar))
+
+            bool isBase64 = Utilities.IsBase64String(updateUser.Avatar!);
+            if (!string.IsNullOrWhiteSpace(updateUser.Avatar) && isBase64)
             {
-                string url = updateUser.Avatar!;
+                string url = existUsers.Avatar!;
                 int startIndex = url.LastIndexOf("/eventcontainer/") + "/eventcontainer/".Length;
                 string result = url.Substring(startIndex);
                 await _imageService.DeleteBlob(result);

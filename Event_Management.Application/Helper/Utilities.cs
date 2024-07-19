@@ -44,5 +44,11 @@ namespace Event_Management.Application.Helper
             throw new Exception("Status not found");
         }
 
+        public static bool IsBase64String(string base64)
+        {
+            Span<byte> buffer = new Span<byte>(new byte[base64.Length]);
+            return Convert.TryFromBase64String(base64, buffer, out _);
+        }
+
     }
 }
