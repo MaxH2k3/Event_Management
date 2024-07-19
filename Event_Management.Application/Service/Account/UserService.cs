@@ -2,11 +2,13 @@
 using Event_Management.Application.Dto.UserDTO.Request;
 using Event_Management.Application.Dto.UserDTO.Response;
 using Event_Management.Application.Message;
+using Event_Management.Application.Service.FileService;
 using Event_Management.Domain.Entity;
 using Event_Management.Domain.Enum;
 using Event_Management.Domain.Models.Common;
 using Event_Management.Domain.Models.System;
 using Event_Management.Domain.UnitOfWork;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using System.Globalization;
 using System.Net;
 
@@ -16,11 +18,13 @@ namespace Event_Management.Application.Service
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IImageService _imageService;
 
-        public UserService(IUnitOfWork unitOfWork, IMapper mapper)
+        public UserService(IUnitOfWork unitOfWork, IMapper mapper, IImageService imageService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _imageService = imageService;
         }
 
         public async Task<APIResponse> GetTotalUser()
@@ -90,9 +94,26 @@ namespace Event_Management.Application.Service
         {
             return _unitOfWork.UserRepository.GetUserById(userId);
         }
-        public async Task<User?> GetUserByIdAsync(Guid userId)
+
+        public async Task<APIResponse> GetUserByIdAsync(Guid userId)
         {
-            return await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+            var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+            if (user == null)
+            {
+                return new APIResponse
+                {
+                    StatusResponse = HttpStatusCode.BadRequest,
+                    Message = MessageUser.UserNotFound,
+                    Data = null,
+                };
+            }
+            var mapUser = _mapper.Map<UserUpdatedResponseDto>(user);
+            return new APIResponse
+            {
+                StatusResponse = HttpStatusCode.OK,
+                Message = Message.MessageCommon.Complete,
+                Data = mapUser,
+            };
         }
 
         public async Task<APIResponse> GetAllUser(int page, int eachPage)
@@ -118,16 +139,28 @@ namespace Event_Management.Application.Service
                     Data = null,
                 };
             }
-            existUsers.FullName = updateUser.FullName;
+
+            
             existUsers.Phone = updateUser.Phone;
-            existUsers.Avatar = updateUser.Avatar;
+            
+            existUsers.FullName = updateUser.FullName;
+            if (!string.IsNullOrWhiteSpace(updateUser.Avatar))
+            {
+                string url = updateUser.Avatar!;
+                int startIndex = url.LastIndexOf("/eventcontainer/") + "/eventcontainer/".Length;
+                string result = url.Substring(startIndex);
+                await _imageService.DeleteBlob(result);
+                existUsers.Avatar = await _imageService.UploadImage(updateUser.Avatar, Guid.NewGuid());
+            }
+
             await _unitOfWork.UserRepository.Update(existUsers);
             await _unitOfWork.SaveChangesAsync();
+            var updatedUsers = _mapper.Map<UserUpdatedResponseDto>(existUsers);
             return new APIResponse
             {
                 StatusResponse = HttpStatusCode.OK,
                 Message = Message.MessageCommon.UpdateSuccesfully,
-                Data = existUsers,
+                Data = updatedUsers,
             };
         }
 

@@ -13,7 +13,7 @@ namespace Event_Management.Application.Service
         Task<APIResponse> GetTotalUserByYear(int year);
         Task<APIResponse> GetByKeyWord(string keyWord);
         Task<APIResponse> GetAllUser(int page, int eachPage);
-        Task<User?> GetUserByIdAsync(Guid userId);
+        Task<APIResponse> GetUserByIdAsync(Guid userId);
         User? GetUserById(Guid userId);
         Task<APIResponse> UpdateUser(UpdateDeleteUserDto updateUser);
         Task<APIResponse> DeleteUser(Guid id);

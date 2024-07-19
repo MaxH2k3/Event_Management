@@ -102,7 +102,7 @@ namespace Event_Management.Infrastructure.Repository.SQL
             //int skipElements = (pageNo - 1) * elementEachPage;
             var totalEle = await _context.Events.CountAsync();
             var eventList = _context.Events.Include(e => e.Tags).AsQueryable();
-            eventList = ApplyFilter(eventList, filter).PaginateAndSort(pageNo, elementEachPage, filter.SortBy ?? "EventId", filter.IsAscending);
+            eventList = ApplyFilter(eventList, filter).PaginateAndSort(pageNo, elementEachPage, filter.SortBy ?? "StartDate", filter.IsAscending);
             //eventList = ApplyFilter(eventList, filter).Skip(skipElements).Take(elementEachPage);
             List<Event> temp = await eventList.ToListAsync();
             List<Event> result = new List<Event>();
@@ -177,6 +177,12 @@ namespace Event_Management.Infrastructure.Repository.SQL
                             where (e.Location!.Contains(filter.Location)) || (e.LocationAddress!.Contains(filter.Location))
                             select e;
             }
+            if (!string.IsNullOrWhiteSpace(filter.LocationId))
+            {
+                eventList = from e in eventList
+                            where (e.LocationId!.Equals(filter.LocationId))
+                            select e;
+            }
             if (filter.StartDateFrom != null)
             {
                 DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeMilliseconds((long)filter.StartDateFrom);
@@ -219,7 +225,7 @@ namespace Event_Management.Infrastructure.Repository.SQL
             }
             if (filter.Status != null)
             {
-                eventList = eventList.Where(e => filter.Status.Contains(e.Status));
+                eventList = eventList.Where(e => filter.Status.Contains(e.Status!));
             }
             if (filter.TicketFrom != null)
             {
@@ -438,7 +444,7 @@ namespace Event_Management.Infrastructure.Repository.SQL
         {
             List<EventLocationLeaderBoardDto> result = new List<EventLocationLeaderBoardDto>();
             var temp = _context.Events
-                .AsEnumerable()
+                .AsEnumerable().Where(e => e.Status!.Equals(EventStatus.NotYet.ToString()))
                 .GroupBy(e => e.Location!)
                 .OrderByDescending(g => g.Count())
                 .Take(10)

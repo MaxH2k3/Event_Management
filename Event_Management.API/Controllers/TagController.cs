@@ -133,7 +133,26 @@ namespace Event_Management.API.Controllers
             }
             return response;
         }
-
+        [HttpGet("")]
+        public async Task<IActionResult> GetTagById([FromQuery, Required] int tagId)
+        {
+            var tag = await _tagService.GetById(tagId);
+            if(tag != null)
+            {
+                return Ok(new APIResponse
+                {
+                    StatusResponse = HttpStatusCode.OK,
+                    Message = MessageCommon.Complete,
+                    Data = tag
+                });
+            }
+            return Ok(new APIResponse
+            {
+                StatusResponse = HttpStatusCode.OK,
+                Message = MessageCommon.Complete,
+                Data = null
+            });
+        }
 
     }
 }

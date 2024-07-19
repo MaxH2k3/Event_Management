@@ -17,6 +17,7 @@ namespace Event_Management.Domain.Models.Common
         public long? EndDateFrom { get; set; } = null;
         public long? EndDateTo { get; set; } = null;
         public string? Location { get; set; } = null;
+        public string? LocationId { get; set; } = null;
         public bool? Approval { get; set; } = null;
         public decimal? TicketFrom { get; set; } = null;
         public decimal? TicketTo { get; set; } = null;

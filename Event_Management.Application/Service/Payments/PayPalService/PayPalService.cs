@@ -1,15 +1,10 @@
-﻿using Azure;
-using Event_Management.Application.Dto.PaymentDTO;
-using Event_Management.Application.Dto.PaymentDTO.PayPalPayment;
+﻿using Event_Management.Application.Dto.PaymentDTO.PayPalPayment;
 using Event_Management.Application.Helper;
 using Event_Management.Application.Message;
 using Event_Management.Domain.Models.Payment;
 using Event_Management.Domain.UnitOfWork;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json.Linq;
 using PayPal.Api;
-using RestSharp;
-using System.Text.Json;
 
 namespace Event_Management.Application.Service.Payments.PayPalService
 {

@@ -61,6 +61,10 @@ namespace Event_Management.Infrastructure.Repository.SQL
             {
                 return (await GetAll()).Any(u => u.Email!.ToLower().Equals(value.ToLower()));
             }
+            else if (UserFieldType.Phone == field)
+            {
+                return (await GetAll()).Any(u => u.Phone != null && u.Phone.Equals(value));
+            }
 
             return false;
         }
@@ -78,16 +82,16 @@ namespace Event_Management.Infrastructure.Repository.SQL
 
         public async Task<IEnumerable<User>> GetAllUser(int page, int pagesize, string sortBy, bool isAscending = false)
         {
-            var cacheKey = $"GetAllUser_{page}_{pagesize}_{sortBy}_{isAscending}";
-            var cachedUsers = await _cacheRepository.GetAsync<IEnumerable<User>>(cacheKey);
+            //var cacheKey = $"GetAllUser_{page}_{pagesize}_{sortBy}_{isAscending}";
+            //var cachedUsers = await _cacheRepository.GetAsync<IEnumerable<User>>(cacheKey);
 
-            if (cachedUsers != null)
-            {
-                return cachedUsers;
-            }
+            //if (cachedUsers != null)
+            //{
+            //    return cachedUsers;
+            //}
 
-            IEnumerable<User> entities = await _context.Users.Include(a => a.Role).Where(x => x.Status == "active").PaginateAndSort(page, pagesize, sortBy, isAscending).ToListAsync();
-            await _cacheRepository.SetAsync(cacheKey, entities);
+            var entities = await _context.Users.Include(a => a.Role).Where(x => x.Status == "active").PaginateAndSort(page, pagesize, sortBy, isAscending).ToListAsync();
+            //await _cacheRepository.SetAsync(cacheKey, entities);
             return entities;
         }
 
