@@ -22,14 +22,16 @@ public class UserController : Controller
         _userService = userService;
     }
 
-    [Authorize]
     [HttpGet("id")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetUserById()
+    public async Task<IActionResult> GetUserById([FromQuery, Required] Guid userId)
     {
-        var userId = User.GetUserIdFromToken();
-        var result = await _userService.GetUserByIdAsync(Guid.Parse(userId));
+        var result = await _userService.GetUserByIdAsync(userId);
+        if (result.StatusResponse != HttpStatusCode.OK)
+        {
+            return BadRequest(result.StatusResponse);
+        }
         return Ok(result);
     }
 

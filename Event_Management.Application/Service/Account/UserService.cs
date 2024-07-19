@@ -90,9 +90,26 @@ namespace Event_Management.Application.Service
         {
             return _unitOfWork.UserRepository.GetUserById(userId);
         }
-        public async Task<User?> GetUserByIdAsync(Guid userId)
+
+        public async Task<APIResponse> GetUserByIdAsync(Guid userId)
         {
-            return await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+            var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+            if (user == null)
+            {
+                return new APIResponse
+                {
+                    StatusResponse = HttpStatusCode.BadRequest,
+                    Message = MessageUser.UserNotFound,
+                    Data = null,
+                };
+            }
+            var mapUser = _mapper.Map<UserUpdatedResponseDto>(user);
+            return new APIResponse
+            {
+                StatusResponse = HttpStatusCode.OK,
+                Message = Message.MessageCommon.Complete,
+                Data = mapUser,
+            };
         }
 
         public async Task<APIResponse> GetAllUser(int page, int eachPage)
@@ -118,16 +135,28 @@ namespace Event_Management.Application.Service
                     Data = null,
                 };
             }
+
+            bool? a = await _unitOfWork.UserRepository.IsExisted(UserFieldType.Phone, updateUser.Phone);
+            if ((bool)a)
+            {
+                return new APIResponse
+                {
+                    StatusResponse = HttpStatusCode.BadRequest,
+                    Message = MessageUser.PhoneExisted,
+                    Data = null,
+                };
+            }
             existUsers.FullName = updateUser.FullName;
             existUsers.Phone = updateUser.Phone;
             existUsers.Avatar = updateUser.Avatar;
             await _unitOfWork.UserRepository.Update(existUsers);
             await _unitOfWork.SaveChangesAsync();
+            var updatedUsers = _mapper.Map<UserUpdatedResponseDto>(existUsers);
             return new APIResponse
             {
                 StatusResponse = HttpStatusCode.OK,
                 Message = Message.MessageCommon.UpdateSuccesfully,
-                Data = existUsers,
+                Data = updatedUsers,
             };
         }
 

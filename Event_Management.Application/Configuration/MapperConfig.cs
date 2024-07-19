@@ -29,6 +29,7 @@ namespace Event_Management.Domain.Configuration
                 .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items)).ReverseMap();
 
             CreateMap<User, UserByKeywordResponseDto>().ReverseMap();
+            CreateMap<User, UserUpdatedResponseDto>().ReverseMap();
 
 
             //Mapper Event

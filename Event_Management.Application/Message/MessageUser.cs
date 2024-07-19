@@ -20,6 +20,7 @@ namespace Event_Management.Application.Message
         public const string OTPSuccess = "OTP sent successfully";
         public const string OTPNotFound = "OTP not found";
         public const string OTPExpired = "OTP expired";
+        public const string PhoneExisted = "Phone has already existed";
 
         //Authentication Message response
         public const string TokenInvalid = "Invalid token";
