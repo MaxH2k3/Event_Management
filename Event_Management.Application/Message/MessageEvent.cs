@@ -10,7 +10,7 @@ namespace Event_Management.Application.Message
     {
         //Event Message response
         public const string StartEndTimeValidation = "Start date must after current time 12 hours and end date must after start date 30 mins!!";
-        public const string StarTimeValidation = "Start date must after current time 12 hours and do not exceed 4 month from current time";
+        public const string StarTimeValidation = "Start date must not exceed 4 month from current time. Maximum time spane between start and end date is 7 days.";
         public const string UpdateStartEndTimeValidation = "Start date must after event created time at least 6 hours and end date must after start date 30 mins!!";
         public const string EventIdNotExist = "EventId not exist!";
         public const string GetAllEvent = "Get all events!";

@@ -110,7 +110,9 @@ namespace Event_Management.Application.Service
         public async Task<APIResponse> AddEvent(EventRequestDto eventDto, string userId)// HttpContext context)
         {
             var tempStartDate = DateTimeOffset.FromUnixTimeMilliseconds(eventDto.StartDate).DateTime;
-            if(tempStartDate > DateTime.Now.AddMonths(4))
+            var tempEndDate = DateTimeOffset.FromUnixTimeMilliseconds(eventDto.EndDate).DateTime;
+            var TimeSpan = tempEndDate - tempStartDate;
+            if (tempStartDate > DateTime.Now.AddMonths(4) || TimeSpan.TotalDays > 7)
             {
                 return new APIResponse
                 {
