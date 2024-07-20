@@ -4,6 +4,7 @@ using Event_Management.Application.Message;
 using Event_Management.Domain;
 using Event_Management.Domain.Constants;
 using Event_Management.Domain.Entity;
+using Event_Management.Domain.Enum;
 using Event_Management.Domain.Models.JWT;
 using Event_Management.Domain.Models.System;
 using Event_Management.Domain.UnitOfWork;
@@ -19,7 +20,7 @@ namespace Event_Management.Application.Service
 {
     public class JWTService : IJWTService
     {
-        private readonly JWTSetting _jwtSettings; 
+        private readonly JWTSetting _jwtSettings;
         private readonly IUnitOfWork _unitOfWork;
 
         public JWTService(IOptions<JWTSetting> jwtSetting, IUnitOfWork unitOfWork)
@@ -110,6 +111,7 @@ namespace Event_Management.Application.Service
 
             //check user existed in the refresh token
             var existUser = await _unitOfWork.RefreshTokenRepository.GetUserByIdAsync(Guid.Parse(userIdClaim!.Value));
+            var existUsers = await _unitOfWork.UserRepository.GetUserByIdAsync(Guid.Parse(userIdClaim!.Value));
             if (existUser == null)
             {
                 return new APIResponse
@@ -119,6 +121,16 @@ namespace Event_Management.Application.Service
                     Data = null
                 };
             }
+            else if (existUsers!.Status == AccountStatus.Blocked.ToString())
+            {
+                return new APIResponse
+                {
+                    StatusResponse = System.Net.HttpStatusCode.Unauthorized,
+                    Message = MessageCommon.Blocked,
+                    Data = null
+                };
+            }
+
 
             //check refresh token whether it's expired or null
             var existingRefreshToken = await _unitOfWork.RefreshTokenRepository.GetTokenAsync(token.RefreshToken!);

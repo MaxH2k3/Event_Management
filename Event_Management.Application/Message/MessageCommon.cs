@@ -34,7 +34,7 @@ namespace Event_Management.Application.Message
         public const string ReturnNullList = "List is null";
 
         public const string Unauthorized = "Unauthorized";
-
+        public const string Blocked = "User blocked";
         public const string InvalidToken = "Invalid Token";
 
 

@@ -43,9 +43,16 @@ namespace Event_Management.Infrastructure.Repository.SQL
         {
             var tags = await _context.Tags.Include(t => t.Events)
             .Where(t => t.Events.Any(e => e.Status == EventStatus.NotYet.ToString()))
+            .GroupBy(t => new { t.TagId, t.TagName })
+                .OrderByDescending(g => g.Count())
+                .Select(g => new Tag
+                {
+                    TagId = g.Key.TagId,
+                    TagName = g.Key.TagName!
+                })
             .ToListAsync();
 
-            var result = tags
+           /* var result = tags
                 .GroupBy(t => t)
                 .OrderByDescending(g => g.Count())
                 .Select(g => new Tag
@@ -53,9 +60,9 @@ namespace Event_Management.Infrastructure.Repository.SQL
                     TagId = g.Key.TagId,
                     TagName = g.Key.TagName!
                 })
-                .ToList();
+                .ToList();*/
 
-            return result;
+            return tags;
         }
     }
 }

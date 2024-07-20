@@ -65,16 +65,20 @@ namespace Event_Management.Application.Service
                 CreatedBy = await getUserInfo(feedback.UserId)
             };
         }
-        public async Task<FeedbackView> GetUserFeedback(Guid eventId, Guid userId)
+        public async Task<FeedbackView?> GetUserFeedback(Guid eventId, Guid userId)
         {
             var result = await _unitOfWork.FeedbackRepository.GetUserEventFeedback(eventId, userId);
-            return new FeedbackView
+            if(result != null)
             {
-                EventId = eventId,
-                Content = result.Content,
-                Rating = result.Rating,
-                CreatedBy = await getUserInfo(result.UserId)
-            };
+                return new FeedbackView
+                {
+                    EventId = eventId,
+                    Content = result.Content,
+                    Rating = result.Rating,
+                    CreatedBy = await getUserInfo(result.UserId)
+                };
+            }
+            return null;
         }
         public async Task<PagedList<FeedbackView>> GetAllUserFeebacks(Guid userId, int page, int eachPage)
         {

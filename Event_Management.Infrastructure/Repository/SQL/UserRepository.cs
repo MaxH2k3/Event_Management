@@ -90,7 +90,7 @@ namespace Event_Management.Infrastructure.Repository.SQL
             //    return cachedUsers;
             //}
 
-            var entities = await _context.Users.Include(a => a.Role).Where(x => x.Status == "active").PaginateAndSort(page, pagesize, sortBy, isAscending).ToListAsync();
+            var entities = await _context.Users.Include(a => a.Role).PaginateAndSort(page, pagesize, sortBy, isAscending).ToListAsync();
             //await _cacheRepository.SetAsync(cacheKey, entities);
             return entities;
         }

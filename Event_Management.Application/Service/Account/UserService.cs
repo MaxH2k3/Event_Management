@@ -179,7 +179,26 @@ namespace Event_Management.Application.Service
                     Data = null,
                 };
             }
-            existUsers.Status = AccountStatus.Blocked.ToString();
+
+            if (existUsers.RoleId == (int)UserRole.Admin)
+            {
+                return new APIResponse
+                {
+                    StatusResponse = HttpStatusCode.Forbidden,
+                    Message = "Can't block admin",
+                    Data = null,
+                };
+            }
+
+            if (existUsers.Status == AccountStatus.Active.ToString())
+            {
+                existUsers.Status = AccountStatus.Blocked.ToString();
+            }
+            else if (existUsers.Status == AccountStatus.Blocked.ToString())
+            {
+                existUsers.Status = AccountStatus.Active.ToString();
+            }
+            existUsers.UpdatedAt = DateTime.UtcNow;
             await _unitOfWork.UserRepository.Update(existUsers);
             await _unitOfWork.SaveChangesAsync();
             return new APIResponse

@@ -80,6 +80,7 @@ namespace Event_Management.Application.ServiceTask
                 await _emailService.SendEmailTicket(MailConstant.ReminderMail.PathTemplate, MailConstant.ReminderMail.Title, new TicketModel()
                 {
                     EventId = participant.EventId,
+                    UserId = (Guid)participant.Event.CreatedBy!,
                     Email = participant.User.Email,
                     RoleEventId = (int)participant.RoleEventId!,
                     FullName = participant.User.FullName,
@@ -121,6 +122,7 @@ namespace Event_Management.Application.ServiceTask
             await _emailService.SendEmailTicket(MailConstant.TicketMail.PathTemplate, MailConstant.TicketMail.Title, new TicketModel()
             {
                 EventId = registerEventModel.EventId,
+                UserId = (Guid)currentEvent.CreatedBy!,
                 Email = user.Email,
                 RoleEventId = registerEventModel.RoleEventId,
                 FullName = user.FullName,

@@ -9,6 +9,7 @@ namespace Event_Management.Domain.Models.ParticipantDTO
     public class TicketModel
     {
         public Guid EventId { get; set; }
+        public Guid UserId { get; set; }
         public string? OrgainzerName { get; set; }
         public int RoleEventId { get; set; }
         public string? Email { get; set; }

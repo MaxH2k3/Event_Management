@@ -11,7 +11,7 @@ namespace Event_Management.Application.Service
         Task<FeedbackDto> AddFeedback(FeedbackDto feedbackDto, Guid userId);
         Task<FeedbackDto> UpdateFeedback(FeedbackDto feedbackDto, Guid userId);
         Task<PagedList<FeedbackEvent>?> GetEventFeedbacks(Guid eventId, int? numOfStar, int pageNo, int elementEachPage);
-        Task<FeedbackView> GetUserFeedback(Guid eventId, Guid userId);
+        Task<FeedbackView?> GetUserFeedback(Guid eventId, Guid userId);
         Task<PagedList<FeedbackView>> GetAllUserFeebacks(Guid userId, int page, int eachPage);
     }
 }

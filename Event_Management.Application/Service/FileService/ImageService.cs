@@ -116,7 +116,7 @@ namespace Event_Management.Application.Service.FileService
                 ContentType = "image/png" // file type
             };
             BlobContainerClient blobContainerClient = GetBlobContainerClient();
-            BlobClient blobClient = blobContainerClient.GetBlobClient(EventId.ToString() + sponsorName + "logo");
+            BlobClient blobClient = blobContainerClient.GetBlobClient(EventId.ToString() + "sponsor-" + sponsorName);
 
             // Decode base64 string to byte array
             byte[] imageBytes = Convert.FromBase64String(base64);
