@@ -15,5 +15,7 @@ namespace Event_Management.Application.Service
         //Task<bool> UpdateTag(TagDto tagDTO);
         Task<List<TagDto>> SearchTag(string searchTerm);
 
+        Task<List<TagDto>> TrendingsTags();
+
     }
 }

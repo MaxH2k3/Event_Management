@@ -153,6 +153,17 @@ namespace Event_Management.API.Controllers
                 Data = null
             });
         }
+        [HttpGet("trending")]
+        public async Task<IActionResult> TrendingTask()
+        {
+            var result = await _tagService.TrendingsTags();
+            return Ok(new APIResponse
+            {
+                StatusResponse = HttpStatusCode.OK,
+                Message = MessageCommon.Complete,
+                Data = result
+            });
+        }
 
     }
 }

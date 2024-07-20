@@ -66,7 +66,11 @@ namespace Event_Management.Application.Service
             return result!;
         }
 
-
+        public async Task<List<TagDto>> TrendingsTags()
+        {
+            var result = await _unitOfWork.TagRepository.TrendingTag();
+            return _mapper.Map<List<TagDto>>(result);
+        }
 
 
         /*public async Task<bool> UpdateTag(TagDto tagDTO)

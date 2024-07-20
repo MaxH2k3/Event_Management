@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using Event_Management.Domain.Models.Common;
 using Microsoft.EntityFrameworkCore;
 using Event_Management.Domain.Entity;
+using Event_Management.Domain.Enum;
+using Event_Management.Application.Dto;
 
 namespace Event_Management.Infrastructure.Repository.SQL
 {
@@ -36,6 +38,24 @@ namespace Event_Management.Infrastructure.Repository.SQL
         public async Task<List<Tag>> SearchTag(string searchTerm)
         {
             return await _context.Tags.Where(p => p.TagName.Contains(searchTerm)).ToListAsync();
+        }
+        public async Task<List<Tag>> TrendingTag()
+        {
+            var tags = await _context.Tags.Include(t => t.Events)
+            .Where(t => t.Events.Any(e => e.Status == EventStatus.NotYet.ToString()))
+            .ToListAsync();
+
+            var result = tags
+                .GroupBy(t => t)
+                .OrderByDescending(g => g.Count())
+                .Select(g => new Tag
+                {
+                    TagId = g.Key.TagId,
+                    TagName = g.Key.TagName!
+                })
+                .ToList();
+
+            return result;
         }
     }
 }
